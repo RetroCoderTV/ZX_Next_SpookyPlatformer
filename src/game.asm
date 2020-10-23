@@ -7,7 +7,7 @@ game_init:
 
 
 game_update:
-    ld b,5
+    ld b,20
     call WaitRasterLine
     call scroll_right
     ret

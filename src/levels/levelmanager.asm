@@ -4,8 +4,13 @@ WORLD_WIDTH equ 80
 VIEW_WIDTH equ 40
 VIEW_HEIGHT equ 32
 
+VIEW_SIZE equ VIEW_WIDTH*VIEW_HEIGHT
+
 
 current_scroll db 0
+
+LEVEL_START equ 0
+offset db LEVEL_START+VIEW_WIDTH
 
 
 init_tiles:
@@ -24,6 +29,8 @@ init_tiles:
     nextreg $6f, $60
     nextreg $68, %10000000
     nextreg $43, %00110000
+
+    CLIPTILES 4,155,0,255
 
     ld a,4 ;magenta
     nextreg $4c,a ;tilemap transparency colour
@@ -57,7 +64,6 @@ uploadpal:
 
 
 view_draw:
-    
     ld hl,level1
     ld de,0x4000
 view_draw_line:
@@ -65,18 +71,48 @@ view_draw_line:
     ldir
     add hl,WORLD_WIDTH-VIEW_WIDTH
     ld a,d
-    cp $60
-    ret z
-    jp view_draw_line
+    cp $45
+    jp nz, view_draw_line
+    ret
     
-
+    
 
 scroll_right:
     ld a,(current_scroll)
     inc a
+    cp 8            
+    call z,nowdrawcolumn 
     ld (current_scroll),a
     nextreg $30,a
     ret
+nowdrawcolumn:
+    ld hl,$4001
+    ld de,$4000
+    ld bc,1280
+    ldir  ; move whole screen to left 1 tile 
+    ld hl,level1            ; start of tiles 
+    ld a,(offset)           ; current offset 
+    add hl,a                ; add this to tile offset 
+    inc a                   ; inc the offset 
+    ld (offset),a
+    cp WORLD_WIDTH
+    call z,resetoffset 
+    ld de,$4028              ; top right cell 
+    ld b,VIEW_HEIGHT
+columnloop:
+    ld a,(hl)                   ; get tile from (hl)
+    ld (de),a                   ; put in (de)
+    add de,VIEW_WIDTH                  ; move de to next line
+    add hl,WORLD_WIDTH          ; move hl to next map line
+    djnz columnloop             ; loop for 32 lines 
+    xor a
+    ld (current_scroll),a
+    ret 
+resetoffset: 
+    xor a 
+    ld (offset),a
+    ret 
+
 
 
 

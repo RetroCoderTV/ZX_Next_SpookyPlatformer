@@ -2,6 +2,22 @@
 	MACRO BREAKPOINT 
 		DW $01DD 
 	ENDM
+
+
+
+	MACRO CLIPTILES x1,y1,x2,y2
+		ld a,x1
+		nextreg 27,a
+		ld a,y1
+		nextreg 27,a
+		ld a,x2
+		nextreg 27,a
+		ld a,y2
+		nextreg 27,a
+
+	ENDM
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Wait for n clock cycles
 ;; Inputs: BC=n
