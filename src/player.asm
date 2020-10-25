@@ -21,44 +21,10 @@ PLAYER_ANIMATION_DELAY equ 4
 
 
 player_init:
-    call player_draw_init
+    call player_init_sprites
     ret
 
-player_update:
-    ld a,(player_animation_timer)
-    inc a
-    ld (player_animation_timer),a
-
-    ld a,(keypressed_D)
-    cp TRUE
-    call z,plyr_move_right
-
-
-    ret
-
-
-
-plyr_move_right:
-    ld a,(player_animation_timer)
-    cp PLAYER_ANIMATION_DELAY
-    call nc, player_animate_walk
-
-    ld hl,(px)
-    ld a,l
-    cp SCROLL_MARKER_X
-    jp nc,scroll_right
-    jp c,p_move_right
-        
-p_move_right
-    add hl,PLAYER_WALK_SPEED
-    ld (px),hl
-    ret
-
-
-
-
-
-player_draw_init:
+player_init_sprites:
     ld a,PLAYER_SLOT
     nextreg $34,a
 
@@ -168,6 +134,42 @@ player_draw_init:
     nextreg $39,a
 
     ret 
+;
+
+
+
+player_update:
+    ld a,(player_animation_timer)
+    inc a
+    ld (player_animation_timer),a
+
+    ld a,(keypressed_D)
+    cp TRUE
+    call z,plyr_move_right
+
+
+    ret
+
+
+
+plyr_move_right:
+    ld a,(player_animation_timer)
+    cp PLAYER_ANIMATION_DELAY
+    call nc, player_animate_walk
+
+    ld hl,(px)
+    ld a,l
+    cp SCROLL_MARKER_X
+    jp nc,scroll_right
+    jp c,p_move_right
+        
+p_move_right
+    add hl,PLAYER_WALK_SPEED
+    ld (px),hl
+    ret
+
+
+
 
 
 
@@ -200,14 +202,7 @@ player_draw:
     ld a,(player_attr_4)
     nextreg $39,a
 
-    
-
-
-
     ret 
-
-
-
 
 
 
