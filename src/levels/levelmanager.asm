@@ -77,6 +77,49 @@ view_draw_line:
     
     
 
+scroll_left:
+    ld a,(current_scroll)
+    inc a
+    cp 8          
+    call z,drawcolumn_left 
+    ld (current_scroll),a
+    ld b,a
+    ld a,8
+    sub b
+    nextreg $30,a
+    ret
+drawcolumn_left:
+    ; ld hl,$4000+1279
+    ; ld de,$4001+1279
+    ld hl,$44FF
+    ld de,$4500
+    ld bc,40*32
+    lddr  ; move whole screen to right 1 tile 
+    ld hl,level1            ; start of tiles 
+    ld a,(offset)           ; current offset 
+    add hl,a                ; add this to tile offset 
+    dec a                   ; dec the offset 
+    ld (offset),a
+    cp $ff
+    call z,resetoffset_left 
+    ld de,$4000              ; top left cell 
+    ld b,VIEW_HEIGHT
+columnloop_left:
+    ld a,(hl)                   ; get tile from (hl)
+    ld (de),a                   ; put in (de)
+    add de,VIEW_WIDTH                  ; move de to next line
+    add hl,WORLD_WIDTH          ; move hl to next map line
+    djnz columnloop_left             ; loop for 32 lines 
+    xor a
+    ld (current_scroll),a
+    ret 
+resetoffset_left: 
+    ld a,WORLD_WIDTH-1
+    ld (offset),a
+    ret 
+
+
+
 scroll_right:
     ld a,(current_scroll)
     inc a
@@ -96,8 +139,8 @@ nowdrawcolumn:
     inc a                   ; inc the offset 
     ld (offset),a
     cp WORLD_WIDTH
-    call z,resetoffset 
-    ld de,$4028              ; top right cell 
+    call z,resetoffset_right 
+    ld de,$4027              ; top right cell 
     ld b,VIEW_HEIGHT
 columnloop:
     ld a,(hl)                   ; get tile from (hl)
@@ -108,7 +151,8 @@ columnloop:
     xor a
     ld (current_scroll),a
     ret 
-resetoffset: 
+
+resetoffset_right: 
     xor a 
     ld (offset),a
     ret 
@@ -116,20 +160,7 @@ resetoffset:
 
 
 
-; tiledworld_draw_view:
-; 	ld hl,level1
-; 	ld de,0x4000
-; 	ld bc,WORLD_WIDTH-VIEWPORT_WIDTH
-; drawview_start:
-; 	push bc
-; 	ld bc,VIEWPORT_WIDTH
-; 	ldir
-; 	pop bc
-; 	add hl,bc
-; 	ld a,d
-; 	cp 0x60
-; 	ret z
-; 	jp drawview_start
+
 
 
 

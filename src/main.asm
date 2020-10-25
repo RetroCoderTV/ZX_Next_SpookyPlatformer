@@ -23,6 +23,7 @@ STACK_SIZE equ 20
 stack_bottom ds STACK_SIZE, 0
 stack_top db 0  
 
+	include 'player.asm'
 	
 	include 'retrotools\tools.asm'
 	include 'retrotools\constants.asm'
@@ -31,6 +32,8 @@ stack_top db 0
 	include 'retrotools\spritetools.asm'
 	include 'levels\levels.asm'
 	include 'levels\levelmanager.asm'
+	include 'assets\sprites.asm'
+
 
 	
 
