@@ -10,7 +10,7 @@ VIEW_SIZE equ VIEW_WIDTH*VIEW_HEIGHT
 current_scroll db 0
 
 LEVEL_START equ 0
-offset db LEVEL_START+VIEW_WIDTH
+offset db 40
 
 
 init_tiles:

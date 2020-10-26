@@ -1,0 +1,3037 @@
+# file opened: src/main.asm
+  1   0000                  org 0x8000
+  2   8000
+  3   8000                  DEVICE ZXSPECTRUMNEXT
+  4   8000              	CSPECTMAP main.map
+  5   8000
+  6   8000
+  7   8000              start:
+  8   8000 F3           	di
+  9   8001 31 FE 7F     	ld sp,0x7FFE
+ 10   8004 ED 91 07 03  	nextreg $7,3 ;set Mhz mode (3=28mhz)
+ 11   8008 CD 53 82     	call game_init
+ 12   800B C3 0E 80     	jp main_loop
+ 13   800E
+ 14   800E              main_loop:
+ 15   800E CD 6A 82     	call game_update
+ 16   8011 CD 76 82     	call game_draw
+ 17   8014 C3 0E 80     	jp main_loop
+ 18   8017
+ 19   8017
+ 20   8017
+ 21   8017
+ 22   8017              STACK_SIZE equ 20
+ 23   8017 00 00 00...  stack_bottom ds STACK_SIZE, 0
+ 24   802B 00           stack_top db 0
+ 25   802C
+ 26   802C              	include 'player.asm'
+# file opened: src/player.asm
+  1+  802C                  MACRO BREAKPOINT
+  2+  802C ~            		DW $01DD
+  3+  802C              	ENDM
+  4+  802C
+  5+  802C
+  6+  802C
+  7+  802C
+  8+  802C              PLAYER_SLOT equ 50
+  9+  802C
+ 10+  802C              PLAYER_DEFAULT_ATTR3 equ %11000000
+ 11+  802C
+ 12+  802C              PLAYER_HEIGHT equ 32
+ 13+  802C
+ 14+  802C              SCROLL_MARKER_X equ 320/2
+ 15+  802C
+ 16+  802C              PLAYER_WALK_SPEED equ 1
+ 17+  802C
+ 18+  802C
+ 19+  802C
+ 20+  802C 00           player_world_x db 0 ;in cells
+ 21+  802D 00           player_world_y db 0
+ 22+  802E
+ 23+  802E 20 00        px dw 32
+ 24+  8030 00           py db 0
+ 25+  8031 08           player_attr_2 db %00001000
+ 26+  8032 C0           player_attr_3 db PLAYER_DEFAULT_ATTR3
+ 27+  8033 20           player_attr_4 db %00100000
+ 28+  8034
+ 29+  8034 00           player_animation_timer db 0
+ 30+  8035              PLAYER_ANIMATION_DELAY equ 4
+ 31+  8035
+ 32+  8035
+ 33+  8035              ;movement states:
+ 34+  8035              WALKING equ 0
+ 35+  8035              JUMPING equ 1
+ 36+  8035              ATTACKING equ 2
+ 37+  8035              CLIMBING equ 3
+ 38+  8035
+ 39+  8035
+ 40+  8035 01           player_animation_state db JUMPING
+ 41+  8036
+ 42+  8036
+ 43+  8036 00 00        vy dw 0
+ 44+  8038
+ 45+  8038              GRAVITY_FORCE equ 32
+ 46+  8038              JUMP_FORCE equ 64
+ 47+  8038
+ 48+  8038              MAX_DOWN_SPEED equ 7
+ 49+  8038              MAX_UP_SPEED equ 5
+ 50+  8038
+ 51+  8038
+ 52+  8038
+ 53+  8038 00           player_collided_solid db FALSE
+ 54+  8039
+ 55+  8039
+ 56+  8039
+ 57+  8039              player_init:
+ 58+  8039 CD 3D 80         call player_init_sprites
+ 59+  803C C9               ret
+ 60+  803D
+ 61+  803D              player_init_sprites:
+ 62+  803D 3E 32            ld a,PLAYER_SLOT
+ 63+  803F ED 92 34         nextreg $34,a
+ 64+  8042
+ 65+  8042                  ;attr 0
+ 66+  8042 3A 2E 80         ld a,(px)
+ 67+  8045 ED 92 35         nextreg $35,a
+ 68+  8048
+ 69+  8048                  ;attr 1
+ 70+  8048 3A 30 80         ld a,(py)
+ 71+  804B ED 92 36         nextreg $36,a
+ 72+  804E
+ 73+  804E                  ;attr 2
+ 74+  804E 3A 31 80         ld a,(player_attr_2)
+ 75+  8051 47               ld b,a
+ 76+  8052 2A 2E 80         ld hl,(px)
+ 77+  8055 7C               ld a,h
+ 78+  8056 B0               or b
+ 79+  8057 ED 92 37         nextreg $37,a
+ 80+  805A
+ 81+  805A                  ;attr 3
+ 82+  805A 3A 32 80         ld a,(player_attr_3)
+ 83+  805D ED 92 38         nextreg $38,a
+ 84+  8060
+ 85+  8060                  ;attr 4
+ 86+  8060 3A 33 80         ld a,(player_attr_4)
+ 87+  8063 ED 92 39         nextreg $39,a
+ 88+  8066
+ 89+  8066                  ;relative sprites...
+ 90+  8066
+ 91+  8066                  ;r1:
+ 92+  8066                  ;x0
+ 93+  8066                  ;xx
+ 94+  8066
+ 95+  8066 3E 33            ld a,PLAYER_SLOT+1
+ 96+  8068 ED 92 34         nextreg $34,a
+ 97+  806B
+ 98+  806B                  ;a0
+ 99+  806B 3E 10            ld a,16
+100+  806D ED 92 35         nextreg $35,a
+101+  8070
+102+  8070                  ;a1
+103+  8070 3E 00            ld a,0
+104+  8072 ED 92 36         nextreg $36,a
+105+  8075
+106+  8075                  ;a2
+107+  8075 3E 01            ld a,%00000001
+108+  8077 ED 92 37         nextreg $37,a
+109+  807A
+110+  807A                  ;a3
+111+  807A 3E C1            ld a,%11000001
+112+  807C ED 92 38         nextreg $38,a
+113+  807F
+114+  807F                  ;a4
+115+  807F 3E 41            ld a,%01000001
+116+  8081 ED 92 39         nextreg $39,a
+117+  8084
+118+  8084                  ;r2:
+119+  8084                  ;xx
+120+  8084                  ;0x
+121+  8084 3E 34            ld a,PLAYER_SLOT+2
+122+  8086 ED 92 34         nextreg $34,a
+123+  8089
+124+  8089                  ;a0
+125+  8089 3E 00            ld a,0
+126+  808B ED 92 35         nextreg $35,a
+127+  808E
+128+  808E                  ;a1
+129+  808E 3E 10            ld a,16
+130+  8090 ED 92 36         nextreg $36,a
+131+  8093
+132+  8093                  ;a2
+133+  8093 3E 01            ld a,%00000001
+134+  8095 ED 92 37         nextreg $37,a
+135+  8098
+136+  8098                  ;a3
+137+  8098 3E C2            ld a,%11000010
+138+  809A ED 92 38         nextreg $38,a
+139+  809D
+140+  809D                  ;a4
+141+  809D 3E 41            ld a,%01000001
+142+  809F ED 92 39         nextreg $39,a
+143+  80A2
+144+  80A2                  ;r3:
+145+  80A2                  ;xx
+146+  80A2                  ;x0
+147+  80A2 3E 35            ld a,PLAYER_SLOT+3
+148+  80A4 ED 92 34         nextreg $34,a
+149+  80A7
+150+  80A7                  ;a0
+151+  80A7 3E 10            ld a,16
+152+  80A9 ED 92 35         nextreg $35,a
+153+  80AC
+154+  80AC                  ;a1
+155+  80AC 3E 10            ld a,16
+156+  80AE ED 92 36         nextreg $36,a
+157+  80B1
+158+  80B1                  ;a2
+159+  80B1 3E 01            ld a,%00000001
+160+  80B3 ED 92 37         nextreg $37,a
+161+  80B6
+162+  80B6                  ;a3
+163+  80B6 3E C3            ld a,%11000011
+164+  80B8 ED 92 38         nextreg $38,a
+165+  80BB
+166+  80BB                  ;a4
+167+  80BB 3E 41            ld a,%01000001
+168+  80BD ED 92 39         nextreg $39,a
+169+  80C0
+170+  80C0 C9               ret
+171+  80C1              ;
+172+  80C1
+173+  80C1
+174+  80C1
+175+  80C1              player_update:
+176+  80C1 3A 34 80         ld a,(player_animation_timer)
+177+  80C4 3C               inc a
+178+  80C5 32 34 80         ld (player_animation_timer),a
+179+  80C8
+180+  80C8
+181+  80C8
+182+  80C8 3A 35 80         ld a,(player_animation_state)
+183+  80CB FE 00            cp WALKING
+184+  80CD CA D6 80         jp z, player_update_walking
+185+  80D0 FE 01            cp JUMPING
+186+  80D2 CA DF 80         jp z, player_update_jumping
+187+  80D5                  ; cp ATTACKING
+188+  80D5                  ; cp CLIMBING
+189+  80D5
+190+  80D5
+191+  80D5 C9               ret
+192+  80D6
+193+  80D6
+194+  80D6              player_update_walking:
+195+  80D6 3A 80 82         ld a,(keypressed_D)
+196+  80D9 FE 01            cp TRUE
+197+  80DB CC 08 81         call z,plyr_move_right
+198+  80DE
+199+  80DE
+200+  80DE C9               ret
+201+  80DF
+202+  80DF
+203+  80DF              player_update_jumping:
+204+  80DF CD 76 81         call player_calculate_world_position
+205+  80E2 CD 97 81         call check_collision_feet
+206+  80E5 CD EC 80         call apply_gravity
+207+  80E8
+208+  80E8 CD FB 80         call apply_velocity
+209+  80EB C9               ret
+210+  80EC
+211+  80EC              apply_gravity:
+212+  80EC 2A 36 80         ld hl,(vy)
+213+  80EF 7C               ld a,h
+214+  80F0 FE 07            cp MAX_DOWN_SPEED
+215+  80F2 C8               ret z
+216+  80F3 ED 34 20 00      add hl,GRAVITY_FORCE
+217+  80F7 22 36 80         ld (vy),hl
+218+  80FA
+219+  80FA
+220+  80FA C9               ret
+221+  80FB
+222+  80FB              apply_velocity:
+223+  80FB 21 30 80         ld hl,py
+224+  80FE 46               ld b,(hl)
+225+  80FF 2A 36 80         ld hl,(vy)
+226+  8102 67               ld h,a
+227+  8103 80               add a,b
+228+  8104 32 30 80         ld (py),a
+229+  8107 C9               ret
+230+  8108
+231+  8108
+232+  8108              plyr_move_right:
+233+  8108 CD 76 81         call player_calculate_world_position
+234+  810B CD C8 81         call check_collision_right
+235+  810E
+236+  810E 3A 38 80         ld a,(player_collided_solid)
+237+  8111 FE 01            cp TRUE
+238+  8113 C8               ret z
+239+  8114
+240+  8114 3A 34 80         ld a,(player_animation_timer)
+241+  8117 FE 04            cp PLAYER_ANIMATION_DELAY
+242+  8119 D4 5A 81         call nc, player_animate_walk
+243+  811C
+244+  811C 2A 2E 80         ld hl,(px)
+245+  811F 7D               ld a,l
+246+  8120 FE A0            cp SCROLL_MARKER_X
+247+  8122 D2 B1 8E         jp nc,scroll_right
+248+  8125 DA 28 81         jp c,p_move_right
+249+  8128
+250+  8128              p_move_right
+251+  8128 ED 34 01 00      add hl,PLAYER_WALK_SPEED
+252+  812C 22 2E 80         ld (px),hl
+253+  812F C9               ret
+254+  8130
+255+  8130
+256+  8130
+257+  8130              player_draw:
+258+  8130 3E 32            ld a,PLAYER_SLOT
+259+  8132 ED 92 34         nextreg $34,a
+260+  8135
+261+  8135                  ;attr 0
+262+  8135 3A 2E 80         ld a,(px)
+263+  8138 ED 92 35         nextreg $35,a
+264+  813B
+265+  813B                  ;attr 1
+266+  813B 3A 30 80         ld a,(py)
+267+  813E ED 92 36         nextreg $36,a
+268+  8141
+269+  8141                  ;attr 2
+270+  8141 3A 31 80         ld a,(player_attr_2)
+271+  8144 47               ld b,a
+272+  8145 2A 2E 80         ld hl,(px)
+273+  8148 7C               ld a,h
+274+  8149 B0               or b
+275+  814A ED 92 37         nextreg $37,a
+276+  814D
+277+  814D                  ;attr 3
+278+  814D 3A 32 80         ld a,(player_attr_3)
+279+  8150 ED 92 38         nextreg $38,a
+280+  8153
+281+  8153                  ;attr 4
+282+  8153 3A 33 80         ld a,(player_attr_4)
+283+  8156 ED 92 39         nextreg $39,a
+284+  8159
+285+  8159 C9               ret
+286+  815A
+287+  815A
+288+  815A
+289+  815A
+290+  815A              player_animate_walk:
+291+  815A AF               xor a
+292+  815B 32 34 80         ld (player_animation_timer),a
+293+  815E
+294+  815E 3A 32 80         ld a,(player_attr_3)
+295+  8161 E6 3F            and %00111111 ;mask out top 2 bits
+296+  8163 FE 0C            cp SPRITE_COUNT-SPRITE_SEGMENTS
+297+  8165 CA 70 81         jp z,player_set_to_default_frame
+298+  8168 C6 04            add a,SPRITE_SEGMENTS
+299+  816A C6 C0            add a,PLAYER_DEFAULT_ATTR3
+300+  816C 32 32 80         ld (player_attr_3),a
+301+  816F C9               ret
+302+  8170
+303+  8170              player_set_to_default_frame:
+304+  8170 3E C0            ld a,PLAYER_DEFAULT_ATTR3
+305+  8172 32 32 80         ld (player_attr_3),a
+306+  8175 C9               ret
+307+  8176
+308+  8176
+309+  8176              player_calculate_world_position:
+310+  8176 3A 30 80         ld a,(py)
+311+  8179 E6 F8            and %11111000
+312+  817B 0F               rrca
+313+  817C 0F               rrca
+314+  817D 0F               rrca
+315+  817E 32 2D 80         ld (player_world_y),a
+316+  8181
+317+  8181 2A 2E 80         ld hl,(px)
+318+  8184 7D               ld a,l
+319+  8185 E6 F8            and %11111000
+320+  8187 0F               rrca
+321+  8188 0F               rrca
+322+  8189 0F               rrca
+323+  818A 47               ld b,a
+324+  818B 3A E3 8D         ld a,(offset)
+325+  818E D6 28            sub VIEW_WIDTH
+326+  8190 4F               ld c,a
+327+  8191 78               ld a,b
+328+  8192 81               add a,c
+329+  8193 32 2C 80         ld (player_world_x),a
+330+  8196
+331+  8196 C9               ret
+332+  8197
+333+  8197
+334+  8197
+335+  8197              check_collision_feet:
+336+  8197 21 E2 83         ld hl,level1
+337+  819A 3A 2D 80         ld a,(player_world_y)
+338+  819D C6 04            add a,4
+339+  819F 57               ld d,a
+340+  81A0 1E 50            ld e,WORLD_WIDTH
+341+  81A2 ED 30            mul d,e
+342+  81A4 19               add hl,de
+343+  81A5 3A 2C 80         ld a,(player_world_x)
+344+  81A8 5F               ld e,a
+345+  81A9 16 00            ld d,0
+346+  81AB 19               add hl,de
+347+  81AC 7E               ld a,(hl)
+348+  81AD FE 0C            cp 12
+349+  81AF DA B3 81         jp c,collided_solid_feet
+350+  81B2
+351+  81B2 C9               ret
+352+  81B3              collided_solid_feet:
+353+  81B3 3A 2D 80         ld a,(player_world_y)
+354+  81B6 87               add a,a
+355+  81B7 87               add a,a
+356+  81B8 87               add a,a
+357+  81B9 32 30 80         ld (py),a
+358+  81BC
+359+  81BC 3E 00            ld a,WALKING
+360+  81BE 32 35 80         ld (player_animation_state),a
+361+  81C1 21 00 00         ld hl,0
+362+  81C4 22 36 80         ld (vy),hl
+363+  81C7
+364+  81C7
+365+  81C7 C9               ret
+366+  81C8
+367+  81C8
+368+  81C8              check_collision_right:
+369+  81C8 21 E2 83         ld hl,level1
+370+  81CB 3A 2D 80         ld a,(player_world_y)
+371+  81CE C6 02            add a,2
+372+  81D0 57               ld d,a
+373+  81D1 1E 50            ld e,WORLD_WIDTH
+374+  81D3 ED 30            mul d,e
+375+  81D5 19               add hl,de
+376+  81D6 3A 2C 80         ld a,(player_world_x)
+377+  81D9 C6 01            add a,1
+378+  81DB 5F               ld e,a
+379+  81DC 16 00            ld d,0
+380+  81DE 19               add hl,de
+381+  81DF 7E               ld a,(hl)
+382+  81E0 FE 0C            cp 12
+383+  81E2 DA EB 81         jp c,collided_solid_right
+384+  81E5
+385+  81E5 3E 00            ld a,FALSE
+386+  81E7 32 38 80         ld (player_collided_solid),a
+387+  81EA
+388+  81EA C9               ret
+389+  81EB
+390+  81EB              collided_solid_right:
+391+  81EB
+392+  81EB 3E 01            ld a,TRUE
+393+  81ED 32 38 80         ld (player_collided_solid),a
+394+  81F0 C9               ret
+# file closed: src/player.asm
+ 27   81F1
+ 28   81F1              	include 'retrotools\tools.asm'
+# file opened: src/retrotools/tools.asm
+  1+  81F1              ;MACROS
+  2+  81F1
+  3+  81F1
+  4+  81F1
+  5+  81F1
+  6+  81F1
+  7+  81F1              	MACRO CLIPTILES x1,y1,x2,y2
+  8+  81F1 ~            		ld a,x1
+  9+  81F1 ~            		nextreg 27,a
+ 10+  81F1 ~            		ld a,y1
+ 11+  81F1 ~            		nextreg 27,a
+ 12+  81F1 ~            		ld a,x2
+ 13+  81F1 ~            		nextreg 27,a
+ 14+  81F1 ~            		ld a,y2
+ 15+  81F1 ~            		nextreg 27,a
+ 16+  81F1 ~
+ 17+  81F1              	ENDM
+ 18+  81F1
+ 19+  81F1
+ 20+  81F1              ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+ 21+  81F1              ;; Wait for n clock cycles
+ 22+  81F1              ;; Inputs: BC=n
+ 23+  81F1              ;; Outputs: none
+ 24+  81F1              ;; Destroys: A,BC
+ 25+  81F1              ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+ 26+  81F1              wait:
+ 27+  81F1 0B           	dec bc
+ 28+  81F2 78           	ld a,b
+ 29+  81F3 FE 00        	cp 0
+ 30+  81F5 C2 F1 81     	jp nz, wait
+ 31+  81F8 C9           	ret
+ 32+  81F9
+ 33+  81F9
+ 34+  81F9
+ 35+  81F9              ;;;em00k wrote this;;;;
+ 36+  81F9              ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+ 37+  81F9              ;; Wait for vertical blank
+ 38+  81F9              ;; Inputs: B=frames delay count
+ 39+  81F9              ;; Outputs:
+ 40+  81F9              ;; Destroys:
+ 41+  81F9              ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+ 42+  81F9              WaitRasterLine:
+ 43+  81F9 CD FF 81     	call RastererWait
+ 44+  81FC 10 FB        	djnz WaitRasterLine
+ 45+  81FE C9           	ret
+ 46+  81FF              RastererWait:
+ 47+  81FF C5           	push bc
+ 48+  8200 1E 10        	ld e,16
+ 48+  8202 3E 1F          ld a,$1f
+ 48+  8204 01 3B 24       ld bc,$243b
+ 48+  8207 ED 79          out (c),a
+ 48+  8209 04             inc b
+ 49+  820A              WaitForLinea:
+ 50+  820A ED 78        	in a,(c)
+ 50+  820C BB             cp e
+ 50+  820D 20 FB          jr nz,WaitForLinea
+ 51+  820F C1           	pop bc
+ 52+  8210 C9           	ret
+ 53+  8211
+ 54+  8211
+ 55+  8211
+ 56+  8211
+ 57+  8211
+ 58+  8211
+ 59+  8211
+ 60+  8211
+ 61+  8211
+ 62+  8211
+ 63+  8211
+ 64+  8211              LAYER2_ACCESS_PORT	EQU 	$123B
+ 65+  8211
+ 66+  8211              		;----------------
+ 67+  8211              		; Original code by Michael Ware adjustd to work with ZXB
+ 68+  8211              		; Plot tile to layer 2 (needs to accept > 256 tiles)
+ 69+  8211              		; in - hl = y/x tile coordinate (0-17, 0-31)
+ 70+  8211              		; in - a = number of tile to display
+ 71+  8211              		;----------------
+ 72+  8211              PlotTile8:
+ 73+  8211 ED 91 56 11  		nextreg $56,17
+ 74+  8215
+ 75+  8215 16 40        		ld d,64
+ 76+  8217 5F           		ld e,a					; 11
+ 77+  8218 ED 30        		mul
+ 78+  821A
+ 79+  821A 3E C0        		ld a,%11000000 			; this points to $c000
+ 80+  821C B2           		or d		 			; 8
+ 81+  821D EB           		ex de,hl				; 4			; cannot avoid an ex (de now = yx)
+ 82+  821E 67           		ld h,a					; 4
+ 83+  821F 7B           		ld a,e
+ 84+  8220 07           		rlca
+ 85+  8221 07           		rlca
+ 86+  8222 07           		rlca
+ 87+  8223 5F           		ld e,a					; 4+4+4+4+4 = 20	; mul x,8
+ 88+  8224 7A           		ld a,d
+ 89+  8225 07           		rlca
+ 90+  8226 07           		rlca
+ 91+  8227 07           		rlca
+ 92+  8228 57           		ld d,a					; 4+4+4+4+4 = 20	; mul y,8
+ 93+  8229 E6 C0        		and 192
+ 94+  822B F6 03        		or 3					; or 3 to keep layer on				; 8
+ 95+  822D 01 3B 12     		ld bc,LAYER2_ACCESS_PORT
+ 96+  8230 ED 79        		out (c),a      ; 21			; select bank
+ 97+  8232
+ 98+  8232 7A           		ld a,d
+ 99+  8233 E6 3F        		and 63
+100+  8235 57           		ld d,a					; clear top 2 bits of y (dest) (4+4+4 = 12)
+101+  8236              		; T96 here
+102+  8236 3E 08        		ld a,8					; 7
+103+  8238              .plotTilesLoop2:
+104+  8238 D5           		push de					; 11
+105+  8239 ED A0        		ldi
+106+  823B ED A0        		ldi
+107+  823D ED A0        		ldi
+108+  823F ED A0        		ldi
+109+  8241 ED A0        		ldi
+110+  8243 ED A0        		ldi
+111+  8245 ED A0        		ldi
+112+  8247 ED A0        		ldi					; 8 * 16 = 128
+113+  8249
+114+  8249 D1           		pop de					; 11
+115+  824A 14           		inc d					; 4 add 256 for next line down
+116+  824B 3D           		dec a					; 4
+117+  824C 20 EA        		jr nz,.plotTilesLoop2			; 12/7
+118+  824E
+119+  824E ED 91 56 0E  		nextreg $56,14 ;$0e
+120+  8252 C9           		ret
+121+  8253
+122+  8253
+123+  8253
+124+  8253
+125+  8253
+126+  8253
+127+  8253              ; ;HL=mem address start yx
+128+  8253              ; ;DE=message address
+129+  8253              ; display_string:
+130+  8253              ;     ld a,(de)
+131+  8253              ;     cp 0
+132+  8253              ;     ret z
+133+  8253              ;     cp ' '
+134+  8253              ;     jp nz,disp_char_next
+135+  8253              ; 	inc a
+136+  8253              ; disp_char_next:
+137+  8253              ;     sub FONT_ASCII_OFFSET
+138+  8253              ;     push de
+139+  8253              ;     push hl
+140+  8253              ;     call PlotTile8
+141+  8253              ;     pop hl
+142+  8253              ;     pop de
+143+  8253
+144+  8253              ;     inc de
+145+  8253              ;     inc l
+146+  8253              ;     jp display_string
+147+  8253
+148+  8253
+149+  8253              ; display_numbers:
+150+  8253              ;     ld c,-100
+151+  8253              ;     call dispnums_add_offset
+152+  8253              ;     ld c,-10
+153+  8253              ;     call dispnums_add_offset
+154+  8253              ;     ld c,-1
+155+  8253              ; dispnums_add_offset:
+156+  8253              ;     ld b,FONT_START
+157+  8253              ; dispnums_inc:
+158+  8253              ;     inc b
+159+  8253              ;     add a,c
+160+  8253              ;     jr c, dispnums_inc
+161+  8253              ;     sub c ;actually adding (its holding minus number)
+162+  8253              ;     push af
+163+  8253              ;     ld a,b
+164+  8253              ;     push hl
+165+  8253              ;     call PlotTile8
+166+  8253              ;     pop hl
+167+  8253              ;     inc l
+168+  8253              ;     pop af
+169+  8253              ;     ret
+170+  8253
+171+  8253
+172+  8253
+173+  8253
+# file closed: src/retrotools/tools.asm
+ 29   8253              	include 'retrotools\constants.asm'
+# file opened: src/retrotools/constants.asm
+  1+  8253              FALSE equ 0
+  2+  8253              TRUE equ 1
+  3+  8253
+  4+  8253              DEAD equ 0
+  5+  8253              ALIVE equ 1
+  6+  8253
+  7+  8253              NOT_VISIBLE equ 0
+  8+  8253              VISIBLE equ 1
+  9+  8253
+ 10+  8253              NOT_ENABLED equ 0
+ 11+  8253              ENABLED equ 1
+ 12+  8253
+ 13+  8253
+ 14+  8253              ;DIRECTIONS:
+ 15+  8253              LEFT equ 0
+ 16+  8253              RIGHT equ 1
+ 17+  8253              UP equ 2
+ 18+  8253              DOWN equ 3
+ 19+  8253
+ 20+  8253
+ 21+  8253              ;48k Screen
+ 22+  8253              SCREEN_WIDTH_CELLS equ 32
+ 23+  8253              SCREEN_HEIGHT_CELLS equ 24
+ 24+  8253
+ 25+  8253
+ 26+  8253
+ 27+  8253              ;Next Screen
+ 28+  8253              GUTTER equ 32
+ 29+  8253
+ 30+  8253
+ 31+  8253
+ 32+  8253
+ 33+  8253
+ 34+  8253
+ 35+  8253
+ 36+  8253
+ 37+  8253
+ 38+  8253
+ 39+  8253
+ 40+  8253
+ 41+  8253
+# file closed: src/retrotools/constants.asm
+ 30   8253              	include 'game.asm'
+# file opened: src/game.asm
+  1+  8253
+  2+  8253              game_init:
+  3+  8253
+  4+  8253 ED 91 56 0E      nextreg $56,14
+  5+  8257 06 10            ld b,SPRITE_COUNT
+  6+  8259 21 00 C0         ld hl,$c000
+  7+  825C CD BA 83         call init_sprites
+  8+  825F
+  9+  825F ED 91 15 03      nextreg $15,%00000011
+ 10+  8263 CD E4 8D         call init_tiles
+ 11+  8266
+ 12+  8266 CD 39 80         call player_init
+ 13+  8269
+ 14+  8269 C9               ret
+ 15+  826A
+ 16+  826A
+ 17+  826A              game_update:
+ 18+  826A 06 0C            ld b,12
+ 19+  826C CD F9 81         call WaitRasterLine
+ 20+  826F CD 8A 82         call check_keys
+ 21+  8272 CD C1 80         call player_update
+ 22+  8275 C9               ret
+ 23+  8276
+ 24+  8276              game_draw:
+ 25+  8276 CD 30 81         call player_draw
+ 26+  8279 C9               ret
+ 27+  827A
+ 28+  827A
+# file closed: src/game.asm
+ 31   827A              	include 'retrotools\keycacher.asm'
+# file opened: src/retrotools/keycacher.asm
+  1+  827A              ;Usage:
+  2+  827A              ;first call check_keys
+  3+  827A              ;compare states of cached values (eg. keypressed_W) before doing movement/actions etc.
+  4+  827A              ;after all actions, call reset_keys
+  5+  827A
+  6+  827A
+  7+  827A              ; 32766 B, N, M, Symbol Shift, Space
+  8+  827A              ; 49150 H, J, K, L, Enter
+  9+  827A              ; 57342 Y, U, I, O, P
+ 10+  827A              ; 61438 6, 7, 8, 9, 0
+ 11+  827A              ; 63486 5, 4, 3, 2, 1
+ 12+  827A              ; 64510 T, R, E, W, Q
+ 13+  827A              ; 65022 G, F, D, S, A
+ 14+  827A              ; 65278 V, C, X, Z, Caps Shift
+ 15+  827A
+ 16+  827A
+ 17+  827A 00           keypressed_W db FALSE
+ 18+  827B 00           keypressed_W_Held db FALSE
+ 19+  827C 00           keypressed_A db FALSE
+ 20+  827D 00           keypressed_A_Held db FALSE
+ 21+  827E 00           keypressed_S db FALSE
+ 22+  827F 00           keypressed_S_Held db FALSE
+ 23+  8280 00           keypressed_D db FALSE
+ 24+  8281
+ 25+  8281 00           keypressed_F db FALSE
+ 26+  8282 00           keypressed_F_Held db FALSE
+ 27+  8283 00           keypressed_I db FALSE
+ 28+  8284 00           keypressed_Q db FALSE
+ 29+  8285 00           keypressed_Q_Held db FALSE
+ 30+  8286 00           keypressed_O db FALSE
+ 31+  8287 00           keypressed_P db FALSE
+ 32+  8288 00           keypressed_Space db FALSE
+ 33+  8289 00           keypressed_Space_Held db FALSE
+ 34+  828A
+ 35+  828A              check_keys:
+ 36+  828A 3A 7A 82         ld a,(keypressed_W)
+ 37+  828D FE 01            cp TRUE
+ 38+  828F CC 42 83         call z,set_W_Held
+ 39+  8292 C4 48 83         call nz, reset_W_Held
+ 40+  8295
+ 41+  8295 3A 7E 82         ld a,(keypressed_S)
+ 42+  8298 FE 01            cp TRUE
+ 43+  829A CC 64 83         call z,set_S_Held
+ 44+  829D C4 6A 83         call nz, reset_S_Held
+ 45+  82A0
+ 46+  82A0 3A 81 82         ld a,(keypressed_F)
+ 47+  82A3 FE 01            cp TRUE
+ 48+  82A5 CC 7B 83         call z, set_F_Held
+ 49+  82A8 C4 81 83         call nz, reset_F_Held
+ 50+  82AB
+ 51+  82AB 3A 7C 82         ld a,(keypressed_A)
+ 52+  82AE FE 01            cp TRUE
+ 53+  82B0 CC 53 83         call z,set_A_Held
+ 54+  82B3 C4 59 83         call nz, reset_A_Held
+ 55+  82B6
+ 56+  82B6 3A 84 82         ld a,(keypressed_Q)
+ 57+  82B9 FE 01            cp TRUE
+ 58+  82BB CC 92 83         call z,set_Q_Held
+ 59+  82BE C4 98 83         call nz, reset_Q_Held
+ 60+  82C1
+ 61+  82C1 3A 88 82         ld a,(keypressed_Space)
+ 62+  82C4 FE 01            cp TRUE
+ 63+  82C6 CC AF 83         call z,set_Space_Held
+ 64+  82C9 C4 B5 83         call nz, reset_Space_Held
+ 65+  82CC
+ 66+  82CC
+ 67+  82CC
+ 68+  82CC AF               xor a
+ 69+  82CD 32 7A 82         ld (keypressed_W),a
+ 70+  82D0 32 7C 82         ld (keypressed_A),a
+ 71+  82D3 32 7E 82         ld (keypressed_S),a
+ 72+  82D6 32 80 82         ld (keypressed_D),a
+ 73+  82D9 32 81 82         ld (keypressed_F),a
+ 74+  82DC 32 83 82         ld (keypressed_I),a
+ 75+  82DF 32 84 82         ld (keypressed_Q),a
+ 76+  82E2 32 86 82         ld (keypressed_O),a
+ 77+  82E5 32 87 82         ld (keypressed_P),a
+ 78+  82E8 32 88 82         ld (keypressed_Space),a
+ 79+  82EB
+ 80+  82EB
+ 81+  82EB 01 FE FD         ld bc,0xFDFE ;ASDFG
+ 82+  82EE ED 78            in a,(c)
+ 83+  82F0 1F               rra
+ 84+  82F1 F5               push af
+ 85+  82F2 D4 4D 83         call nc, set_A
+ 86+  82F5 F1               pop af
+ 87+  82F6 1F               rra
+ 88+  82F7 F5               push af
+ 89+  82F8 D4 5E 83         call nc, set_S
+ 90+  82FB F1               pop af
+ 91+  82FC 1F               rra
+ 92+  82FD F5               push af
+ 93+  82FE D4 6F 83         call nc, set_D
+ 94+  8301 F1               pop af
+ 95+  8302 1F               rra
+ 96+  8303 F5               push af
+ 97+  8304 D4 75 83         call nc, set_F
+ 98+  8307 F1               pop af
+ 99+  8308
+100+  8308 01 FE FB         ld bc,0xFBFE ;QWERT
+101+  830B ED 78            in a,(c)
+102+  830D 1F               rra ;Q
+103+  830E F5               push af
+104+  830F D4 8C 83         call nc, set_Q
+105+  8312 F1               pop af
+106+  8313 1F               rra ;W
+107+  8314 F5               push af
+108+  8315 D4 3C 83         call nc, set_W
+109+  8318 F1               pop af
+110+  8319
+111+  8319 01 FE DF         ld bc,0xDFFE ;POIUY
+112+  831C ED 78            in a,(c)
+113+  831E 1F               rra ;P
+114+  831F F5               push af
+115+  8320 D4 A3 83         call nc, set_P
+116+  8323 F1               pop af
+117+  8324 1F               rra ;O
+118+  8325 F5               push af
+119+  8326 D4 9D 83         call nc, set_O
+120+  8329 F1               pop af
+121+  832A 1F               rra ;I
+122+  832B F5               push af
+123+  832C D4 86 83         call nc, set_I
+124+  832F F1               pop af
+125+  8330
+126+  8330 01 FE 7F         ld bc,32766
+127+  8333 ED 78            in a,(c)
+128+  8335 1F               rra
+129+  8336 F5               push af
+130+  8337 D4 A9 83         call nc, set_Space
+131+  833A F1               pop af
+132+  833B
+133+  833B
+134+  833B C9               ret
+135+  833C
+136+  833C              set_W:
+137+  833C 3E 01            ld a,TRUE
+138+  833E 32 7A 82         ld (keypressed_W),a
+139+  8341 C9               ret
+140+  8342
+141+  8342              set_W_Held:
+142+  8342 3E 01            ld a,TRUE
+143+  8344 32 7B 82         ld (keypressed_W_Held),a
+144+  8347 C9               ret
+145+  8348              reset_W_Held:
+146+  8348 AF               xor a
+147+  8349 32 7B 82         ld (keypressed_W_Held),a
+148+  834C C9               ret
+149+  834D
+150+  834D              set_A:
+151+  834D 3E 01            ld a,TRUE
+152+  834F 32 7C 82         ld (keypressed_A),a
+153+  8352 C9               ret
+154+  8353
+155+  8353              set_A_Held:
+156+  8353 3E 01            ld a,TRUE
+157+  8355 32 7D 82         ld (keypressed_A_Held),a
+158+  8358 C9               ret
+159+  8359
+160+  8359              reset_A_Held:
+161+  8359 AF               xor a
+162+  835A 32 7D 82         ld (keypressed_A_Held),a
+163+  835D C9               ret
+164+  835E
+165+  835E              set_S:
+166+  835E 3E 01            ld a,TRUE
+167+  8360 32 7E 82         ld (keypressed_S),a
+168+  8363 C9               ret
+169+  8364              set_S_Held:
+170+  8364 3E 01            ld a,TRUE
+171+  8366 32 7F 82         ld (keypressed_S_Held),a
+172+  8369 C9               ret
+173+  836A              reset_S_Held:
+174+  836A AF               xor a
+175+  836B 32 7F 82         ld (keypressed_S_Held),a
+176+  836E C9               ret
+177+  836F
+178+  836F              set_D:
+179+  836F 3E 01            ld a,TRUE
+180+  8371 32 80 82         ld (keypressed_D),a
+181+  8374 C9               ret
+182+  8375
+183+  8375              set_F:
+184+  8375 3E 01            ld a,TRUE
+185+  8377 32 81 82         ld (keypressed_F),a
+186+  837A C9               ret
+187+  837B
+188+  837B
+189+  837B              set_F_Held:
+190+  837B 3E 01            ld a,TRUE
+191+  837D 32 82 82         ld (keypressed_F_Held),a
+192+  8380 C9               ret
+193+  8381
+194+  8381              reset_F_Held:
+195+  8381 AF               xor a
+196+  8382 32 82 82         ld (keypressed_F_Held),a
+197+  8385 C9               ret
+198+  8386
+199+  8386
+200+  8386
+201+  8386              set_I:
+202+  8386 3E 01            ld a,TRUE
+203+  8388 32 83 82         ld (keypressed_I),a
+204+  838B C9               ret
+205+  838C
+206+  838C
+207+  838C              set_Q:
+208+  838C 3E 01            ld a,TRUE
+209+  838E 32 84 82         ld (keypressed_Q),a
+210+  8391 C9               ret
+211+  8392
+212+  8392              set_Q_Held:
+213+  8392 3E 01            ld a,TRUE
+214+  8394 32 85 82         ld (keypressed_Q_Held),a
+215+  8397 C9               ret
+216+  8398
+217+  8398              reset_Q_Held:
+218+  8398 AF               xor a
+219+  8399 32 85 82         ld (keypressed_Q_Held),a
+220+  839C C9               ret
+221+  839D
+222+  839D              set_O:
+223+  839D 3E 01            ld a,TRUE
+224+  839F 32 86 82         ld (keypressed_O),a
+225+  83A2 C9               ret
+226+  83A3
+227+  83A3              set_P:
+228+  83A3 3E 01            ld a,TRUE
+229+  83A5 32 87 82         ld (keypressed_P),a
+230+  83A8 C9               ret
+231+  83A9
+232+  83A9              set_Space:
+233+  83A9 3E 01            ld a,TRUE
+234+  83AB 32 88 82         ld (keypressed_Space),a
+235+  83AE C9               ret
+236+  83AF              set_Space_Held:
+237+  83AF 3E 01            ld a,TRUE
+238+  83B1 32 89 82         ld (keypressed_Space_Held),a
+239+  83B4 C9               ret
+240+  83B5
+241+  83B5              reset_Space_Held:
+242+  83B5 AF               xor a
+243+  83B6 32 89 82         ld (keypressed_Space_Held),a
+244+  83B9 C9               ret
+245+  83BA
+# file closed: src/retrotools/keycacher.asm
+ 32   83BA              	include 'retrotools\spritetools.asm'
+# file opened: src/retrotools/spritetools.asm
+  1+  83BA              VISIBILITY equ %10000000
+  2+  83BA              EXTENDED equ %01000000
+  3+  83BA              MIRROR_X equ %00001000
+  4+  83BA              MIRROR_Y equ %00000100
+  5+  83BA
+  6+  83BA
+  7+  83BA
+  8+  83BA              ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  9+  83BA              ;; Upload spritesheet to 16K FPGA Internal Memory
+ 10+  83BA              ;; Inputs: B=Sprite Count HL=Sprite data Ptr
+ 11+  83BA              ;; Outputs: none
+ 12+  83BA              ;; Destroys: A,BC,HL
+ 13+  83BA              ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+ 14+  83BA              init_sprites:
+ 15+  83BA C5           	push bc
+ 16+  83BB 3E 00        	ld a,0
+ 17+  83BD 01 3B 30     	ld bc,$303b
+ 18+  83C0 ED 79        	out (c),a
+ 19+  83C2 C1           	pop bc
+ 20+  83C3              is_loop:
+ 21+  83C3 C5           	push bc
+ 22+  83C4 01 5B 00     	ld bc,$005b
+ 23+  83C7 ED B3        	otir
+ 24+  83C9 C1           	pop bc
+ 25+  83CA 10 F7        	djnz is_loop
+ 26+  83CC C9           	ret
+# file closed: src/retrotools/spritetools.asm
+ 33   83CD              	include 'levels\levels.asm'
+# file opened: src/levels/levels.asm
+  1+  83CD              solids:
+  2+  83CD 00 01 02 03      db 0,1,2,3,4,5,6,7,8,9,10,11
+  2+  83D1 04 05 06 07
+  2+  83D5 08 09 0A 0B
+  3+  83D9              SOLIDS_LENGTH equ 10
+  4+  83D9
+  5+  83D9              check_solid:
+  6+  83D9 21 CD 83         ld hl,solids
+  7+  83DC 01 0A 00         ld bc,SOLIDS_LENGTH
+  8+  83DF ED B1            cpir
+  9+  83E1 C9               ret
+ 10+  83E2
+ 11+  83E2              ;solids:
+ 12+  83E2              ;0-9
+ 13+  83E2
+ 14+  83E2              ;grave (solid)
+ 15+  83E2              ;6,7
+ 16+  83E2              ;8,9
+ 17+  83E2              ;(10,11)
+ 18+  83E2              ;(10,11)
+ 19+  83E2              ;(10,11)
+ 20+  83E2
+ 21+  83E2
+ 22+  83E2              ;ground layout
+ 23+  83E2              ;32,33
+ 24+  83E2              ;00,01 =solid
+ 25+  83E2              ;34,35
+ 26+  83E2              ;36,37
+ 27+  83E2              ;38,39
+ 28+  83E2
+ 29+  83E2
+ 30+  83E2              ;left edge ground
+ 31+  83E2              ;40,41
+ 32+  83E2              ;02,03 =solid
+ 33+  83E2              ;42,43
+ 34+  83E2              ;44,45
+ 35+  83E2              ;46,47
+ 36+  83E2
+ 37+  83E2              ;right edge ground
+ 38+  83E2              ;48,49
+ 39+  83E2              ;04,05 =solid
+ 40+  83E2              ;50,51
+ 41+  83E2              ;52,53
+ 42+  83E2              ;54,55
+ 43+  83E2
+ 44+  83E2              ;sky
+ 45+  83E2              ;56 (black)
+ 46+  83E2
+ 47+  83E2
+ 48+  83E2
+ 49+  83E2              level1:
+ 50+  83E2 38 38 38 38      db 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56, 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56
+ 50+  83E6 38 38 38 38
+ 50+  83EA 38 38 38 38
+ 50+  83EE 38 38 38 38
+ 50+  83F2 38 38 38 38
+ 50+  83F6 38 38 38 38
+ 50+  83FA 38 38 38 38
+ 50+  83FE 38 38 38 38
+ 50+  8402 38 38 38 38
+ 50+  8406 38 38 38 38
+ 50+  840A 38 38 38 38
+ 50+  840E 38 38 38 38
+ 50+  8412 38 38 38 38
+ 50+  8416 38 38 38 38
+ 50+  841A 38 38 38 38
+ 50+  841E 38 38 38 38
+ 50+  8422 38 38 38 38
+ 50+  8426 38 38 38 38
+ 50+  842A 38 38 38 38
+ 50+  842E 38 38 38 38
+ 51+  8432 38 38 38 38      db 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56, 06,07,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56
+ 51+  8436 38 38 38 38
+ 51+  843A 38 38 38 38
+ 51+  843E 38 38 38 38
+ 51+  8442 38 38 38 38
+ 51+  8446 38 38 38 38
+ 51+  844A 38 38 38 38
+ 51+  844E 38 38 38 38
+ 51+  8452 38 38 38 38
+ 51+  8456 38 38 38 38
+ 51+  845A 06 07 38 38
+ 51+  845E 38 38 38 38
+ 51+  8462 38 38 38 38
+ 51+  8466 38 38 38 38
+ 51+  846A 38 38 38 38
+ 51+  846E 38 38 38 38
+ 51+  8472 38 38 38 38
+ 51+  8476 38 38 38 38
+ 51+  847A 38 38 38 38
+ 51+  847E 38 38 38 38
+ 52+  8482 38 38 38 38      db 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56, 08,09,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56
+ 52+  8486 38 38 38 38
+ 52+  848A 38 38 38 38
+ 52+  848E 38 38 38 38
+ 52+  8492 38 38 38 38
+ 52+  8496 38 38 38 38
+ 52+  849A 38 38 38 38
+ 52+  849E 38 38 38 38
+ 52+  84A2 38 38 38 38
+ 52+  84A6 38 38 38 38
+ 52+  84AA 08 09 38 38
+ 52+  84AE 38 38 38 38
+ 52+  84B2 38 38 38 38
+ 52+  84B6 38 38 38 38
+ 52+  84BA 38 38 38 38
+ 52+  84BE 38 38 38 38
+ 52+  84C2 38 38 38 38
+ 52+  84C6 38 38 38 38
+ 52+  84CA 38 38 38 38
+ 52+  84CE 38 38 38 38
+ 53+  84D2 38 38 38 38      db 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56, 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56
+ 53+  84D6 38 38 38 38
+ 53+  84DA 38 38 38 38
+ 53+  84DE 38 38 38 38
+ 53+  84E2 38 38 38 38
+ 53+  84E6 38 38 38 38
+ 53+  84EA 38 38 38 38
+ 53+  84EE 38 38 38 38
+ 53+  84F2 38 38 38 38
+ 53+  84F6 38 38 38 38
+ 53+  84FA 38 38 38 38
+ 53+  84FE 38 38 38 38
+ 53+  8502 38 38 38 38
+ 53+  8506 38 38 38 38
+ 53+  850A 38 38 38 38
+ 53+  850E 38 38 38 38
+ 53+  8512 38 38 38 38
+ 53+  8516 38 38 38 38
+ 53+  851A 38 38 38 38
+ 53+  851E 38 38 38 38
+ 54+  8522 38 38 38 38      db 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56, 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56
+ 54+  8526 38 38 38 38
+ 54+  852A 38 38 38 38
+ 54+  852E 38 38 38 38
+ 54+  8532 38 38 38 38
+ 54+  8536 38 38 38 38
+ 54+  853A 38 38 38 38
+ 54+  853E 38 38 38 38
+ 54+  8542 38 38 38 38
+ 54+  8546 38 38 38 38
+ 54+  854A 38 38 38 38
+ 54+  854E 38 38 38 38
+ 54+  8552 38 38 38 38
+ 54+  8556 38 38 38 38
+ 54+  855A 38 38 38 38
+ 54+  855E 38 38 38 38
+ 54+  8562 38 38 38 38
+ 54+  8566 38 38 38 38
+ 54+  856A 38 38 38 38
+ 54+  856E 38 38 38 38
+ 55+  8572 38 38 38 38      db 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56, 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56
+ 55+  8576 38 38 38 38
+ 55+  857A 38 38 38 38
+ 55+  857E 38 38 38 38
+ 55+  8582 38 38 38 38
+ 55+  8586 38 38 38 38
+ 55+  858A 38 38 38 38
+ 55+  858E 38 38 38 38
+ 55+  8592 38 38 38 38
+ 55+  8596 38 38 38 38
+ 55+  859A 38 38 38 38
+ 55+  859E 38 38 38 38
+ 55+  85A2 38 38 38 38
+ 55+  85A6 38 38 38 38
+ 55+  85AA 38 38 38 38
+ 55+  85AE 38 38 38 38
+ 55+  85B2 38 38 38 38
+ 55+  85B6 38 38 38 38
+ 55+  85BA 38 38 38 38
+ 55+  85BE 38 38 38 38
+ 56+  85C2 38 38 38 38      db 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56, 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56
+ 56+  85C6 38 38 38 38
+ 56+  85CA 38 38 38 38
+ 56+  85CE 38 38 38 38
+ 56+  85D2 38 38 38 38
+ 56+  85D6 38 38 38 38
+ 56+  85DA 38 38 38 38
+ 56+  85DE 38 38 38 38
+ 56+  85E2 38 38 38 38
+ 56+  85E6 38 38 38 38
+ 56+  85EA 38 38 38 38
+ 56+  85EE 38 38 38 38
+ 56+  85F2 38 38 38 38
+ 56+  85F6 38 38 38 38
+ 56+  85FA 38 38 38 38
+ 56+  85FE 38 38 38 38
+ 56+  8602 38 38 38 38
+ 56+  8606 38 38 38 38
+ 56+  860A 38 38 38 38
+ 56+  860E 38 38 38 38
+ 57+  8612 38 38 38 38      db 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56, 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56
+ 57+  8616 38 38 38 38
+ 57+  861A 38 38 38 38
+ 57+  861E 38 38 38 38
+ 57+  8622 38 38 38 38
+ 57+  8626 38 38 38 38
+ 57+  862A 38 38 38 38
+ 57+  862E 38 38 38 38
+ 57+  8632 38 38 38 38
+ 57+  8636 38 38 38 38
+ 57+  863A 38 38 38 38
+ 57+  863E 38 38 38 38
+ 57+  8642 38 38 38 38
+ 57+  8646 38 38 38 38
+ 57+  864A 38 38 38 38
+ 57+  864E 38 38 38 38
+ 57+  8652 38 38 38 38
+ 57+  8656 38 38 38 38
+ 57+  865A 38 38 38 38
+ 57+  865E 38 38 38 38
+ 58+  8662 38 38 38 38      db 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56, 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56
+ 58+  8666 38 38 38 38
+ 58+  866A 38 38 38 38
+ 58+  866E 38 38 38 38
+ 58+  8672 38 38 38 38
+ 58+  8676 38 38 38 38
+ 58+  867A 38 38 38 38
+ 58+  867E 38 38 38 38
+ 58+  8682 38 38 38 38
+ 58+  8686 38 38 38 38
+ 58+  868A 38 38 38 38
+ 58+  868E 38 38 38 38
+ 58+  8692 38 38 38 38
+ 58+  8696 38 38 38 38
+ 58+  869A 38 38 38 38
+ 58+  869E 38 38 38 38
+ 58+  86A2 38 38 38 38
+ 58+  86A6 38 38 38 38
+ 58+  86AA 38 38 38 38
+ 58+  86AE 38 38 38 38
+ 59+  86B2 38 38 38 38      db 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56, 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56
+ 59+  86B6 38 38 38 38
+ 59+  86BA 38 38 38 38
+ 59+  86BE 38 38 38 38
+ 59+  86C2 38 38 38 38
+ 59+  86C6 38 38 38 38
+ 59+  86CA 38 38 38 38
+ 59+  86CE 38 38 38 38
+ 59+  86D2 38 38 38 38
+ 59+  86D6 38 38 38 38
+ 59+  86DA 38 38 38 38
+ 59+  86DE 38 38 38 38
+ 59+  86E2 38 38 38 38
+ 59+  86E6 38 38 38 38
+ 59+  86EA 38 38 38 38
+ 59+  86EE 38 38 38 38
+ 59+  86F2 38 38 38 38
+ 59+  86F6 38 38 38 38
+ 59+  86FA 38 38 38 38
+ 59+  86FE 38 38 38 38
+ 60+  8702 38 38 38 38      db 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56, 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56
+ 60+  8706 38 38 38 38
+ 60+  870A 38 38 38 38
+ 60+  870E 38 38 38 38
+ 60+  8712 38 38 38 38
+ 60+  8716 38 38 38 38
+ 60+  871A 38 38 38 38
+ 60+  871E 38 38 38 38
+ 60+  8722 38 38 38 38
+ 60+  8726 38 38 38 38
+ 60+  872A 38 38 38 38
+ 60+  872E 38 38 38 38
+ 60+  8732 38 38 38 38
+ 60+  8736 38 38 38 38
+ 60+  873A 38 38 38 38
+ 60+  873E 38 38 38 38
+ 60+  8742 38 38 38 38
+ 60+  8746 38 38 38 38
+ 60+  874A 38 38 38 38
+ 60+  874E 38 38 38 38
+ 61+  8752 38 38 38 38      db 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56, 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56
+ 61+  8756 38 38 38 38
+ 61+  875A 38 38 38 38
+ 61+  875E 38 38 38 38
+ 61+  8762 38 38 38 38
+ 61+  8766 38 38 38 38
+ 61+  876A 38 38 38 38
+ 61+  876E 38 38 38 38
+ 61+  8772 38 38 38 38
+ 61+  8776 38 38 38 38
+ 61+  877A 38 38 38 38
+ 61+  877E 38 38 38 38
+ 61+  8782 38 38 38 38
+ 61+  8786 38 38 38 38
+ 61+  878A 38 38 38 38
+ 61+  878E 38 38 38 38
+ 61+  8792 38 38 38 38
+ 61+  8796 38 38 38 38
+ 61+  879A 38 38 38 38
+ 61+  879E 38 38 38 38
+ 62+  87A2 38 38 38 38      db 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56, 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56
+ 62+  87A6 38 38 38 38
+ 62+  87AA 38 38 38 38
+ 62+  87AE 38 38 38 38
+ 62+  87B2 38 38 38 38
+ 62+  87B6 38 38 38 38
+ 62+  87BA 38 38 38 38
+ 62+  87BE 38 38 38 38
+ 62+  87C2 38 38 38 38
+ 62+  87C6 38 38 38 38
+ 62+  87CA 38 38 38 38
+ 62+  87CE 38 38 38 38
+ 62+  87D2 38 38 38 38
+ 62+  87D6 38 38 38 38
+ 62+  87DA 38 38 38 38
+ 62+  87DE 38 38 38 38
+ 62+  87E2 38 38 38 38
+ 62+  87E6 38 38 38 38
+ 62+  87EA 38 38 38 38
+ 62+  87EE 38 38 38 38
+ 63+  87F2 38 38 38 38      db 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56, 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56
+ 63+  87F6 38 38 38 38
+ 63+  87FA 38 38 38 38
+ 63+  87FE 38 38 38 38
+ 63+  8802 38 38 38 38
+ 63+  8806 38 38 38 38
+ 63+  880A 38 38 38 38
+ 63+  880E 38 38 38 38
+ 63+  8812 38 38 38 38
+ 63+  8816 38 38 38 38
+ 63+  881A 38 38 38 38
+ 63+  881E 38 38 38 38
+ 63+  8822 38 38 38 38
+ 63+  8826 38 38 38 38
+ 63+  882A 38 38 38 38
+ 63+  882E 38 38 38 38
+ 63+  8832 38 38 38 38
+ 63+  8836 38 38 38 38
+ 63+  883A 38 38 38 38
+ 63+  883E 38 38 38 38
+ 64+  8842 38 38 38 38      db 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56, 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56
+ 64+  8846 38 38 38 38
+ 64+  884A 38 38 38 38
+ 64+  884E 38 38 38 38
+ 64+  8852 38 38 38 38
+ 64+  8856 38 38 38 38
+ 64+  885A 38 38 38 38
+ 64+  885E 38 38 38 38
+ 64+  8862 38 38 38 38
+ 64+  8866 38 38 38 38
+ 64+  886A 38 38 38 38
+ 64+  886E 38 38 38 38
+ 64+  8872 38 38 38 38
+ 64+  8876 38 38 38 38
+ 64+  887A 38 38 38 38
+ 64+  887E 38 38 38 38
+ 64+  8882 38 38 38 38
+ 64+  8886 38 38 38 38
+ 64+  888A 38 38 38 38
+ 64+  888E 38 38 38 38
+ 65+  8892 38 38 38 38      db 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56, 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56
+ 65+  8896 38 38 38 38
+ 65+  889A 38 38 38 38
+ 65+  889E 38 38 38 38
+ 65+  88A2 38 38 38 38
+ 65+  88A6 38 38 38 38
+ 65+  88AA 38 38 38 38
+ 65+  88AE 38 38 38 38
+ 65+  88B2 38 38 38 38
+ 65+  88B6 38 38 38 38
+ 65+  88BA 38 38 38 38
+ 65+  88BE 38 38 38 38
+ 65+  88C2 38 38 38 38
+ 65+  88C6 38 38 38 38
+ 65+  88CA 38 38 38 38
+ 65+  88CE 38 38 38 38
+ 65+  88D2 38 38 38 38
+ 65+  88D6 38 38 38 38
+ 65+  88DA 38 38 38 38
+ 65+  88DE 38 38 38 38
+ 66+  88E2 38 38 38 38      db 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56, 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56
+ 66+  88E6 38 38 38 38
+ 66+  88EA 38 38 38 38
+ 66+  88EE 38 38 38 38
+ 66+  88F2 38 38 38 38
+ 66+  88F6 38 38 38 38
+ 66+  88FA 38 38 38 38
+ 66+  88FE 38 38 38 38
+ 66+  8902 38 38 38 38
+ 66+  8906 38 38 38 38
+ 66+  890A 38 38 38 38
+ 66+  890E 38 38 38 38
+ 66+  8912 38 38 38 38
+ 66+  8916 38 38 38 38
+ 66+  891A 38 38 38 38
+ 66+  891E 38 38 38 38
+ 66+  8922 38 38 38 38
+ 66+  8926 38 38 38 38
+ 66+  892A 38 38 38 38
+ 66+  892E 38 38 38 38
+ 67+  8932 38 38 38 38      db 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56, 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56
+ 67+  8936 38 38 38 38
+ 67+  893A 38 38 38 38
+ 67+  893E 38 38 38 38
+ 67+  8942 38 38 38 38
+ 67+  8946 38 38 38 38
+ 67+  894A 38 38 38 38
+ 67+  894E 38 38 38 38
+ 67+  8952 38 38 38 38
+ 67+  8956 38 38 38 38
+ 67+  895A 38 38 38 38
+ 67+  895E 38 38 38 38
+ 67+  8962 38 38 38 38
+ 67+  8966 38 38 38 38
+ 67+  896A 38 38 38 38
+ 67+  896E 38 38 38 38
+ 67+  8972 38 38 38 38
+ 67+  8976 38 38 38 38
+ 67+  897A 38 38 38 38
+ 67+  897E 38 38 38 38
+ 68+  8982 38 38 38 38      db 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56, 56,56,56,56,56,56,56,56,06,07,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56
+ 68+  8986 38 38 38 38
+ 68+  898A 38 38 38 38
+ 68+  898E 38 38 38 38
+ 68+  8992 38 38 38 38
+ 68+  8996 38 38 38 38
+ 68+  899A 38 38 38 38
+ 68+  899E 38 38 38 38
+ 68+  89A2 38 38 38 38
+ 68+  89A6 38 38 38 38
+ 68+  89AA 38 38 38 38
+ 68+  89AE 38 38 38 38
+ 68+  89B2 06 07 38 38
+ 68+  89B6 38 38 38 38
+ 68+  89BA 38 38 38 38
+ 68+  89BE 38 38 38 38
+ 68+  89C2 38 38 38 38
+ 68+  89C6 38 38 38 38
+ 68+  89CA 38 38 38 38
+ 68+  89CE 38 38 38 38
+ 69+  89D2 38 38 38 38      db 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56, 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56
+ 69+  89D6 38 38 38 38
+ 69+  89DA 38 38 38 38
+ 69+  89DE 38 38 38 38
+ 69+  89E2 38 38 38 38
+ 69+  89E6 38 38 38 38
+ 69+  89EA 38 38 38 38
+ 69+  89EE 38 38 38 38
+ 69+  89F2 38 38 38 38
+ 69+  89F6 38 38 38 38
+ 69+  89FA 38 38 38 38
+ 69+  89FE 38 38 38 38
+ 69+  8A02 38 38 38 38
+ 69+  8A06 38 38 38 38
+ 69+  8A0A 38 38 38 38
+ 69+  8A0E 38 38 38 38
+ 69+  8A12 38 38 38 38
+ 69+  8A16 38 38 38 38
+ 69+  8A1A 38 38 38 38
+ 69+  8A1E 38 38 38 38
+ 70+  8A22 38 38 38 38      db 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56, 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56
+ 70+  8A26 38 38 38 38
+ 70+  8A2A 38 38 38 38
+ 70+  8A2E 38 38 38 38
+ 70+  8A32 38 38 38 38
+ 70+  8A36 38 38 38 38
+ 70+  8A3A 38 38 38 38
+ 70+  8A3E 38 38 38 38
+ 70+  8A42 38 38 38 38
+ 70+  8A46 38 38 38 38
+ 70+  8A4A 38 38 38 38
+ 70+  8A4E 38 38 38 38
+ 70+  8A52 38 38 38 38
+ 70+  8A56 38 38 38 38
+ 70+  8A5A 38 38 38 38
+ 70+  8A5E 38 38 38 38
+ 70+  8A62 38 38 38 38
+ 70+  8A66 38 38 38 38
+ 70+  8A6A 38 38 38 38
+ 70+  8A6E 38 38 38 38
+ 71+  8A72 38 38 38 38      db 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56, 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56
+ 71+  8A76 38 38 38 38
+ 71+  8A7A 38 38 38 38
+ 71+  8A7E 38 38 38 38
+ 71+  8A82 38 38 38 38
+ 71+  8A86 38 38 38 38
+ 71+  8A8A 38 38 38 38
+ 71+  8A8E 38 38 38 38
+ 71+  8A92 38 38 38 38
+ 71+  8A96 38 38 38 38
+ 71+  8A9A 38 38 38 38
+ 71+  8A9E 38 38 38 38
+ 71+  8AA2 38 38 38 38
+ 71+  8AA6 38 38 38 38
+ 71+  8AAA 38 38 38 38
+ 71+  8AAE 38 38 38 38
+ 71+  8AB2 38 38 38 38
+ 71+  8AB6 38 38 38 38
+ 71+  8ABA 38 38 38 38
+ 71+  8ABE 38 38 38 38
+ 72+  8AC2 38 38 38 38      db 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,06,07,56,56,56, 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56
+ 72+  8AC6 38 38 38 38
+ 72+  8ACA 38 38 38 38
+ 72+  8ACE 38 38 38 38
+ 72+  8AD2 38 38 38 38
+ 72+  8AD6 38 38 38 38
+ 72+  8ADA 38 38 38 38
+ 72+  8ADE 38 38 38 38
+ 72+  8AE2 38 38 38 06
+ 72+  8AE6 07 38 38 38
+ 72+  8AEA 38 38 38 38
+ 72+  8AEE 38 38 38 38
+ 72+  8AF2 38 38 38 38
+ 72+  8AF6 38 38 38 38
+ 72+  8AFA 38 38 38 38
+ 72+  8AFE 38 38 38 38
+ 72+  8B02 38 38 38 38
+ 72+  8B06 38 38 38 38
+ 72+  8B0A 38 38 38 38
+ 72+  8B0E 38 38 38 38
+ 73+  8B12 38 38 38 38      db 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,08,09,56,56,56, 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56
+ 73+  8B16 38 38 38 38
+ 73+  8B1A 38 38 38 38
+ 73+  8B1E 38 38 38 38
+ 73+  8B22 38 38 38 38
+ 73+  8B26 38 38 38 38
+ 73+  8B2A 38 38 38 38
+ 73+  8B2E 38 38 38 38
+ 73+  8B32 38 38 38 08
+ 73+  8B36 09 38 38 38
+ 73+  8B3A 38 38 38 38
+ 73+  8B3E 38 38 38 38
+ 73+  8B42 38 38 38 38
+ 73+  8B46 38 38 38 38
+ 73+  8B4A 38 38 38 38
+ 73+  8B4E 38 38 38 38
+ 73+  8B52 38 38 38 38
+ 73+  8B56 38 38 38 38
+ 73+  8B5A 38 38 38 38
+ 73+  8B5E 38 38 38 38
+ 74+  8B62 38 38 38 38      db 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56, 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56
+ 74+  8B66 38 38 38 38
+ 74+  8B6A 38 38 38 38
+ 74+  8B6E 38 38 38 38
+ 74+  8B72 38 38 38 38
+ 74+  8B76 38 38 38 38
+ 74+  8B7A 38 38 38 38
+ 74+  8B7E 38 38 38 38
+ 74+  8B82 38 38 38 38
+ 74+  8B86 38 38 38 38
+ 74+  8B8A 38 38 38 38
+ 74+  8B8E 38 38 38 38
+ 74+  8B92 38 38 38 38
+ 74+  8B96 38 38 38 38
+ 74+  8B9A 38 38 38 38
+ 74+  8B9E 38 38 38 38
+ 74+  8BA2 38 38 38 38
+ 74+  8BA6 38 38 38 38
+ 74+  8BAA 38 38 38 38
+ 74+  8BAE 38 38 38 38
+ 75+  8BB2 38 38 38 38      db 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,10,11,56,56,56, 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56
+ 75+  8BB6 38 38 38 38
+ 75+  8BBA 38 38 38 38
+ 75+  8BBE 38 38 38 38
+ 75+  8BC2 38 38 38 38
+ 75+  8BC6 38 38 38 38
+ 75+  8BCA 38 38 38 38
+ 75+  8BCE 38 38 38 38
+ 75+  8BD2 38 38 38 0A
+ 75+  8BD6 0B 38 38 38
+ 75+  8BDA 38 38 38 38
+ 75+  8BDE 38 38 38 38
+ 75+  8BE2 38 38 38 38
+ 75+  8BE6 38 38 38 38
+ 75+  8BEA 38 38 38 38
+ 75+  8BEE 38 38 38 38
+ 75+  8BF2 38 38 38 38
+ 75+  8BF6 38 38 38 38
+ 75+  8BFA 38 38 38 38
+ 75+  8BFE 38 38 38 38
+ 76+  8C02 38 38 38 38      db 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,10,11,56,56,56, 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,06,07,56,56,56,56,56,56,56
+ 76+  8C06 38 38 38 38
+ 76+  8C0A 38 38 38 38
+ 76+  8C0E 38 38 38 38
+ 76+  8C12 38 38 38 38
+ 76+  8C16 38 38 38 38
+ 76+  8C1A 38 38 38 38
+ 76+  8C1E 38 38 38 38
+ 76+  8C22 38 38 38 0A
+ 76+  8C26 0B 38 38 38
+ 76+  8C2A 38 38 38 38
+ 76+  8C2E 38 38 38 38
+ 76+  8C32 38 38 38 38
+ 76+  8C36 38 38 38 38
+ 76+  8C3A 38 38 38 38
+ 76+  8C3E 38 38 38 38
+ 76+  8C42 38 38 38 38
+ 76+  8C46 38 38 38 06
+ 76+  8C4A 07 38 38 38
+ 76+  8C4E 38 38 38 38
+ 77+  8C52 20 20 20 21      db 32,32,32,33,32,33,32,33,32,33,32,33,32,33,32,33,32,33,32,48,49,33,32,33,40,41,32,33,32,33,32,33,32,33,32,10,11,33,32,33, 40,41,32,33,32,33,32,33,32,33,32,33,32,33,32,33,32,33,32,48,49,33,32,33,40,41,32,33,32,33,32,08,09,33,32,33,32,33,32,33
+ 77+  8C56 20 21 20 21
+ 77+  8C5A 20 21 20 21
+ 77+  8C5E 20 21 20 21
+ 77+  8C62 20 21 20 30
+ 77+  8C66 31 21 20 21
+ 77+  8C6A 28 29 20 21
+ 77+  8C6E 20 21 20 21
+ 77+  8C72 20 21 20 0A
+ 77+  8C76 0B 21 20 21
+ 77+  8C7A 28 29 20 21
+ 77+  8C7E 20 21 20 21
+ 77+  8C82 20 21 20 21
+ 77+  8C86 20 21 20 21
+ 77+  8C8A 20 21 20 30
+ 77+  8C8E 31 21 20 21
+ 77+  8C92 28 29 20 21
+ 77+  8C96 20 21 20 08
+ 77+  8C9A 09 21 20 21
+ 77+  8C9E 20 21 20 21
+ 78+  8CA2 02 03 00 01      db 02,03,00,01,00,01,00,01,00,01,00,01,00,01,00,01,00,01,00,04,05,01,00,01,02,03,00,01,00,01,00,01,00,01,00,01,00,01,00,01, 02,03,00,01,00,01,00,01,00,01,00,01,00,01,00,01,00,01,00,04,05,01,00,01,02,03,00,01,00,01,00,01,00,01,00,01,00,01,00,01
+ 78+  8CA6 00 01 00 01
+ 78+  8CAA 00 01 00 01
+ 78+  8CAE 00 01 00 01
+ 78+  8CB2 00 01 00 04
+ 78+  8CB6 05 01 00 01
+ 78+  8CBA 02 03 00 01
+ 78+  8CBE 00 01 00 01
+ 78+  8CC2 00 01 00 01
+ 78+  8CC6 00 01 00 01
+ 78+  8CCA 02 03 00 01
+ 78+  8CCE 00 01 00 01
+ 78+  8CD2 00 01 00 01
+ 78+  8CD6 00 01 00 01
+ 78+  8CDA 00 01 00 04
+ 78+  8CDE 05 01 00 01
+ 78+  8CE2 02 03 00 01
+ 78+  8CE6 00 01 00 01
+ 78+  8CEA 00 01 00 01
+ 78+  8CEE 00 01 00 01
+ 79+  8CF2 2A 2B 22 23      db 42,43,34,35,34,35,34,35,34,35,34,35,34,35,34,35,34,35,34,50,51,35,34,35,42,43,34,35,34,35,34,35,34,35,34,35,34,35,34,35, 42,43,34,35,34,35,34,35,34,35,34,35,34,35,34,35,34,35,34,50,51,35,34,35,42,43,34,35,34,35,34,35,34,35,34,35,34,35,34,35
+ 79+  8CF6 22 23 22 23
+ 79+  8CFA 22 23 22 23
+ 79+  8CFE 22 23 22 23
+ 79+  8D02 22 23 22 32
+ 79+  8D06 33 23 22 23
+ 79+  8D0A 2A 2B 22 23
+ 79+  8D0E 22 23 22 23
+ 79+  8D12 22 23 22 23
+ 79+  8D16 22 23 22 23
+ 79+  8D1A 2A 2B 22 23
+ 79+  8D1E 22 23 22 23
+ 79+  8D22 22 23 22 23
+ 79+  8D26 22 23 22 23
+ 79+  8D2A 22 23 22 32
+ 79+  8D2E 33 23 22 23
+ 79+  8D32 2A 2B 22 23
+ 79+  8D36 22 23 22 23
+ 79+  8D3A 22 23 22 23
+ 79+  8D3E 22 23 22 23
+ 80+  8D42 2C 2D 24 25      db 44,45,36,37,36,37,36,37,36,37,36,37,36,37,36,37,36,37,36,52,53,37,36,37,44,45,36,37,36,37,36,37,36,37,36,37,36,37,36,37, 44,45,36,37,36,37,36,37,36,37,36,37,36,37,36,37,36,37,36,52,53,37,36,37,44,45,36,37,36,37,36,37,36,37,36,37,36,37,36,37
+ 80+  8D46 24 25 24 25
+ 80+  8D4A 24 25 24 25
+ 80+  8D4E 24 25 24 25
+ 80+  8D52 24 25 24 34
+ 80+  8D56 35 25 24 25
+ 80+  8D5A 2C 2D 24 25
+ 80+  8D5E 24 25 24 25
+ 80+  8D62 24 25 24 25
+ 80+  8D66 24 25 24 25
+ 80+  8D6A 2C 2D 24 25
+ 80+  8D6E 24 25 24 25
+ 80+  8D72 24 25 24 25
+ 80+  8D76 24 25 24 25
+ 80+  8D7A 24 25 24 34
+ 80+  8D7E 35 25 24 25
+ 80+  8D82 2C 2D 24 25
+ 80+  8D86 24 25 24 25
+ 80+  8D8A 24 25 24 25
+ 80+  8D8E 24 25 24 25
+ 81+  8D92 2E 2F 26 27      db 46,47,38,39,38,39,38,39,38,39,38,39,38,39,38,39,38,39,38,54,55,39,38,39,46,47,38,39,38,39,38,39,38,39,38,39,38,39,38,39, 46,47,38,39,38,39,38,39,38,39,38,39,38,39,38,39,38,39,38,54,55,39,38,39,46,47,38,39,38,39,38,39,38,39,38,39,38,39,38,39
+ 81+  8D96 26 27 26 27
+ 81+  8D9A 26 27 26 27
+ 81+  8D9E 26 27 26 27
+ 81+  8DA2 26 27 26 36
+ 81+  8DA6 37 27 26 27
+ 81+  8DAA 2E 2F 26 27
+ 81+  8DAE 26 27 26 27
+ 81+  8DB2 26 27 26 27
+ 81+  8DB6 26 27 26 27
+ 81+  8DBA 2E 2F 26 27
+ 81+  8DBE 26 27 26 27
+ 81+  8DC2 26 27 26 27
+ 81+  8DC6 26 27 26 27
+ 81+  8DCA 26 27 26 36
+ 81+  8DCE 37 27 26 27
+ 81+  8DD2 2E 2F 26 27
+ 81+  8DD6 26 27 26 27
+ 81+  8DDA 26 27 26 27
+ 81+  8DDE 26 27 26 27
+ 82+  8DE2
+ 83+  8DE2
+ 84+  8DE2
+ 85+  8DE2
+ 86+  8DE2              ; check_collision_solid_down:
+ 87+  8DE2              ; 	ld hl,thedwarf
+ 88+  8DE2              ; 	ld a,(player_world_y)
+ 89+  8DE2              ; 	add a,2
+ 90+  8DE2              ; 	ld d,a
+ 91+  8DE2              ; 	ld e,WORLD_WIDTH
+ 92+  8DE2              ; 	mul d,e
+ 93+  8DE2              ; 	add hl,de
+ 94+  8DE2              ; 	ld a,(player_world_x)
+ 95+  8DE2              ; 	ld e,a
+ 96+  8DE2              ; 	ld d,0
+ 97+  8DE2              ; 	add hl,de
+ 98+  8DE2              ; 	ld a,(hl)
+ 99+  8DE2              ; 	cp $3a
+100+  8DE2              ; 	jp c,collided
+101+  8DE2
+102+  8DE2              ; 	ld hl,thedwarf
+103+  8DE2              ; 	ld a,(player_world_y)
+104+  8DE2              ; 	add a,2
+105+  8DE2              ; 	ld d,a
+106+  8DE2              ; 	ld e,WORLD_WIDTH
+107+  8DE2              ; 	mul d,e
+108+  8DE2              ; 	add hl,de
+109+  8DE2              ; 	ld a,(player_world_x)
+110+  8DE2              ; 	add a,2
+111+  8DE2              ; 	ld e,a
+112+  8DE2              ; 	ld d,0
+113+  8DE2              ; 	add hl,de
+114+  8DE2              ; 	ld a,(hl)
+115+  8DE2              ; 	cp $3a
+116+  8DE2              ; 	jp c,collided
+117+  8DE2
+118+  8DE2              ; 	ret
+# file closed: src/levels/levels.asm
+ 34   8DE2              	include 'levels\levelmanager.asm'
+# file opened: src/levels/levelmanager.asm
+  1+  8DE2              GGTILES_SIZE equ 2048
+  2+  8DE2
+  3+  8DE2              WORLD_WIDTH equ 80
+  4+  8DE2              VIEW_WIDTH equ 40
+  5+  8DE2              VIEW_HEIGHT equ 32
+  6+  8DE2
+  7+  8DE2              VIEW_SIZE equ VIEW_WIDTH*VIEW_HEIGHT
+  8+  8DE2
+  9+  8DE2
+ 10+  8DE2 00           current_scroll db 0
+ 11+  8DE3
+ 12+  8DE3              LEVEL_START equ 0
+ 13+  8DE3 28           offset db 40
+ 14+  8DE4
+ 15+  8DE4
+ 16+  8DE4              init_tiles:
+ 17+  8DE4 CD 35 8E         call set_palette
+ 18+  8DE7
+ 19+  8DE7                  ;load the tile defs
+ 20+  8DE7 ED 91 56 10      nextreg $56, 16
+ 21+  8DEB 21 00 C0         ld hl,$c000
+ 22+  8DEE 11 00 60         ld de,$6000
+ 23+  8DF1 01 00 08         ld bc,GGTILES_SIZE
+ 24+  8DF4 ED B0            ldir
+ 25+  8DF6
+ 26+  8DF6 ED 91 6B A0      nextreg $6b, %10100000
+ 27+  8DFA ED 91 6C 00      nextreg $6c, 0
+ 28+  8DFE ED 91 6E 40      nextreg $6e, $40
+ 29+  8E02 ED 91 6F 60      nextreg $6f, $60
+ 30+  8E06 ED 91 68 80      nextreg $68, %10000000
+ 31+  8E0A ED 91 43 30      nextreg $43, %00110000
+ 32+  8E0E
+ 33+  8E0E                  CLIPTILES 4,155,0,255
+ 33+  8E0E 3E 04       >		ld a,4
+ 33+  8E10 ED 92 1B    >		nextreg 27,a
+ 33+  8E13 3E 9B       >		ld a,155
+ 33+  8E15 ED 92 1B    >		nextreg 27,a
+ 33+  8E18 3E 00       >		ld a,0
+ 33+  8E1A ED 92 1B    >		nextreg 27,a
+ 33+  8E1D 3E FF       >		ld a,255
+ 33+  8E1F ED 92 1B    >		nextreg 27,a
+ 33+  8E22             >
+ 34+  8E22
+ 35+  8E22 3E 04            ld a,4 ;magenta
+ 36+  8E24 ED 92 4C         nextreg $4c,a ;tilemap transparency colour
+ 37+  8E27
+ 38+  8E27 AF               xor a ;black
+ 39+  8E28 ED 92 14         nextreg $14,a; global transparency colour
+ 40+  8E2B ED 92 31         nextreg $31,a ;tiles y offset
+ 41+  8E2E ED 92 30         nextreg $30,a ;tiles x offset
+ 42+  8E31
+ 43+  8E31
+ 44+  8E31 CD 4F 8E         call view_draw
+ 45+  8E34
+ 46+  8E34 C9               ret
+ 47+  8E35
+ 48+  8E35              set_palette:
+ 49+  8E35 21 18 8F         ld hl,gg_palette
+ 50+  8E38 ED 91 43 30      nextreg $43,%00110000
+ 51+  8E3C AF               xor a
+ 52+  8E3D 06 10            ld b,16
+ 53+  8E3F ED 92 40         nextreg $40,a
+ 54+  8E42              uploadpal:
+ 55+  8E42 7E               ld a,(hl)
+ 56+  8E43 ED 92 44         nextreg $44,a
+ 57+  8E46 23               inc hl
+ 58+  8E47 7E               ld a,(hl)
+ 59+  8E48 ED 92 44         nextreg $44,a
+ 60+  8E4B 23               inc hl
+ 61+  8E4C 10 F4            djnz uploadpal
+ 62+  8E4E C9               ret
+ 63+  8E4F
+ 64+  8E4F
+ 65+  8E4F
+ 66+  8E4F              view_draw:
+ 67+  8E4F 21 E2 83         ld hl,level1
+ 68+  8E52 11 00 40         ld de,0x4000
+ 69+  8E55              view_draw_line:
+ 70+  8E55 01 28 00         ld bc,VIEW_WIDTH
+ 71+  8E58 ED B0            ldir
+ 72+  8E5A ED 34 28 00      add hl,WORLD_WIDTH-VIEW_WIDTH
+ 73+  8E5E 7A               ld a,d
+ 74+  8E5F FE 45            cp $45
+ 75+  8E61 C2 55 8E         jp nz, view_draw_line
+ 76+  8E64 C9               ret
+ 77+  8E65
+ 78+  8E65
+ 79+  8E65
+ 80+  8E65              scroll_left:
+ 81+  8E65 3A E2 8D         ld a,(current_scroll)
+ 82+  8E68 3C               inc a
+ 83+  8E69 FE 08            cp 8
+ 84+  8E6B CC 79 8E         call z,drawcolumn_left
+ 85+  8E6E 32 E2 8D         ld (current_scroll),a
+ 86+  8E71 47               ld b,a
+ 87+  8E72 3E 08            ld a,8
+ 88+  8E74 90               sub b
+ 89+  8E75 ED 92 30         nextreg $30,a
+ 90+  8E78 C9               ret
+ 91+  8E79              drawcolumn_left:
+ 92+  8E79                  ; ld hl,$4000+1279
+ 93+  8E79                  ; ld de,$4001+1279
+ 94+  8E79 21 FF 44         ld hl,$44FF
+ 95+  8E7C 11 00 45         ld de,$4500
+ 96+  8E7F 01 00 05         ld bc,40*32
+ 97+  8E82 ED B8            lddr  ; move whole screen to right 1 tile
+ 98+  8E84 21 E2 83         ld hl,level1            ; start of tiles
+ 99+  8E87 3A E3 8D         ld a,(offset)           ; current offset
+100+  8E8A ED 31            add hl,a                ; add this to tile offset
+101+  8E8C 3D               dec a                   ; dec the offset
+102+  8E8D 32 E3 8D         ld (offset),a
+103+  8E90 FE FF            cp $ff
+104+  8E92 CC AB 8E         call z,resetoffset_left
+105+  8E95 11 00 40         ld de,$4000              ; top left cell
+106+  8E98 06 20            ld b,VIEW_HEIGHT
+107+  8E9A              columnloop_left:
+108+  8E9A 7E               ld a,(hl)                   ; get tile from (hl)
+109+  8E9B 12               ld (de),a                   ; put in (de)
+110+  8E9C ED 35 28 00      add de,VIEW_WIDTH                  ; move de to next line
+111+  8EA0 ED 34 50 00      add hl,WORLD_WIDTH          ; move hl to next map line
+112+  8EA4 10 F4            djnz columnloop_left             ; loop for 32 lines
+113+  8EA6 AF               xor a
+114+  8EA7 32 E2 8D         ld (current_scroll),a
+115+  8EAA C9               ret
+116+  8EAB              resetoffset_left:
+117+  8EAB 3E 4F            ld a,WORLD_WIDTH-1
+118+  8EAD 32 E3 8D         ld (offset),a
+119+  8EB0 C9               ret
+120+  8EB1
+121+  8EB1
+122+  8EB1
+123+  8EB1              scroll_right:
+124+  8EB1 3A E2 8D         ld a,(current_scroll)
+125+  8EB4 3C               inc a
+126+  8EB5 FE 08            cp 8
+127+  8EB7 CC C1 8E         call z,nowdrawcolumn
+128+  8EBA 32 E2 8D         ld (current_scroll),a
+129+  8EBD ED 92 30         nextreg $30,a
+130+  8EC0 C9               ret
+131+  8EC1              nowdrawcolumn:
+132+  8EC1 21 01 40         ld hl,$4001
+133+  8EC4 11 00 40         ld de,$4000
+134+  8EC7 01 00 05         ld bc,1280
+135+  8ECA ED B0            ldir  ; move whole screen to left 1 tile
+136+  8ECC 21 E2 83         ld hl,level1            ; start of tiles
+137+  8ECF 3A E3 8D         ld a,(offset)           ; current offset
+138+  8ED2 ED 31            add hl,a                ; add this to tile offset
+139+  8ED4 3C               inc a                   ; inc the offset
+140+  8ED5 32 E3 8D         ld (offset),a
+141+  8ED8 FE 50            cp WORLD_WIDTH
+142+  8EDA CC F3 8E         call z,resetoffset_right
+143+  8EDD 11 27 40         ld de,$4027              ; top right cell
+144+  8EE0 06 20            ld b,VIEW_HEIGHT
+145+  8EE2              columnloop:
+146+  8EE2 7E               ld a,(hl)                   ; get tile from (hl)
+147+  8EE3 12               ld (de),a                   ; put in (de)
+148+  8EE4 ED 35 28 00      add de,VIEW_WIDTH                  ; move de to next line
+149+  8EE8 ED 34 50 00      add hl,WORLD_WIDTH          ; move hl to next map line
+150+  8EEC 10 F4            djnz columnloop             ; loop for 32 lines
+151+  8EEE AF               xor a
+152+  8EEF 32 E2 8D         ld (current_scroll),a
+153+  8EF2 C9               ret
+154+  8EF3
+155+  8EF3              resetoffset_right:
+156+  8EF3 AF               xor a
+157+  8EF4 32 E3 8D         ld (offset),a
+158+  8EF7 C9               ret
+159+  8EF8
+160+  8EF8
+161+  8EF8
+162+  8EF8
+163+  8EF8
+164+  8EF8
+165+  8EF8
+166+  8EF8
+167+  8EF8
+168+  8EF8
+169+  8EF8
+170+  8EF8
+171+  8EF8
+172+  8EF8                  incbin '../assets/ggtiles.nxp',0
+173+  8F18
+174+  8F18
+175+  8F18
+176+  8F18              gg_palette:
+177+  8F18                  incbin '../assets/ggtiles.nxp',0
+178+  8F38
+179+  8F38                  MMU 6,16
+180+  8F38                  org $c000
+181+  C000
+182+  C000                  incbin '../assets/ggtiles.til',0,GGTILES_SIZE
+183+  C800
+184+  C800
+# file closed: src/levels/levelmanager.asm
+ 35   C800              	include 'assets\sprites.asm'
+# file opened: src/assets/sprites.asm
+  1+  C800              ; Sprite Attribute 0
+  2+  C800              ;     X X X X X X X X
+  3+  C800
+  4+  C800              ; Sprite Attribute 1
+  5+  C800              ;     Y Y Y Y Y Y Y Y
+  6+  C800
+  7+  C800              ; Sprite Attribute 2
+  8+  C800              ;     P P P P XM YM R X8/PR
+  9+  C800
+ 10+  C800              ; Sprite Attribute 3
+ 11+  C800              ;     V E N5 N4 N3 N2 N1 N0 (NNNNN=Pattern ID)
+ 12+  C800
+ 13+  C800              ; Sprite Attribute 4
+ 14+  C800              ; A. Extended Anchor Sprite
+ 15+  C800              ;     H N6 T X X Y Y Y8
+ 16+  C800              ; B. Relative Sprite, Composite Type
+ 17+  C800              ;     0 1 N6 X X Y Y PO
+ 18+  C800              ; C. Relative Sprite, Unified Type
+ 19+  C800              ;     0 1 N6 0 0 0 0 PO
+ 20+  C800
+ 21+  C800
+ 22+  C800                  MMU 6,14
+ 23+  C800                  org $c000
+ 24+  C000
+ 25+  C000              SPRITE_SEGMENTS equ 4
+ 26+  C000              SPRITE_COUNT equ 16
+ 27+  C000
+ 28+  C000              spikealot_A_1:
+ 29+  C000 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $6E, $B6, $49, $00, $E3;
+ 29+  C004 E3 E3 E3 E3
+ 29+  C008 E3 E3 E3 6E
+ 29+  C00C B6 49 00 E3
+ 30+  C010 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $49, $B6, $B6, $B6, $6E, $49;
+ 30+  C014 E3 E3 E3 E3
+ 30+  C018 E3 E3 49 B6
+ 30+  C01C B6 B6 6E 49
+ 31+  C020 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $92, $B6, $B6, $B6, $B6, $6E;
+ 31+  C024 E3 E3 E3 E3
+ 31+  C028 E3 E3 92 B6
+ 31+  C02C B6 B6 B6 6E
+ 32+  C030 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $00, $49, $49, $92, $B6, $B6;
+ 32+  C034 E3 E3 E3 E3
+ 32+  C038 E3 E3 00 49
+ 32+  C03C 49 92 B6 B6
+ 33+  C040 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $49, $6E, $92, $6E, $49, $6E;
+ 33+  C044 E3 E3 E3 E3
+ 33+  C048 E3 E3 49 6E
+ 33+  C04C 92 6E 49 6E
+ 34+  C050 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $49, $92, $B6, $92, $92, $49;
+ 34+  C054 E3 E3 E3 E3
+ 34+  C058 E3 E3 49 92
+ 34+  C05C B6 92 92 49
+ 35+  C060 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $00, $48, $B1, $48, $48, $48;
+ 35+  C064 E3 E3 E3 E3
+ 35+  C068 E3 E3 00 48
+ 35+  C06C B1 48 48 48
+ 36+  C070 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $48, $68, $D6, $92, $0E, $B6;
+ 36+  C074 E3 E3 E3 E3
+ 36+  C078 E3 E3 48 68
+ 36+  C07C D6 92 0E B6
+ 37+  C080 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $68, $D6, $D6, $D6, $D6, $D6;
+ 37+  C084 E3 E3 E3 E3
+ 37+  C088 E3 E3 68 D6
+ 37+  C08C D6 D6 D6 D6
+ 38+  C090 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $49, $00, $68, $68, $68, $68, $B1;
+ 38+  C094 E3 E3 E3 E3
+ 38+  C098 E3 49 00 68
+ 38+  C09C 68 68 68 B1
+ 39+  C0A0 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $6E, $48, $68, $68, $68, $68, $68;
+ 39+  C0A4 E3 E3 E3 E3
+ 39+  C0A8 E3 6E 48 68
+ 39+  C0AC 68 68 68 68
+ 40+  C0B0 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $92, $68, $68, $48, $68, $48, $49;
+ 40+  C0B4 E3 E3 E3 E3
+ 40+  C0B8 E3 92 68 68
+ 40+  C0BC 48 68 48 49
+ 41+  C0C0 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $6E, $48, $48, $48, $49, $49, $6E;
+ 41+  C0C4 E3 E3 E3 E3
+ 41+  C0C8 E3 6E 48 48
+ 41+  C0CC 48 49 49 6E
+ 42+  C0D0 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $49, $B6, $6E, $49, $92, $92, $92;
+ 42+  C0D4 E3 E3 E3 E3
+ 42+  C0D8 E3 49 B6 6E
+ 42+  C0DC 49 92 92 92
+ 43+  C0E0 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $6E, $49, $00, $B6, $B6, $92, $B6, $B6, $B6;
+ 43+  C0E4 E3 E3 E3 6E
+ 43+  C0E8 49 00 B6 B6
+ 43+  C0EC 92 B6 B6 B6
+ 44+  C0F0 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $6E, $B6, $6E, $00, $49, $B6, $B6, $B6, $92, $6E;
+ 44+  C0F4 E3 E3 6E B6
+ 44+  C0F8 6E 00 49 B6
+ 44+  C0FC B6 B6 92 6E
+ 45+  C100
+ 46+  C100              spikealot_A_2:
+ 47+  C100 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+ 47+  C104 E3 E3 E3 E3
+ 47+  C108 E3 E3 E3 E3
+ 47+  C10C E3 E3 E3 E3
+ 48+  C110 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+ 48+  C114 E3 E3 E3 E3
+ 48+  C118 E3 E3 E3 E3
+ 48+  C11C E3 E3 E3 E3
+ 49+  C120 49 00 E3 E3  	db  $49, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+ 49+  C124 E3 E3 E3 E3
+ 49+  C128 E3 E3 E3 E3
+ 49+  C12C E3 E3 E3 E3
+ 50+  C130 49 49 00 E3  	db  $49, $49, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+ 50+  C134 E3 E3 E3 E3
+ 50+  C138 E3 E3 E3 E3
+ 50+  C13C E3 E3 E3 E3
+ 51+  C140 92 49 00 E3  	db  $92, $49, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+ 51+  C144 E3 E3 E3 E3
+ 51+  C148 E3 E3 E3 E3
+ 51+  C14C E3 E3 E3 E3
+ 52+  C150 6E 49 49 00  	db  $6E, $49, $49, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+ 52+  C154 E3 E3 E3 E3
+ 52+  C158 E3 E3 E3 E3
+ 52+  C15C E3 E3 E3 E3
+ 53+  C160 49 49 49 00  	db  $49, $49, $49, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+ 53+  C164 E3 E3 E3 E3
+ 53+  C168 E3 E3 E3 E3
+ 53+  C16C E3 E3 E3 E3
+ 54+  C170 6E 49 49 00  	db  $6E, $49, $49, $00, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+ 54+  C174 00 E3 E3 E3
+ 54+  C178 E3 E3 E3 E3
+ 54+  C17C E3 E3 E3 E3
+ 55+  C180 6E 49 00 49  	db  $6E, $49, $00, $49, $49, $00, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+ 55+  C184 49 00 00 E3
+ 55+  C188 E3 E3 E3 E3
+ 55+  C18C E3 E3 E3 E3
+ 56+  C190 49 00 49 6E  	db  $49, $00, $49, $6E, $92, $B6, $49, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+ 56+  C194 92 B6 49 00
+ 56+  C198 E3 E3 E3 E3
+ 56+  C19C E3 E3 E3 E3
+ 57+  C1A0 49 49 6E 92  	db  $49, $49, $6E, $92, $B6, $B6, $B6, $49, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+ 57+  C1A4 B6 B6 B6 49
+ 57+  C1A8 00 E3 E3 E3
+ 57+  C1AC E3 E3 E3 E3
+ 58+  C1B0 6E 00 6E 92  	db  $6E, $00, $6E, $92, $92, $B6, $B6, $92, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+ 58+  C1B4 92 B6 B6 92
+ 58+  C1B8 00 E3 E3 E3
+ 58+  C1BC E3 E3 E3 E3
+ 59+  C1C0 92 00 49 92  	db  $92, $00, $49, $92, $6E, $49, $00, $00, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+ 59+  C1C4 6E 49 00 00
+ 59+  C1C8 00 E3 E3 E3
+ 59+  C1CC E3 E3 E3 E3
+ 60+  C1D0 6E 49 00 00  	db  $6E, $49, $00, $00, $00, $00, $6E, $49, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+ 60+  C1D4 00 00 6E 49
+ 60+  C1D8 00 E3 E3 E3
+ 60+  C1DC E3 E3 E3 E3
+ 61+  C1E0 6E 00 00 00  	db  $6E, $00, $00, $00, $6E, $B6, $B6, $6E, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+ 61+  C1E4 6E B6 B6 6E
+ 61+  C1E8 00 E3 E3 E3
+ 61+  C1EC E3 E3 E3 E3
+ 62+  C1F0 00 00 49 00  	db  $00, $00, $49, $00, $6E, $92, $B6, $49, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+ 62+  C1F4 6E 92 B6 49
+ 62+  C1F8 00 E3 E3 E3
+ 62+  C1FC E3 E3 E3 E3
+ 63+  C200
+ 64+  C200              spikealot_A_3:
+ 65+  C200 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $6E, $92, $92, $00, $6E, $49, $6E, $6E, $49, $49;
+ 65+  C204 E3 E3 6E 92
+ 65+  C208 92 00 6E 49
+ 65+  C20C 6E 6E 49 49
+ 66+  C210 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $49, $6E, $6E, $00, $6E, $B6, $6E, $92, $B6, $6E;
+ 66+  C214 E3 E3 49 6E
+ 66+  C218 6E 00 6E B6
+ 66+  C21C 6E 92 B6 6E
+ 67+  C220 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $49, $6E, $00, $B6, $6E, $B6, $6E, $49;
+ 67+  C224 E3 E3 E3 E3
+ 67+  C228 49 6E 00 B6
+ 67+  C22C 6E B6 6E 49
+ 68+  C230 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $00, $00, $60, $00, $88, $88, $00, $88;
+ 68+  C234 E3 E3 E3 E3
+ 68+  C238 00 00 60 00
+ 68+  C23C 88 88 00 88
+ 69+  C240 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $49, $00, $60, $60, $00, $60;
+ 69+  C244 E3 E3 E3 E3
+ 69+  C248 E3 E3 49 00
+ 69+  C24C 60 60 00 60
+ 70+  C250 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $49, $6E, $49, $49, $49, $49;
+ 70+  C254 E3 E3 E3 E3
+ 70+  C258 E3 E3 49 6E
+ 70+  C25C 49 49 49 49
+ 71+  C260 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $49, $B6, $B6, $92, $92, $00;
+ 71+  C264 E3 E3 E3 E3
+ 71+  C268 E3 E3 49 B6
+ 71+  C26C B6 92 92 00
+ 72+  C270 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $00, $B6, $00, $92, $92;
+ 72+  C274 E3 E3 E3 E3
+ 72+  C278 E3 E3 E3 00
+ 72+  C27C B6 00 92 92
+ 73+  C280 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $00, $6E, $B6, $B6;
+ 73+  C284 E3 E3 E3 E3
+ 73+  C288 E3 E3 E3 E3
+ 73+  C28C 00 6E B6 B6
+ 74+  C290 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $92, $B6, $92;
+ 74+  C294 E3 E3 E3 E3
+ 74+  C298 E3 E3 E3 E3
+ 74+  C29C E3 92 B6 92
+ 75+  C2A0 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $00, $00, $00;
+ 75+  C2A4 E3 E3 E3 E3
+ 75+  C2A8 E3 E3 E3 E3
+ 75+  C2AC E3 00 00 00
+ 76+  C2B0 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $92, $B6, $92, $49;
+ 76+  C2B4 E3 E3 E3 E3
+ 76+  C2B8 E3 E3 E3 E3
+ 76+  C2BC 92 B6 92 49
+ 77+  C2C0 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $92, $B6, $92, $49;
+ 77+  C2C4 E3 E3 E3 E3
+ 77+  C2C8 E3 E3 E3 E3
+ 77+  C2CC 92 B6 92 49
+ 78+  C2D0 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $6E, $92, $B6, $B6, $92, $6E;
+ 78+  C2D4 E3 E3 E3 E3
+ 78+  C2D8 E3 E3 6E 92
+ 78+  C2DC B6 B6 92 6E
+ 79+  C2E0 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $6E, $92, $92, $92, $92, $92, $92;
+ 79+  C2E4 E3 E3 E3 E3
+ 79+  C2E8 E3 6E 92 92
+ 79+  C2EC 92 92 92 92
+ 80+  C2F0 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $00, $00, $00, $00, $00, $00;
+ 80+  C2F4 E3 E3 E3 E3
+ 80+  C2F8 E3 E3 00 00
+ 80+  C2FC 00 00 00 00
+ 81+  C300
+ 82+  C300              spikealot_A_4:
+ 83+  C300 49 49 49 49  	db  $49, $49, $49, $49, $00, $00, $6E, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+ 83+  C304 00 00 6E 00
+ 83+  C308 E3 E3 E3 E3
+ 83+  C30C E3 E3 E3 E3
+ 84+  C310 49 49 6E B6  	db  $49, $49, $6E, $B6, $92, $00, $49, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+ 84+  C314 92 00 49 00
+ 84+  C318 E3 E3 E3 E3
+ 84+  C31C E3 E3 E3 E3
+ 85+  C320 B6 92 B6 B6  	db  $B6, $92, $B6, $B6, $B6, $92, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+ 85+  C324 B6 92 00 E3
+ 85+  C328 E3 E3 E3 E3
+ 85+  C32C E3 E3 E3 E3
+ 86+  C330 B6 B6 B6 B6  	db  $B6, $B6, $B6, $B6, $6E, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+ 86+  C334 6E 00 E3 E3
+ 86+  C338 E3 E3 E3 E3
+ 86+  C33C E3 E3 E3 E3
+ 87+  C340 92 B6 92 00  	db  $92, $B6, $92, $00, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+ 87+  C344 00 E3 E3 E3
+ 87+  C348 E3 E3 E3 E3
+ 87+  C34C E3 E3 E3 E3
+ 88+  C350 49 6E 00 49  	db  $49, $6E, $00, $49, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+ 88+  C354 00 E3 E3 E3
+ 88+  C358 E3 E3 E3 E3
+ 88+  C35C E3 E3 E3 E3
+ 89+  C360 00 00 6E 49  	db  $00, $00, $6E, $49, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+ 89+  C364 00 E3 E3 E3
+ 89+  C368 E3 E3 E3 E3
+ 89+  C36C E3 E3 E3 E3
+ 90+  C370 6E 49 00 00  	db  $6E, $49, $00, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+ 90+  C374 E3 E3 E3 E3
+ 90+  C378 E3 E3 E3 E3
+ 90+  C37C E3 E3 E3 E3
+ 91+  C380 92 6E 00 E3  	db  $92, $6E, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+ 91+  C384 E3 E3 E3 E3
+ 91+  C388 E3 E3 E3 E3
+ 91+  C38C E3 E3 E3 E3
+ 92+  C390 6E 00 E3 E3  	db  $6E, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+ 92+  C394 E3 E3 E3 E3
+ 92+  C398 E3 E3 E3 E3
+ 92+  C39C E3 E3 E3 E3
+ 93+  C3A0 49 00 E3 E3  	db  $49, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+ 93+  C3A4 E3 E3 E3 E3
+ 93+  C3A8 E3 E3 E3 E3
+ 93+  C3AC E3 E3 E3 E3
+ 94+  C3B0 00 6E 00 E3  	db  $00, $6E, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+ 94+  C3B4 E3 E3 E3 E3
+ 94+  C3B8 E3 E3 E3 E3
+ 94+  C3BC E3 E3 E3 E3
+ 95+  C3C0 00 92 00 E3  	db  $00, $92, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+ 95+  C3C4 E3 E3 E3 E3
+ 95+  C3C8 E3 E3 E3 E3
+ 95+  C3CC E3 E3 E3 E3
+ 96+  C3D0 00 92 92 00  	db  $00, $92, $92, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+ 96+  C3D4 E3 E3 E3 E3
+ 96+  C3D8 E3 E3 E3 E3
+ 96+  C3DC E3 E3 E3 E3
+ 97+  C3E0 00 92 6E 49  	db  $00, $92, $6E, $49, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+ 97+  C3E4 00 E3 E3 E3
+ 97+  C3E8 E3 E3 E3 E3
+ 97+  C3EC E3 E3 E3 E3
+ 98+  C3F0 6E 49 00 00  	db  $6E, $49, $00, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+ 98+  C3F4 E3 E3 E3 E3
+ 98+  C3F8 E3 E3 E3 E3
+ 98+  C3FC E3 E3 E3 E3
+ 99+  C400
+100+  C400
+101+  C400
+102+  C400
+103+  C400              spikealot_B_1:
+104+  C400 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+104+  C404 E3 E3 E3 E3
+104+  C408 E3 E3 E3 E3
+104+  C40C E3 E3 E3 E3
+105+  C410 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $49, $B6, $6E, $49, $49;
+105+  C414 E3 E3 E3 E3
+105+  C418 E3 E3 E3 49
+105+  C41C B6 6E 49 49
+106+  C420 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $92, $B6, $B6, $B6, $92;
+106+  C424 E3 E3 E3 E3
+106+  C428 E3 E3 E3 92
+106+  C42C B6 B6 B6 92
+107+  C430 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $B6, $B6, $B6, $B6, $B6;
+107+  C434 E3 E3 E3 E3
+107+  C438 E3 E3 E3 B6
+107+  C43C B6 B6 B6 B6
+108+  C440 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $00, $49, $6E, $6E, $92;
+108+  C444 E3 E3 E3 E3
+108+  C448 E3 E3 E3 00
+108+  C44C 49 6E 6E 92
+109+  C450 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $49, $92, $B6, $92, $6E;
+109+  C454 E3 E3 E3 E3
+109+  C458 E3 E3 E3 49
+109+  C45C 92 B6 92 6E
+110+  C460 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $00, $48, $B1, $48, $48;
+110+  C464 E3 E3 E3 E3
+110+  C468 E3 E3 E3 00
+110+  C46C 48 B1 48 48
+111+  C470 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $48, $68, $D6, $92, $0E;
+111+  C474 E3 E3 E3 E3
+111+  C478 E3 E3 E3 48
+111+  C47C 68 D6 92 0E
+112+  C480 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $68, $D6, $D6, $D6, $D6;
+112+  C484 E3 E3 E3 E3
+112+  C488 E3 E3 E3 68
+112+  C48C D6 D6 D6 D6
+113+  C490 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $49, $00, $68, $68, $68, $68;
+113+  C494 E3 E3 E3 E3
+113+  C498 E3 E3 49 00
+113+  C49C 68 68 68 68
+114+  C4A0 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $6E, $48, $68, $68, $68, $68;
+114+  C4A4 E3 E3 E3 E3
+114+  C4A8 E3 E3 6E 48
+114+  C4AC 68 68 68 68
+115+  C4B0 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $92, $68, $68, $48, $68, $48;
+115+  C4B4 E3 E3 E3 E3
+115+  C4B8 E3 E3 92 68
+115+  C4BC 68 48 68 48
+116+  C4C0 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $6E, $48, $48, $48, $49, $49;
+116+  C4C4 E3 E3 E3 E3
+116+  C4C8 E3 E3 6E 48
+116+  C4CC 48 48 49 49
+117+  C4D0 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $49, $B6, $6E, $49, $92, $92;
+117+  C4D4 E3 E3 E3 E3
+117+  C4D8 E3 E3 49 B6
+117+  C4DC 6E 49 92 92
+118+  C4E0 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $00, $B6, $6E, $B6, $B6, $B6;
+118+  C4E4 E3 E3 E3 E3
+118+  C4E8 E3 E3 00 B6
+118+  C4EC 6E B6 B6 B6
+119+  C4F0 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $00, $49, $49, $B6, $B6, $B6;
+119+  C4F4 E3 E3 E3 E3
+119+  C4F8 E3 E3 00 49
+119+  C4FC 49 B6 B6 B6
+120+  C500
+121+  C500
+122+  C500
+123+  C500              spikealot_B_2:
+124+  C500 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+124+  C504 E3 E3 E3 E3
+124+  C508 E3 E3 E3 E3
+124+  C50C E3 E3 E3 E3
+125+  C510 49 E3 E3 E3  	db  $49, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+125+  C514 E3 E3 E3 E3
+125+  C518 E3 E3 E3 E3
+125+  C51C E3 E3 E3 E3
+126+  C520 49 49 00 E3  	db  $49, $49, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+126+  C524 E3 E3 E3 E3
+126+  C528 E3 E3 E3 E3
+126+  C52C E3 E3 E3 E3
+127+  C530 6E 49 49 00  	db  $6E, $49, $49, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+127+  C534 E3 E3 E3 E3
+127+  C538 E3 E3 E3 E3
+127+  C53C E3 E3 E3 E3
+128+  C540 92 6E 49 00  	db  $92, $6E, $49, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+128+  C544 E3 E3 E3 E3
+128+  C548 E3 E3 E3 E3
+128+  C54C E3 E3 E3 E3
+129+  C550 49 92 49 49  	db  $49, $92, $49, $49, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+129+  C554 00 E3 E3 E3
+129+  C558 E3 E3 E3 E3
+129+  C55C E3 E3 E3 E3
+130+  C560 48 49 49 49  	db  $48, $49, $49, $49, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+130+  C564 00 E3 E3 E3
+130+  C568 E3 E3 E3 E3
+130+  C56C E3 E3 E3 E3
+131+  C570 B6 6E 49 49  	db  $B6, $6E, $49, $49, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+131+  C574 00 E3 E3 E3
+131+  C578 E3 E3 E3 E3
+131+  C57C E3 E3 E3 E3
+132+  C580 D6 6E 49 00  	db  $D6, $6E, $49, $00, $00, $00, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+132+  C584 00 00 00 E3
+132+  C588 E3 E3 E3 E3
+132+  C58C E3 E3 E3 E3
+133+  C590 B1 49 00 49  	db  $B1, $49, $00, $49, $6E, $92, $49, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+133+  C594 6E 92 49 00
+133+  C598 E3 E3 E3 E3
+133+  C59C E3 E3 E3 E3
+134+  C5A0 68 49 49 92  	db  $68, $49, $49, $92, $92, $B6, $B6, $49, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+134+  C5A4 92 B6 B6 49
+134+  C5A8 00 E3 E3 E3
+134+  C5AC E3 E3 E3 E3
+135+  C5B0 49 00 6E 92  	db  $49, $00, $6E, $92, $B6, $B6, $B6, $92, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+135+  C5B4 B6 B6 B6 92
+135+  C5B8 00 E3 E3 E3
+135+  C5BC E3 E3 E3 E3
+136+  C5C0 6E 00 6E 92  	db  $6E, $00, $6E, $92, $92, $6E, $B6, $92, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+136+  C5C4 92 6E B6 92
+136+  C5C8 00 E3 E3 E3
+136+  C5CC E3 E3 E3 E3
+137+  C5D0 49 49 49 00  	db  $49, $49, $49, $00, $00, $00, $49, $92, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+137+  C5D4 00 00 49 92
+137+  C5D8 00 E3 E3 E3
+137+  C5DC E3 E3 E3 E3
+138+  C5E0 92 49 00 49  	db  $92, $49, $00, $49, $92, $6E, $49, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+138+  C5E4 92 6E 49 00
+138+  C5E8 E3 E3 E3 E3
+138+  C5EC E3 E3 E3 E3
+139+  C5F0 B6 92 00 6E  	db  $B6, $92, $00, $6E, $B6, $B6, $6E, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+139+  C5F4 B6 B6 6E 00
+139+  C5F8 E3 E3 E3 E3
+139+  C5FC E3 E3 E3 E3
+140+  C600
+141+  C600
+142+  C600
+143+  C600              spikealot_B_3:
+144+  C600 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $00, $92, $49, $6E, $B6, $B6;
+144+  C604 E3 E3 E3 E3
+144+  C608 E3 E3 00 92
+144+  C60C 49 6E B6 B6
+145+  C610 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $6E, $92, $49, $49, $6E;
+145+  C614 E3 E3 E3 E3
+145+  C618 E3 E3 E3 6E
+145+  C61C 92 49 49 6E
+146+  C620 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $00, $B6, $49, $92, $49;
+146+  C624 E3 E3 E3 E3
+146+  C628 E3 E3 E3 00
+146+  C62C B6 49 92 49
+147+  C630 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $60, $00, $88, $88, $00;
+147+  C634 E3 E3 E3 E3
+147+  C638 E3 E3 E3 60
+147+  C63C 00 88 88 00
+148+  C640 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $49, $00, $60, $60, $00;
+148+  C644 E3 E3 E3 E3
+148+  C648 E3 E3 E3 49
+148+  C64C 00 60 60 00
+149+  C650 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $49, $6E, $49, $49, $49;
+149+  C654 E3 E3 E3 E3
+149+  C658 E3 E3 E3 49
+149+  C65C 6E 49 49 49
+150+  C660 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $49, $B6, $6E, $B6, $92;
+150+  C664 E3 E3 E3 E3
+150+  C668 E3 E3 E3 49
+150+  C66C B6 6E B6 92
+151+  C670 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $6E, $00, $92, $92, $49;
+151+  C674 E3 E3 E3 E3
+151+  C678 E3 E3 E3 6E
+151+  C67C 00 92 92 49
+152+  C680 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $6E, $B6, $6E, $00, $49, $6E;
+152+  C684 E3 E3 E3 E3
+152+  C688 E3 E3 6E B6
+152+  C68C 6E 00 49 6E
+153+  C690 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $00, $6E, $6E, $49, $00, $49;
+153+  C694 E3 E3 E3 E3
+153+  C698 E3 E3 00 6E
+153+  C69C 6E 49 00 49
+154+  C6A0 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $6E, $92, $00, $49, $00, $E3, $49;
+154+  C6A4 E3 E3 E3 E3
+154+  C6A8 E3 6E 92 00
+154+  C6AC 49 00 E3 49
+155+  C6B0 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $6E, $B6, $6E, $00, $E3, $E3, $E3;
+155+  C6B4 E3 E3 E3 E3
+155+  C6B8 E3 6E B6 6E
+155+  C6BC 00 E3 E3 E3
+156+  C6C0 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $6E, $92, $49, $00, $E3, $E3, $E3;
+156+  C6C4 E3 E3 E3 E3
+156+  C6C8 E3 6E 92 49
+156+  C6CC 00 E3 E3 E3
+157+  C6D0 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $49, $6E, $B6, $92, $6E, $00, $E3, $E3, $E3;
+157+  C6D4 E3 E3 E3 49
+157+  C6D8 6E B6 92 6E
+157+  C6DC 00 E3 E3 E3
+158+  C6E0 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $49, $6E, $92, $6E, $6E, $6E, $49, $00, $E3, $E3;
+158+  C6E4 E3 E3 49 6E
+158+  C6E8 92 6E 6E 6E
+158+  C6EC 49 00 E3 E3
+159+  C6F0 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $00, $00, $00, $00, $00, $00, $E3, $E3, $6E;
+159+  C6F4 E3 E3 E3 00
+159+  C6F8 00 00 00 00
+159+  C6FC 00 E3 E3 6E
+160+  C700
+161+  C700
+162+  C700
+163+  C700              spikealot_B_4:
+164+  C700 B6 B6 B6 00  	db  $B6, $B6, $B6, $00, $B6, $6E, $49, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+164+  C704 B6 6E 49 00
+164+  C708 E3 E3 E3 E3
+164+  C70C E3 E3 E3 E3
+165+  C710 92 B6 92 00  	db  $92, $B6, $92, $00, $92, $49, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+165+  C714 92 49 00 E3
+165+  C718 E3 E3 E3 E3
+165+  C71C E3 E3 E3 E3
+166+  C720 6E 92 00 6E  	db  $6E, $92, $00, $6E, $49, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+166+  C724 49 00 E3 E3
+166+  C728 E3 E3 E3 E3
+166+  C72C E3 E3 E3 E3
+167+  C730 88 00 60 60  	db  $88, $00, $60, $60, $00, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+167+  C734 00 00 E3 E3
+167+  C738 E3 E3 E3 E3
+167+  C73C E3 E3 E3 E3
+168+  C740 60 00 00 00  	db  $60, $00, $00, $00, $00, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+168+  C744 00 00 E3 E3
+168+  C748 E3 E3 E3 E3
+168+  C74C E3 E3 E3 E3
+169+  C750 49 49 6E 6E  	db  $49, $49, $6E, $6E, $49, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+169+  C754 49 00 E3 E3
+169+  C758 E3 E3 E3 E3
+169+  C75C E3 E3 E3 E3
+170+  C760 49 6E 6E 49  	db  $49, $6E, $6E, $49, $49, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+170+  C764 49 00 E3 E3
+170+  C768 E3 E3 E3 E3
+170+  C76C E3 E3 E3 E3
+171+  C770 92 B6 6E 00  	db  $92, $B6, $6E, $00, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+171+  C774 00 E3 E3 E3
+171+  C778 E3 E3 E3 E3
+171+  C77C E3 E3 E3 E3
+172+  C780 B6 B6 92 00  	db  $B6, $B6, $92, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+172+  C784 E3 E3 E3 E3
+172+  C788 E3 E3 E3 E3
+172+  C78C E3 E3 E3 E3
+173+  C790 92 B6 00 00  	db  $92, $B6, $00, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+173+  C794 E3 E3 E3 E3
+173+  C798 E3 E3 E3 E3
+173+  C79C E3 E3 E3 E3
+174+  C7A0 00 00 49 92  	db  $00, $00, $49, $92, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+174+  C7A4 00 E3 E3 E3
+174+  C7A8 E3 E3 E3 E3
+174+  C7AC E3 E3 E3 E3
+175+  C7B0 92 B6 92 92  	db  $92, $B6, $92, $92, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+175+  C7B4 00 E3 E3 E3
+175+  C7B8 E3 E3 E3 E3
+175+  C7BC E3 E3 E3 E3
+176+  C7C0 49 92 B6 92  	db  $49, $92, $B6, $92, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+176+  C7C4 00 E3 E3 E3
+176+  C7C8 E3 E3 E3 E3
+176+  C7CC E3 E3 E3 E3
+177+  C7D0 E3 6E 92 B6  	db  $E3, $6E, $92, $B6, $6E, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+177+  C7D4 6E 00 E3 E3
+177+  C7D8 E3 E3 E3 E3
+177+  C7DC E3 E3 E3 E3
+178+  C7E0 6E 92 B6 92  	db  $6E, $92, $B6, $92, $92, $49, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+178+  C7E4 92 49 00 E3
+178+  C7E8 E3 E3 E3 E3
+178+  C7EC E3 E3 E3 E3
+179+  C7F0 92 92 6E 00  	db  $92, $92, $6E, $00, $00, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+179+  C7F4 00 00 E3 E3
+179+  C7F8 E3 E3 E3 E3
+179+  C7FC E3 E3 E3 E3
+180+  C800
+181+  C800
+182+  C800              spikealot_D_1:
+183+  C800 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+183+  C804 E3 E3 E3 E3
+183+  C808 E3 E3 E3 E3
+183+  C80C E3 E3 E3 E3
+184+  C810 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $6E, $B6;
+184+  C814 E3 E3 E3 E3
+184+  C818 E3 E3 E3 E3
+184+  C81C E3 E3 6E B6
+185+  C820 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $49, $B6, $B6;
+185+  C824 E3 E3 E3 E3
+185+  C828 E3 E3 E3 E3
+185+  C82C E3 49 B6 B6
+186+  C830 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $92, $B6, $B6;
+186+  C834 E3 E3 E3 E3
+186+  C838 E3 E3 E3 E3
+186+  C83C E3 92 B6 B6
+187+  C840 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $00, $49, $49;
+187+  C844 E3 E3 E3 E3
+187+  C848 E3 E3 E3 E3
+187+  C84C E3 00 49 49
+188+  C850 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $49, $6E, $92;
+188+  C854 E3 E3 E3 E3
+188+  C858 E3 E3 E3 E3
+188+  C85C E3 49 6E 92
+189+  C860 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $49, $92, $B6;
+189+  C864 E3 E3 E3 E3
+189+  C868 E3 E3 E3 E3
+189+  C86C E3 49 92 B6
+190+  C870 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $00, $48, $B1;
+190+  C874 E3 E3 E3 E3
+190+  C878 E3 E3 E3 E3
+190+  C87C E3 00 48 B1
+191+  C880 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $48, $68, $D6;
+191+  C884 E3 E3 E3 E3
+191+  C888 E3 E3 E3 E3
+191+  C88C E3 48 68 D6
+192+  C890 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $68, $D6, $D6;
+192+  C894 E3 E3 E3 E3
+192+  C898 E3 E3 E3 E3
+192+  C89C E3 68 D6 D6
+193+  C8A0 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $49, $00, $68, $68;
+193+  C8A4 E3 E3 E3 E3
+193+  C8A8 E3 E3 E3 E3
+193+  C8AC 49 00 68 68
+194+  C8B0 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $6E, $B6, $B6, $68;
+194+  C8B4 E3 E3 E3 E3
+194+  C8B8 E3 E3 E3 E3
+194+  C8BC 6E B6 B6 68
+195+  C8C0 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $92, $B6, $B6, $B6;
+195+  C8C4 E3 E3 E3 E3
+195+  C8C8 E3 E3 E3 E3
+195+  C8CC 92 B6 B6 B6
+196+  C8D0 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $92, $B6, $B6, $B6;
+196+  C8D4 E3 E3 E3 E3
+196+  C8D8 E3 E3 E3 E3
+196+  C8DC 92 B6 B6 B6
+197+  C8E0 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $49, $92, $92, $B6;
+197+  C8E4 E3 E3 E3 E3
+197+  C8E8 E3 E3 E3 E3
+197+  C8EC 49 92 92 B6
+198+  C8F0 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $49, $49, $92, $B6;
+198+  C8F4 E3 E3 E3 E3
+198+  C8F8 E3 E3 E3 E3
+198+  C8FC 49 49 92 B6
+199+  C900
+200+  C900
+201+  C900
+202+  C900              spikealot_D_2:
+203+  C900 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+203+  C904 E3 E3 E3 E3
+203+  C908 E3 E3 E3 E3
+203+  C90C E3 E3 E3 E3
+204+  C910 49 E3 E3 E3  	db  $49, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+204+  C914 E3 E3 E3 E3
+204+  C918 E3 E3 E3 E3
+204+  C91C E3 E3 E3 E3
+205+  C920 B6 6E 49 E3  	db  $B6, $6E, $49, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+205+  C924 E3 E3 E3 E3
+205+  C928 E3 E3 E3 E3
+205+  C92C E3 E3 E3 E3
+206+  C930 B6 B6 6E 49  	db  $B6, $B6, $6E, $49, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+206+  C934 E3 E3 E3 E3
+206+  C938 E3 E3 E3 E3
+206+  C93C E3 E3 E3 E3
+207+  C940 92 B6 B6 49  	db  $92, $B6, $B6, $49, $49, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+207+  C944 49 E3 E3 E3
+207+  C948 E3 E3 E3 E3
+207+  C94C E3 E3 E3 E3
+208+  C950 6E 49 6E 92  	db  $6E, $49, $6E, $92, $49, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+208+  C954 49 E3 E3 E3
+208+  C958 E3 E3 E3 E3
+208+  C95C E3 E3 E3 E3
+209+  C960 92 92 49 6E  	db  $92, $92, $49, $6E, $49, $49, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+209+  C964 49 49 E3 E3
+209+  C968 E3 E3 E3 E3
+209+  C96C E3 E3 E3 E3
+210+  C970 48 48 48 49  	db  $48, $48, $48, $49, $49, $49, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+210+  C974 49 49 E3 E3
+210+  C978 E3 E3 E3 E3
+210+  C97C E3 E3 E3 E3
+211+  C980 92 0E B6 6E  	db  $92, $0E, $B6, $6E, $49, $49, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+211+  C984 49 49 E3 E3
+211+  C988 E3 E3 E3 E3
+211+  C98C E3 E3 E3 E3
+212+  C990 D6 D6 D6 6E  	db  $D6, $D6, $D6, $6E, $49, $00, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+212+  C994 49 00 00 E3
+212+  C998 E3 E3 E3 E3
+212+  C99C E3 E3 E3 E3
+213+  C9A0 68 68 68 00  	db  $68, $68, $68, $00, $49, $92, $6E, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+213+  C9A4 49 92 6E E3
+213+  C9A8 E3 E3 E3 E3
+213+  C9AC E3 E3 E3 E3
+214+  C9B0 68 48 00 6E  	db  $68, $48, $00, $6E, $6E, $B6, $B6, $6E, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+214+  C9B4 6E B6 B6 6E
+214+  C9B8 E3 E3 E3 E3
+214+  C9BC E3 E3 E3 E3
+215+  C9C0 48 00 49 6E  	db  $48, $00, $49, $6E, $92, $B6, $B6, $B6, $49, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+215+  C9C4 92 B6 B6 B6
+215+  C9C8 49 E3 E3 E3
+215+  C9CC E3 E3 E3 E3
+216+  C9D0 49 49 49 00  	db  $49, $49, $49, $00, $49, $6E, $92, $B6, $49, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+216+  C9D4 49 6E 92 B6
+216+  C9D8 49 E3 E3 E3
+216+  C9DC E3 E3 E3 E3
+217+  C9E0 B6 49 92 B6  	db  $B6, $49, $92, $B6, $00, $00, $49, $6E, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+217+  C9E4 00 00 49 6E
+217+  C9E8 E3 E3 E3 E3
+217+  C9EC E3 E3 E3 E3
+218+  C9F0 B6 00 B6 B6  	db  $B6, $00, $B6, $B6, $92, $6E, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+218+  C9F4 92 6E 00 E3
+218+  C9F8 E3 E3 E3 E3
+218+  C9FC E3 E3 E3 E3
+219+  CA00
+220+  CA00
+221+  CA00
+222+  CA00              spikealot_D_3:
+223+  CA00 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $6E, $49, $6E, $92;
+223+  CA04 E3 E3 E3 E3
+223+  CA08 E3 E3 E3 E3
+223+  CA0C 6E 49 6E 92
+224+  CA10 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $6E, $92, $49, $6E;
+224+  CA14 E3 E3 E3 E3
+224+  CA18 E3 E3 E3 E3
+224+  CA1C 6E 92 49 6E
+225+  CA20 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $92, $B6, $6E, $49;
+225+  CA24 E3 E3 E3 E3
+225+  CA28 E3 E3 E3 E3
+225+  CA2C 92 B6 6E 49
+226+  CA30 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $49, $B6, $6E, $B6;
+226+  CA34 E3 E3 E3 E3
+226+  CA38 E3 E3 E3 E3
+226+  CA3C 49 B6 6E B6
+227+  CA40 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $60, $00, $88, $88;
+227+  CA44 E3 E3 E3 E3
+227+  CA48 E3 E3 E3 E3
+227+  CA4C 60 00 88 88
+228+  CA50 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $6E, $00, $49, $00, $60, $60;
+228+  CA54 E3 E3 E3 E3
+228+  CA58 E3 E3 6E 00
+228+  CA5C 49 00 60 60
+229+  CA60 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $6E, $B6, $49, $6E, $49, $49, $49;
+229+  CA64 E3 E3 E3 E3
+229+  CA68 E3 6E B6 49
+229+  CA6C 6E 49 49 49
+230+  CA70 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $49, $00, $00, $6E, $00, $B6, $6E, $B6;
+230+  CA74 E3 E3 E3 E3
+230+  CA78 49 00 00 6E
+230+  CA7C 00 B6 6E B6
+231+  CA80 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $49, $49, $6E, $92, $92, $92, $00, $49, $00, $6E, $92, $B6;
+231+  CA84 49 49 6E 92
+231+  CA88 92 92 00 49
+231+  CA8C 00 6E 92 B6
+232+  CA90 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $49, $6E, $92, $92, $B6, $92, $6E, $00, $00, $00, $49, $49;
+232+  CA94 49 6E 92 92
+232+  CA98 B6 92 6E 00
+232+  CA9C 00 00 49 49
+233+  CAA0 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $49, $6E, $92, $6E, $00, $E3, $E3, $E3, $00, $00;
+233+  CAA4 E3 E3 49 6E
+233+  CAA8 92 6E 00 E3
+233+  CAAC E3 E3 00 00
+234+  CAB0 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $49, $6E, $00, $E3, $E3, $E3, $E3, $E3;
+234+  CAB4 E3 E3 E3 E3
+234+  CAB8 49 6E 00 E3
+234+  CABC E3 E3 E3 E3
+235+  CAC0 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $00, $E3, $E3, $E3, $E3, $E3, $E3;
+235+  CAC4 E3 E3 E3 E3
+235+  CAC8 E3 00 E3 E3
+235+  CACC E3 E3 E3 E3
+236+  CAD0 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+236+  CAD4 E3 E3 E3 E3
+236+  CAD8 E3 E3 E3 E3
+236+  CADC E3 E3 E3 E3
+237+  CAE0 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+237+  CAE4 E3 E3 E3 E3
+237+  CAE8 E3 E3 E3 E3
+237+  CAEC E3 E3 E3 E3
+238+  CAF0 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+238+  CAF4 E3 E3 E3 E3
+238+  CAF8 E3 E3 E3 E3
+238+  CAFC E3 E3 E3 E3
+239+  CB00
+240+  CB00
+241+  CB00
+242+  CB00              spikealot_D_4:
+243+  CB00 6E 00 92 6E  	db  $6E, $00, $92, $6E, $49, $00, $49, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+243+  CB04 49 00 49 00
+243+  CB08 E3 E3 E3 E3
+243+  CB0C E3 E3 E3 E3
+244+  CB10 00 6E 6E 00  	db  $00, $6E, $6E, $00, $49, $49, $49, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+244+  CB14 49 49 49 00
+244+  CB18 E3 E3 E3 E3
+244+  CB1C E3 E3 E3 E3
+245+  CB20 00 49 49 6E  	db  $00, $49, $49, $6E, $6E, $49, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+245+  CB24 6E 49 00 E3
+245+  CB28 E3 E3 E3 E3
+245+  CB2C E3 E3 E3 E3
+246+  CB30 B6 92 92 92  	db  $B6, $92, $92, $92, $49, $49, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+246+  CB34 49 49 00 E3
+246+  CB38 E3 E3 E3 E3
+246+  CB3C E3 E3 E3 E3
+247+  CB40 00 88 00 60  	db  $00, $88, $00, $60, $60, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+247+  CB44 60 00 E3 E3
+247+  CB48 E3 E3 E3 E3
+247+  CB4C E3 E3 E3 E3
+248+  CB50 00 60 00 00  	db  $00, $60, $00, $00, $00, $00, $00, $00, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+248+  CB54 00 00 00 00
+248+  CB58 00 E3 E3 E3
+248+  CB5C E3 E3 E3 E3
+249+  CB60 49 49 49 49  	db  $49, $49, $49, $49, $49, $00, $49, $92, $6E, $00, $E3, $E3, $E3, $E3, $E3, $E3;
+249+  CB64 49 00 49 92
+249+  CB68 6E 00 E3 E3
+249+  CB6C E3 E3 E3 E3
+250+  CB70 B6 6E 00 00  	db  $B6, $6E, $00, $00, $00, $49, $92, $92, $92, $00, $E3, $E3, $E3, $E3, $E3, $E3;
+250+  CB74 00 49 92 92
+250+  CB78 92 00 E3 E3
+250+  CB7C E3 E3 E3 E3
+251+  CB80 6E 00 B6 92  	db  $6E, $00, $B6, $92, $92, $00, $B6, $B6, $6E, $6E, $00, $E3, $E3, $E3, $E3, $E3;
+251+  CB84 92 00 B6 B6
+251+  CB88 6E 6E 00 E3
+251+  CB8C E3 E3 E3 E3
+252+  CB90 00 92 B6 B6  	db  $00, $92, $B6, $B6, $92, $00, $92, $92, $B6, $B6, $00, $E3, $E3, $E3, $E3, $E3;
+252+  CB94 92 00 92 92
+252+  CB98 B6 B6 00 E3
+252+  CB9C E3 E3 E3 E3
+253+  CBA0 00 49 6E 92  	db  $00, $49, $6E, $92, $00, $6E, $49, $00, $92, $B6, $92, $00, $E3, $E3, $E3, $E3;
+253+  CBA4 00 6E 49 00
+253+  CBA8 92 B6 92 00
+253+  CBAC E3 E3 E3 E3
+254+  CBB0 E3 00 00 00  	db  $E3, $00, $00, $00, $00, $00, $00, $E3, $6E, $92, $92, $00, $E3, $E3, $E3, $E3;
+254+  CBB4 00 00 00 E3
+254+  CBB8 6E 92 92 00
+254+  CBBC E3 E3 E3 E3
+255+  CBC0 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $00, $6E, $92, $00, $E3, $E3, $E3, $E3;
+255+  CBC4 E3 E3 E3 E3
+255+  CBC8 00 6E 92 00
+255+  CBCC E3 E3 E3 E3
+256+  CBD0 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $00, $00, $E3, $E3, $E3, $E3, $E3;
+256+  CBD4 E3 E3 E3 E3
+256+  CBD8 E3 00 00 E3
+256+  CBDC E3 E3 E3 E3
+257+  CBE0 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+257+  CBE4 E3 E3 E3 E3
+257+  CBE8 E3 E3 E3 E3
+257+  CBEC E3 E3 E3 E3
+258+  CBF0 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+258+  CBF4 E3 E3 E3 E3
+258+  CBF8 E3 E3 E3 E3
+258+  CBFC E3 E3 E3 E3
+259+  CC00
+260+  CC00
+261+  CC00
+262+  CC00              spikealot_C_1:
+263+  CC00 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+263+  CC04 E3 E3 E3 E3
+263+  CC08 E3 E3 E3 E3
+263+  CC0C E3 E3 E3 E3
+264+  CC10 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+264+  CC14 E3 E3 E3 E3
+264+  CC18 E3 E3 E3 E3
+264+  CC1C E3 E3 E3 E3
+265+  CC20 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $49, $B6, $6E, $49, $49;
+265+  CC24 E3 E3 E3 E3
+265+  CC28 E3 E3 E3 49
+265+  CC2C B6 6E 49 49
+266+  CC30 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $92, $B6, $B6, $B6, $92;
+266+  CC34 E3 E3 E3 E3
+266+  CC38 E3 E3 E3 92
+266+  CC3C B6 B6 B6 92
+267+  CC40 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $B6, $B6, $B6, $B6, $B6;
+267+  CC44 E3 E3 E3 E3
+267+  CC48 E3 E3 E3 B6
+267+  CC4C B6 B6 B6 B6
+268+  CC50 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $00, $49, $6E, $6E, $92;
+268+  CC54 E3 E3 E3 E3
+268+  CC58 E3 E3 E3 00
+268+  CC5C 49 6E 6E 92
+269+  CC60 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $49, $92, $B6, $92, $6E;
+269+  CC64 E3 E3 E3 E3
+269+  CC68 E3 E3 E3 49
+269+  CC6C 92 B6 92 6E
+270+  CC70 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $00, $48, $B1, $48, $48;
+270+  CC74 E3 E3 E3 E3
+270+  CC78 E3 E3 E3 00
+270+  CC7C 48 B1 48 48
+271+  CC80 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $48, $68, $D6, $92, $0E;
+271+  CC84 E3 E3 E3 E3
+271+  CC88 E3 E3 E3 48
+271+  CC8C 68 D6 92 0E
+272+  CC90 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $6E, $49, $00, $E3, $E3, $E3, $68, $D6, $D6, $D6, $D6;
+272+  CC94 E3 6E 49 00
+272+  CC98 E3 E3 E3 68
+272+  CC9C D6 D6 D6 D6
+273+  CCA0 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $6E, $92, $B6, $B6, $00, $E3, $49, $00, $68, $68, $68, $68;
+273+  CCA4 6E 92 B6 B6
+273+  CCA8 00 E3 49 00
+273+  CCAC 68 68 68 68
+274+  CCB0 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $6E, $92, $92, $B6, $00, $E3, $6E, $48, $68, $68, $68, $68;
+274+  CCB4 6E 92 92 B6
+274+  CCB8 00 E3 6E 48
+274+  CCBC 68 68 68 68
+275+  CCC0 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $49, $6E, $6E, $92, $92, $00, $92, $68, $68, $48, $68, $48;
+275+  CCC4 49 6E 6E 92
+275+  CCC8 92 00 92 68
+275+  CCCC 68 48 68 48
+276+  CCD0 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $49, $6E, $92, $B6, $00, $B6, $48, $48, $48, $49, $49;
+276+  CCD4 E3 49 6E 92
+276+  CCD8 B6 00 B6 48
+276+  CCDC 48 48 49 49
+277+  CCE0 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $49, $6E, $6E, $00, $B6, $B6, $6E, $49, $92, $92;
+277+  CCE4 E3 E3 49 6E
+277+  CCE8 6E 00 B6 B6
+277+  CCEC 6E 49 92 92
+278+  CCF0 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $00, $00, $49, $6E, $B6, $92, $B6, $B6, $B6;
+278+  CCF4 E3 E3 E3 00
+278+  CCF8 00 49 6E B6
+278+  CCFC 92 B6 B6 B6
+279+  CD00
+280+  CD00
+281+  CD00
+282+  CD00              spikealot_C_2:
+283+  CD00 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+283+  CD04 E3 E3 E3 E3
+283+  CD08 E3 E3 E3 E3
+283+  CD0C E3 E3 E3 E3
+284+  CD10 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+284+  CD14 E3 E3 E3 E3
+284+  CD18 E3 E3 E3 E3
+284+  CD1C E3 E3 E3 E3
+285+  CD20 49 00 E3 E3  	db  $49, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+285+  CD24 E3 E3 E3 E3
+285+  CD28 E3 E3 E3 E3
+285+  CD2C E3 E3 E3 E3
+286+  CD30 49 49 00 E3  	db  $49, $49, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+286+  CD34 E3 E3 E3 E3
+286+  CD38 E3 E3 E3 E3
+286+  CD3C E3 E3 E3 E3
+287+  CD40 6E 49 49 00  	db  $6E, $49, $49, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+287+  CD44 E3 E3 E3 E3
+287+  CD48 E3 E3 E3 E3
+287+  CD4C E3 E3 E3 E3
+288+  CD50 92 6E 49 00  	db  $92, $6E, $49, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+288+  CD54 E3 E3 E3 E3
+288+  CD58 E3 E3 E3 E3
+288+  CD5C E3 E3 E3 E3
+289+  CD60 49 92 49 49  	db  $49, $92, $49, $49, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+289+  CD64 00 E3 E3 E3
+289+  CD68 E3 E3 E3 E3
+289+  CD6C E3 E3 E3 E3
+290+  CD70 48 49 49 49  	db  $48, $49, $49, $49, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+290+  CD74 00 E3 E3 E3
+290+  CD78 E3 E3 E3 E3
+290+  CD7C E3 E3 E3 E3
+291+  CD80 B6 6E 49 49  	db  $B6, $6E, $49, $49, $00, $00, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+291+  CD84 00 00 00 E3
+291+  CD88 E3 E3 E3 E3
+291+  CD8C E3 E3 E3 E3
+292+  CD90 D6 6E 49 00  	db  $D6, $6E, $49, $00, $00, $49, $49, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+292+  CD94 00 49 49 00
+292+  CD98 E3 E3 E3 E3
+292+  CD9C E3 E3 E3 E3
+293+  CDA0 B1 49 00 49  	db  $B1, $49, $00, $49, $6E, $92, $B6, $92, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+293+  CDA4 6E 92 B6 92
+293+  CDA8 00 E3 E3 E3
+293+  CDAC E3 E3 E3 E3
+294+  CDB0 68 49 49 6E  	db  $68, $49, $49, $6E, $92, $B6, $B6, $B6, $92, $00, $E3, $E3, $E3, $E3, $E3, $E3;
+294+  CDB4 92 B6 B6 B6
+294+  CDB8 92 00 E3 E3
+294+  CDBC E3 E3 E3 E3
+295+  CDC0 49 6E 00 6E  	db  $49, $6E, $00, $6E, $92, $92, $B6, $00, $00, $00, $E3, $E3, $E3, $E3, $E3, $E3;
+295+  CDC4 92 92 B6 00
+295+  CDC8 00 00 E3 E3
+295+  CDCC E3 E3 E3 E3
+296+  CDD0 6E 92 00 49  	db  $6E, $92, $00, $49, $6E, $92, $00, $B6, $92, $00, $E3, $E3, $E3, $E3, $E3, $E3;
+296+  CDD4 6E 92 00 B6
+296+  CDD8 92 00 E3 E3
+296+  CDDC E3 E3 E3 E3
+297+  CDE0 92 6E 49 00  	db  $92, $6E, $49, $00, $6E, $00, $6E, $92, $B6, $49, $00, $E3, $E3, $E3, $E3, $E3;
+297+  CDE4 6E 00 6E 92
+297+  CDE8 B6 49 00 E3
+297+  CDEC E3 E3 E3 E3
+298+  CDF0 92 49 00 00  	db  $92, $49, $00, $00, $00, $E3, $00, $00, $92, $6E, $00, $E3, $E3, $E3, $E3, $E3;
+298+  CDF4 00 E3 00 00
+298+  CDF8 92 6E 00 E3
+298+  CDFC E3 E3 E3 E3
+299+  CE00
+300+  CE00
+301+  CE00
+302+  CE00              spikealot_C_3:
+303+  CE00 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $6E, $00, $49, $92, $B6, $B6, $92, $92;
+303+  CE04 E3 E3 E3 E3
+303+  CE08 6E 00 49 92
+303+  CE0C B6 B6 92 92
+304+  CE10 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $6E, $49, $6E, $6E, $49, $49;
+304+  CE14 E3 E3 E3 E3
+304+  CE18 E3 E3 6E 49
+304+  CE1C 6E 6E 49 49
+305+  CE20 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $6E, $B6, $49, $92, $B6, $B6;
+305+  CE24 E3 E3 E3 E3
+305+  CE28 E3 E3 6E B6
+305+  CE2C 49 92 B6 B6
+306+  CE30 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $49, $6E, $92, $B6, $B6, $B6;
+306+  CE34 E3 E3 E3 E3
+306+  CE38 E3 E3 49 6E
+306+  CE3C 92 B6 B6 B6
+307+  CE40 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $60, $00, $88, $88, $00, $88;
+307+  CE44 E3 E3 E3 E3
+307+  CE48 E3 E3 60 00
+307+  CE4C 88 88 00 88
+308+  CE50 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $49, $00, $60, $60, $00, $60;
+308+  CE54 E3 E3 E3 E3
+308+  CE58 E3 E3 49 00
+308+  CE5C 60 60 00 60
+309+  CE60 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $00, $00, $B6, $B6, $B6;
+309+  CE64 E3 E3 E3 E3
+309+  CE68 E3 E3 E3 00
+309+  CE6C 00 B6 B6 B6
+310+  CE70 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $92, $92, $00, $B6, $92;
+310+  CE74 E3 E3 E3 E3
+310+  CE78 E3 E3 E3 92
+310+  CE7C 92 00 B6 92
+311+  CE80 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $6E, $92, $49, $6E, $B6, $B6, $92, $00, $49;
+311+  CE84 E3 E3 E3 6E
+311+  CE88 92 49 6E B6
+311+  CE8C B6 92 00 49
+312+  CE90 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $49, $92, $92, $B6, $B6, $92, $49, $00, $49;
+312+  CE94 E3 E3 E3 49
+312+  CE98 92 92 B6 B6
+312+  CE9C 92 49 00 49
+313+  CEA0 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $6E, $92, $92, $6E, $00, $E3, $00;
+313+  CEA4 E3 E3 E3 E3
+313+  CEA8 E3 6E 92 92
+313+  CEAC 6E 00 E3 00
+314+  CEB0 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $49, $92, $49, $00, $E3, $E3;
+314+  CEB4 E3 E3 E3 E3
+314+  CEB8 E3 E3 49 92
+314+  CEBC 49 00 E3 E3
+315+  CEC0 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $00, $00, $E3, $E3, $E3;
+315+  CEC4 E3 E3 E3 E3
+315+  CEC8 E3 E3 E3 00
+315+  CECC 00 E3 E3 E3
+316+  CED0 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+316+  CED4 E3 E3 E3 E3
+316+  CED8 E3 E3 E3 E3
+316+  CEDC E3 E3 E3 E3
+317+  CEE0 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+317+  CEE4 E3 E3 E3 E3
+317+  CEE8 E3 E3 E3 E3
+317+  CEEC E3 E3 E3 E3
+318+  CEF0 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+318+  CEF4 E3 E3 E3 E3
+318+  CEF8 E3 E3 E3 E3
+318+  CEFC E3 E3 E3 E3
+319+  CF00
+320+  CF00
+321+  CF00
+322+  CF00              spikealot_C_4:
+323+  CF00 00 00 49 49  	db  $00, $00, $49, $49, $00, $92, $B6, $B6, $00, $00, $E3, $E3, $E3, $E3, $E3, $E3;
+323+  CF04 00 92 B6 B6
+323+  CF08 00 00 E3 E3
+323+  CF0C E3 E3 E3 E3
+324+  CF10 49 49 49 B6  	db  $49, $49, $49, $B6, $B6, $B6, $B6, $B6, $92, $00, $E3, $E3, $E3, $E3, $E3, $E3;
+324+  CF14 B6 B6 B6 B6
+324+  CF18 92 00 E3 E3
+324+  CF1C E3 E3 E3 E3
+325+  CF20 B6 6E 49 B6  	db  $B6, $6E, $49, $B6, $B6, $B6, $B6, $00, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+325+  CF24 B6 B6 B6 00
+325+  CF28 00 E3 E3 E3
+325+  CF2C E3 E3 E3 E3
+326+  CF30 92 49 00 92  	db  $92, $49, $00, $92, $B6, $92, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+326+  CF34 B6 92 00 E3
+326+  CF38 E3 E3 E3 E3
+326+  CF3C E3 E3 E3 E3
+327+  CF40 00 60 60 00  	db  $00, $60, $60, $00, $00, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+327+  CF44 00 00 E3 E3
+327+  CF48 E3 E3 E3 E3
+327+  CF4C E3 E3 E3 E3
+328+  CF50 00 00 00 00  	db  $00, $00, $00, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+328+  CF54 E3 E3 E3 E3
+328+  CF58 E3 E3 E3 E3
+328+  CF5C E3 E3 E3 E3
+329+  CF60 00 49 49 00  	db  $00, $49, $49, $00, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+329+  CF64 00 E3 E3 E3
+329+  CF68 E3 E3 E3 E3
+329+  CF6C E3 E3 E3 E3
+330+  CF70 92 00 00 49  	db  $92, $00, $00, $49, $6E, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+330+  CF74 6E 00 E3 E3
+330+  CF78 E3 E3 E3 E3
+330+  CF7C E3 E3 E3 E3
+331+  CF80 00 00 49 6E  	db  $00, $00, $49, $6E, $92, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+331+  CF84 92 00 E3 E3
+331+  CF88 E3 E3 E3 E3
+331+  CF8C E3 E3 E3 E3
+332+  CF90 6E 00 6E 92  	db  $6E, $00, $6E, $92, $B6, $6E, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+332+  CF94 B6 6E 00 E3
+332+  CF98 E3 E3 E3 E3
+332+  CF9C E3 E3 E3 E3
+333+  CFA0 00 49 6E 6E  	db  $00, $49, $6E, $6E, $6E, $92, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+333+  CFA4 6E 92 00 E3
+333+  CFA8 E3 E3 E3 E3
+333+  CFAC E3 E3 E3 E3
+334+  CFB0 00 00 00 00  	db  $00, $00, $00, $00, $49, $6E, $49, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+334+  CFB4 49 6E 49 00
+334+  CFB8 E3 E3 E3 E3
+334+  CFBC E3 E3 E3 E3
+335+  CFC0 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $00, $49, $49, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+335+  CFC4 00 49 49 00
+335+  CFC8 E3 E3 E3 E3
+335+  CFCC E3 E3 E3 E3
+336+  CFD0 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $00, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+336+  CFD4 E3 00 00 E3
+336+  CFD8 E3 E3 E3 E3
+336+  CFDC E3 E3 E3 E3
+337+  CFE0 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+337+  CFE4 E3 E3 E3 E3
+337+  CFE8 E3 E3 E3 E3
+337+  CFEC E3 E3 E3 E3
+338+  CFF0 E3 E3 E3 E3  	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+338+  CFF4 E3 E3 E3 E3
+338+  CFF8 E3 E3 E3 E3
+338+  CFFC E3 E3 E3 E3
+339+  D000
+340+  D000
+# file closed: src/assets/sprites.asm
+ 36   D000
+ 37   D000
+ 38   D000
+ 39   D000
+ 40   D000              	MMU 6,17
+ 41   D000              	org 0xC000
+ 42   C000
+ 43   C000 00 00 00...  	ds 64,0
+ 44   C040              	; incbin "fonts/font1.spr"
+ 45   C040              	; incbin "fonts/font2.spr"
+ 46   C040              	; incbin "fonts/font3.spr"
+ 47   C040              	; incbin "fonts/font4.spr"
+ 48   C040              	; incbin "fonts/font5.spr"
+ 49   C040              	; incbin "fonts/font6.spr"
+ 50   C040              	incbin "fonts/font7.spr"
+ 51   D040              	; incbin "fonts/font8.spr"
+ 52   D040              	; incbin "fonts/font9.spr"
+ 53   D040              	; incbin "fonts/font10.spr"
+ 54   D040              	; incbin "fonts/font11.spr"
+ 55   D040              	; incbin "fonts/font12.spr"
+ 56   D040              	; incbin "fonts/font13.spr"
+ 57   D040              	; incbin "fonts/font14.spr"
+ 58   D040              	; incbin "fonts/font15.spr"
+ 59   D040              	; incbin "fonts/font16.spr"
+ 60   D040              	; ; incbin "fonts/font17.spr"
+ 61   D040              	; incbin "fonts/font18.spr" *not mapped same as others (?)
+ 62   D040
+ 63   D040
+ 64   D040
+ 65   D040
+ 66   D040
+ 67   D040
+ 68   D040              	SAVENEX OPEN "main.nex", start , stack_top
+ 69   D040                  SAVENEX CORE 3, 0, 0
+ 70   D040                  SAVENEX CFG 0, 0
+ 71   D040              	SAVENEX AUTO
+ 72   D040                  SAVENEX CLOSE
+ 73   D040
+ 74   D040
+ 75   D040
+# file closed: src/main.asm

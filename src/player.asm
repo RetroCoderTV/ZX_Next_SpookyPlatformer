@@ -1,3 +1,10 @@
+    MACRO BREAKPOINT 
+		DW $01DD 
+	ENDM
+
+
+
+
 PLAYER_SLOT equ 50
 
 PLAYER_DEFAULT_ATTR3 equ %11000000
@@ -8,8 +15,13 @@ SCROLL_MARKER_X equ 320/2
 
 PLAYER_WALK_SPEED equ 1
 
-px dw 50
-py db 190
+
+
+player_world_x db 0 ;in cells
+player_world_y db 0
+
+px dw 32
+py db 0
 player_attr_2 db %00001000
 player_attr_3 db PLAYER_DEFAULT_ATTR3
 player_attr_4 db %00100000
@@ -17,6 +29,28 @@ player_attr_4 db %00100000
 player_animation_timer db 0
 PLAYER_ANIMATION_DELAY equ 4
 
+
+;movement states:
+WALKING equ 0
+JUMPING equ 1
+ATTACKING equ 2
+CLIMBING equ 3
+
+
+player_animation_state db JUMPING
+
+
+vy dw 0
+
+GRAVITY_FORCE equ 32
+JUMP_FORCE equ 64
+
+MAX_DOWN_SPEED equ 7
+MAX_UP_SPEED equ 5
+
+
+
+player_collided_solid db FALSE
 
 
 
@@ -143,6 +177,21 @@ player_update:
     inc a
     ld (player_animation_timer),a
 
+    
+
+    ld a,(player_animation_state)
+    cp WALKING
+    jp z, player_update_walking
+    cp JUMPING
+    jp z, player_update_jumping
+    ; cp ATTACKING
+    ; cp CLIMBING
+
+
+    ret
+
+
+player_update_walking:
     ld a,(keypressed_D)
     cp TRUE
     call z,plyr_move_right
@@ -151,8 +200,43 @@ player_update:
     ret
 
 
+player_update_jumping:
+    call player_calculate_world_position
+    call check_collision_feet
+    call apply_gravity
+    
+    call apply_velocity
+    ret
+
+apply_gravity:
+    ld hl,(vy)
+    ld a,h
+    cp MAX_DOWN_SPEED
+    ret z
+    add hl,GRAVITY_FORCE
+    ld (vy),hl
+
+
+    ret
+
+apply_velocity:
+    ld hl,py
+    ld b,(hl)
+    ld hl,(vy)
+    ld h,a
+    add a,b
+    ld (py),a
+    ret
+
 
 plyr_move_right:
+    call player_calculate_world_position
+    call check_collision_right
+
+    ld a,(player_collided_solid)
+    cp TRUE
+    ret z
+
     ld a,(player_animation_timer)
     cp PLAYER_ANIMATION_DELAY
     call nc, player_animate_walk
@@ -167,10 +251,6 @@ p_move_right
     add hl,PLAYER_WALK_SPEED
     ld (px),hl
     ret
-
-
-
-
 
 
 
@@ -226,5 +306,89 @@ player_set_to_default_frame:
     ret
 
 
+player_calculate_world_position:
+    ld a,(py)
+    and %11111000
+    rrca
+    rrca
+    rrca
+    ld (player_world_y),a
+    
+    ld hl,(px)
+    ld a,l
+    and %11111000
+    rrca
+    rrca
+    rrca 
+    ld b,a
+    ld a,(offset)
+    sub VIEW_WIDTH
+    ld c,a
+    ld a,b
+    add a,c    
+    ld (player_world_x),a
+
+    ret
+
+
+
+check_collision_feet:
+    ld hl,level1
+    ld a,(player_world_y)
+    add a,4
+    ld d,a
+    ld e,WORLD_WIDTH
+    mul d,e
+    add hl,de
+    ld a,(player_world_x)
+    ld e,a
+    ld d,0
+    add hl,de
+    ld a,(hl)
+    cp 12
+    jp c,collided_solid_feet
+
+    ret
+collided_solid_feet:
+    ld a,(player_world_y)
+    add a,a
+    add a,a
+    add a,a
+    ld (py),a
+   
+    ld a,WALKING
+    ld (player_animation_state),a
+    ld hl,0
+    ld (vy),hl
 
     
+    ret
+
+
+check_collision_right:
+    ld hl,level1
+    ld a,(player_world_y)
+    add a,2
+    ld d,a
+    ld e,WORLD_WIDTH
+    mul d,e
+    add hl,de
+    ld a,(player_world_x)
+    add a,1
+    ld e,a
+    ld d,0
+    add hl,de
+    ld a,(hl)
+    cp 12
+    jp c,collided_solid_right
+
+    ld a,FALSE
+    ld (player_collided_solid),a
+
+    ret
+
+collided_solid_right:
+    
+    ld a,TRUE
+    ld (player_collided_solid),a
+    ret
