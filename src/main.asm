@@ -24,6 +24,7 @@ stack_bottom ds STACK_SIZE, 0
 stack_top db 0  
 
 	include 'player.asm'
+	include 'objects.asm'
 	
 	include 'retrotools\tools.asm'
 	include 'retrotools\constants.asm'

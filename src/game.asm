@@ -19,10 +19,12 @@ game_update:
     call WaitRasterLine
     call check_keys
     call player_update
+    call objects_update
     ret
 
 game_draw:
     call player_draw
+    call objects_draw
     ret
 
 

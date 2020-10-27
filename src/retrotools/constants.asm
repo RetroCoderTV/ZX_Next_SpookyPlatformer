@@ -30,6 +30,8 @@ GUTTER equ 32
 
 
 
+END_OF_ARRAY equ 255
+
 
 
 

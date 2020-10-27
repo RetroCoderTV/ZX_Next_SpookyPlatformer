@@ -5,7 +5,7 @@
 
 
 
-PLAYER_SLOT equ 50
+PLAYER_SLOT equ 5
 
 PLAYER_DEFAULT_ATTR3 equ %11000000
 
@@ -21,7 +21,7 @@ player_world_x db 0 ;in cells
 player_world_y db 0
 
 px dw 32
-py db 0
+py db 160
 player_attr_2 db %00001000
 player_attr_3 db PLAYER_DEFAULT_ATTR3
 player_attr_4 db %00100000
@@ -31,19 +31,18 @@ PLAYER_ANIMATION_DELAY equ 4
 
 
 ;movement states:
-WALKING equ 0
-JUMPING equ 1
-ATTACKING equ 2
-CLIMBING equ 3
-
+WALKING equ 0xA
+JUMPING equ 0xB
+ATTACKING equ 0xC
+CLIMBING equ 0xD
 
 player_animation_state db JUMPING
 
 
 vy dw 0
 
-GRAVITY_FORCE equ 32
-JUMP_FORCE equ 64
+DOWN_FORCE equ 32
+UP_FORCE equ 64
 
 MAX_DOWN_SPEED equ 7
 MAX_UP_SPEED equ 5
@@ -53,9 +52,15 @@ MAX_UP_SPEED equ 5
 player_collided_solid db FALSE
 
 
+player_jump_direction db DOWN
+player_jump_point db 208
+PLAYER_JUMP_HEIGHT equ 48
+
+
 
 player_init:
     call player_init_sprites
+    
     ret
 
 player_init_sprites:
@@ -192,43 +197,163 @@ player_update:
 
 
 player_update_walking:
+    ld a,(keypressed_A)
+    cp TRUE
+    call z,plyr_move_left_start
+
     ld a,(keypressed_D)
     cp TRUE
-    call z,plyr_move_right
+    call z,plyr_move_right_start
+
+    ld a,(keypressed_Space)
+    cp TRUE
+    call z,player_jump_start
 
 
     ret
 
+player_jump_start:
+    ld a,(player_animation_state)
+    cp JUMPING
+    ret z
 
-player_update_jumping:
+    ld a,JUMPING
+    ld (player_animation_state),a
+    
+    ld a,(py)
+    ld (player_jump_point),a
+
+    ld a,UP
+    ld (player_jump_direction),a
+
+    ret
+
+
+player_update_jumping:  
+    ld a,(keypressed_A)
+    cp TRUE
+    call z,plyr_move_left_start
+
+    ld a,(keypressed_D)
+    cp TRUE
+    call z,plyr_move_right_start
+
     call player_calculate_world_position
     call check_collision_feet
-    call apply_gravity
+    
+    ld a,(player_jump_point)
+    sub PLAYER_JUMP_HEIGHT
+    ld b,a
+    ld a,(py)
+    cp b
+    call c,plyr_set_jump_down
+
+    
+    ld a,(player_jump_direction)
+    cp UP
+    push af
+    call z, apply_force_up
+    pop af
+    cp DOWN
+    push af
+    call z, apply_force_down
+    pop af
+    
+
     
     call apply_velocity
+
+   
     ret
 
-apply_gravity:
+
+
+
+plyr_set_jump_down:
+    ld a,DOWN
+    ld (player_jump_direction),a
+    ret
+
+apply_force_up:
+    ; call apply_velocity_up
+    ld hl,(vy)
+    ld a,h
+    cp -MAX_UP_SPEED
+    ret z
+    
+    add hl,-UP_FORCE*2
+    ld (vy),hl
+    ret
+apply_force_down:
+    ; call apply_velocity_down
     ld hl,(vy)
     ld a,h
     cp MAX_DOWN_SPEED
     ret z
-    add hl,GRAVITY_FORCE
+    add hl,DOWN_FORCE
     ld (vy),hl
-
-
     ret
 
 apply_velocity:
     ld hl,py
     ld b,(hl)
     ld hl,(vy)
-    ld h,a
+    ld a,h
     add a,b
     ld (py),a
     ret
 
 
+
+plyr_move_left_start:
+    ld a,(player_attr_2)
+    bit 3,a
+    jp z,plyr_move_left
+
+    ld a,(player_attr_2)
+    res 3,a
+    ld (player_attr_2),a
+
+    ld a,(px)
+    sub 16
+    ld (px),a
+
+plyr_move_left:
+    call player_calculate_world_position
+    call check_collision_left
+
+    ld a,(player_collided_solid)
+    cp TRUE
+    ret z
+
+    ld a,(player_animation_timer)
+    cp PLAYER_ANIMATION_DELAY
+    call nc, player_animate_walk
+
+    ld hl,(px)
+    ld a,l
+    cp SCROLL_MARKER_X-1
+    jp c,scroll_left
+    jp nc,p_move_left
+        
+p_move_left
+    add hl,-PLAYER_WALK_SPEED
+    ld (px),hl
+    ret
+
+
+plyr_move_right_start:
+    ld a,(player_attr_2)
+    bit 3,a
+    jp nz,plyr_move_right
+
+    ld a,(player_attr_2)
+    set 3,a
+    ld (player_attr_2),a
+
+    ld a,(px)
+    add a,16
+    ld (px),a
 plyr_move_right:
     call player_calculate_world_position
     call check_collision_right
@@ -251,6 +376,9 @@ p_move_right
     add hl,PLAYER_WALK_SPEED
     ld (px),hl
     ret
+
+
+
 
 
 
@@ -293,7 +421,7 @@ player_animate_walk:
     
     ld a,(player_attr_3)
     and %00111111 ;mask out top 2 bits
-    cp SPRITE_COUNT-SPRITE_SEGMENTS
+    cp SPRITE_PLAYER_COUNT-SPRITE_SEGMENTS
     jp z,player_set_to_default_frame
     add a,SPRITE_SEGMENTS
     add a,PLAYER_DEFAULT_ATTR3
@@ -356,6 +484,10 @@ collided_solid_feet:
     add a,a
     ld (py),a
    
+    ld a,(player_jump_direction)
+    cp UP
+    ret z
+
     ld a,WALKING
     ld (player_animation_state),a
     ld hl,0
@@ -363,6 +495,31 @@ collided_solid_feet:
 
     
     ret
+
+
+
+check_collision_left:
+    ld hl,level1
+    ld a,(player_world_y)
+    add a,2
+    ld d,a
+    ld e,WORLD_WIDTH
+    mul d,e
+    add hl,de
+    ld a,(player_world_x)
+    ld e,a
+    ld d,0
+    add hl,de
+    ld a,(hl)
+    cp 12
+    jp c,collided_solid_sideways
+
+    ld a,FALSE
+    ld (player_collided_solid),a
+
+    ret
+
+
 
 
 check_collision_right:
@@ -380,15 +537,19 @@ check_collision_right:
     add hl,de
     ld a,(hl)
     cp 12
-    jp c,collided_solid_right
+    jp c,collided_solid_sideways
 
     ld a,FALSE
     ld (player_collided_solid),a
 
     ret
 
-collided_solid_right:
-    
+
+
+
+
+
+collided_solid_sideways:
     ld a,TRUE
     ld (player_collided_solid),a
     ret
