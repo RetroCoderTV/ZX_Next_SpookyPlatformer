@@ -1,8 +1,7 @@
 ;MACROS
-
-
-
-
+	MACRO BREAKPOINT 
+		DW $01DD 
+	ENDM
 
 	MACRO CLIPTILES x1,y1,x2,y2
 		ld a,x1

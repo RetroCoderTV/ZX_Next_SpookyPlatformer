@@ -167,18 +167,3 @@ resetoffset_right:
 
 
 
-
-
-    incbin '../assets/ggtiles.nxp',0
-
-
-
-gg_palette:
-    incbin '../assets/ggtiles.nxp',0
-
-    MMU 6,16
-    org $c000
-
-    incbin '../assets/ggtiles.til',0,GGTILES_SIZE
-
-

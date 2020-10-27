@@ -1,6 +1,4 @@
-    MACRO BREAKPOINT 
-		DW $01DD 
-	ENDM
+    
 
 
 
@@ -54,8 +52,8 @@ player_collided_solid db FALSE
 
 player_jump_direction db DOWN
 player_jump_point db 208
-PLAYER_JUMP_HEIGHT equ 48
-
+PLAYER_JUMP_HEIGHT equ 9
+player_grounded db FALSE
 
 
 player_init:
@@ -178,6 +176,8 @@ player_init_sprites:
 
 
 player_update:
+    
+
     ld a,(player_animation_timer)
     inc a
     ld (player_animation_timer),a
@@ -197,6 +197,8 @@ player_update:
 
 
 player_update_walking:
+    
+
     ld a,(keypressed_A)
     cp TRUE
     call z,plyr_move_left_start
@@ -209,6 +211,7 @@ player_update_walking:
     cp TRUE
     call z,player_jump_start
 
+    call check_grounded
 
     ret
 
@@ -226,7 +229,7 @@ player_jump_start:
     ld a,UP
     ld (player_jump_direction),a
 
-    ret
+    jp player_update
 
 
 player_update_jumping:  
@@ -469,6 +472,7 @@ check_collision_feet:
     mul d,e
     add hl,de
     ld a,(player_world_x)
+    add a,1
     ld e,a
     ld d,0
     add hl,de
@@ -477,6 +481,65 @@ check_collision_feet:
     jp c,collided_solid_feet
 
     ret
+
+
+
+
+
+check_grounded:
+    ld a,(player_jump_direction)
+    cp UP
+    ret z
+
+    ld hl,level1
+    ld a,(player_world_y)
+    add a,5
+    ld d,a
+    ld e,WORLD_WIDTH
+    mul d,e
+    add hl,de
+    ld a,(player_world_x)
+    add a,1
+    ld e,a
+    ld d,0
+    add hl,de
+    ld a,(hl)
+    cp 12
+    jp c,player_set_grounded ;if under 12, the tile is solid
+
+    ld hl,level1
+    ld a,(player_world_y)
+    add a,5
+    ld d,a
+    ld e,WORLD_WIDTH
+    mul d,e
+    add hl,de
+    ld a,(player_world_x)
+    add a,2
+    ld e,a
+    ld d,0
+    add hl,de
+    ld a,(hl)
+    cp 12
+    jp c,player_set_grounded ;if under 12, the tile is solid
+
+    ;else not grounded:
+    ld a,FALSE
+    ld (player_grounded),a
+    ;set mode to jumping>down
+    ld a,JUMPING
+    ld (player_animation_state),a
+    ld a,DOWN
+    ld (player_jump_direction),a
+
+    ret
+
+player_set_grounded:
+    ld a,TRUE
+    ld (player_grounded),a
+    ret
+
+
 collided_solid_feet:
     ld a,(player_world_y)
     add a,a
