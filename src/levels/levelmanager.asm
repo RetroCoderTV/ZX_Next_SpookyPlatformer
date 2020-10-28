@@ -10,7 +10,8 @@ VIEW_SIZE equ VIEW_WIDTH*VIEW_HEIGHT
 current_scroll db 0
 
 LEVEL_START equ 0
-offset db 40
+offset db LEVEL_START+VIEW_WIDTH
+cam_x db LEVEL_START
 
 
 init_tiles:
@@ -78,6 +79,14 @@ view_draw_line:
     
 
 scroll_left:
+    ld a,(offset)
+    cp LEVEL_START+VIEW_WIDTH+1
+    jp c, p_move_left
+
+    ld a,(offset)
+    sub VIEW_WIDTH
+    ld (cam_x),a
+
     ld a,(current_scroll)
     inc a
     cp 8          
@@ -96,12 +105,12 @@ drawcolumn_left:
     ld bc,40*32
     lddr  ; move whole screen to right 1 tile 
     ld hl,level1            ; start of tiles 
-    ld a,(offset)           ; current offset 
+    ld a,(cam_x)           ; current offset 
+    dec a
     add hl,a                ; add this to tile offset 
-    dec a                   ; dec the offset 
+    ; dec a                   ; dec the offset 
+    add a,VIEW_WIDTH
     ld (offset),a
-    cp $ff
-    call z,resetoffset_left 
     ld de,$4000              ; top left cell 
     ld b,VIEW_HEIGHT
 columnloop_left:
@@ -113,14 +122,13 @@ columnloop_left:
     xor a
     ld (current_scroll),a
     ret 
-resetoffset_left: 
-    ld a,WORLD_WIDTH-1
-    ld (offset),a
-    ret 
 
 
 
 scroll_right:
+    ld a,(offset)
+    cp WORLD_WIDTH
+    jp nc, p_move_right
     ld a,(current_scroll)
     inc a
     cp 8            
@@ -138,8 +146,6 @@ nowdrawcolumn:
     add hl,a                ; add this to tile offset 
     inc a                   ; inc the offset 
     ld (offset),a
-    cp WORLD_WIDTH
-    call z,resetoffset_right 
     ld de,$4027              ; top right cell 
     ld b,VIEW_HEIGHT
 columnloop:
@@ -152,10 +158,6 @@ columnloop:
     ld (current_scroll),a
     ret 
 
-resetoffset_right: 
-    xor a 
-    ld (offset),a
-    ret 
 
 
 

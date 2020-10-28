@@ -176,8 +176,6 @@ player_init_sprites:
 
 
 player_update:
-    
-
     ld a,(player_animation_timer)
     inc a
     ld (player_animation_timer),a
@@ -211,11 +209,17 @@ player_update_walking:
     cp TRUE
     call z,player_jump_start
 
+    
+
     call check_grounded
 
     ret
 
 player_jump_start:
+    ; ld a,(keypressed_Space_Held)
+    ; cp TRUE
+    ; ret z
+
     ld a,(player_animation_state)
     cp JUMPING
     ret z
@@ -317,10 +321,9 @@ plyr_move_left_start:
     res 3,a
     ld (player_attr_2),a
 
-    ld a,(px)
-    sub 16
-    ld (px),a
-
+    ld hl,(px)
+    add hl,-16
+    ld (px),hl
 plyr_move_left:
     call player_calculate_world_position
     call check_collision_left
@@ -334,8 +337,11 @@ plyr_move_left:
     call nc, player_animate_walk
 
     ld hl,(px)
+    ld a,h
+    cp 0
+    jp nz,p_move_left
     ld a,l
-    cp SCROLL_MARKER_X-1
+    cp SCROLL_MARKER_X+1
     jp c,scroll_left
     jp nc,p_move_left
         
@@ -354,9 +360,9 @@ plyr_move_right_start:
     set 3,a
     ld (player_attr_2),a
 
-    ld a,(px)
-    add a,16
-    ld (px),a
+    ld hl,(px)
+    add hl,16
+    ld (px),hl
 plyr_move_right:
     call player_calculate_world_position
     call check_collision_right
@@ -464,6 +470,29 @@ player_calculate_world_position:
 
 
 check_collision_feet:
+    ld a,(player_animation_state)
+    cp JUMPING
+    ret nz
+
+    ld a,(player_jump_direction)
+    cp DOWN
+    ret nz
+
+    ; ld hl,level1
+    ; ld a,(player_world_y)
+    ; add a,4
+    ; ld d,a
+    ; ld e,WORLD_WIDTH
+    ; mul d,e
+    ; add hl,de
+    ; ld a,(player_world_x)
+    ; ld e,a
+    ; ld d,0
+    ; add hl,de
+    ; ld a,(hl)
+    ; cp 12
+    ; jp c,collided_solid_feet
+
     ld hl,level1
     ld a,(player_world_y)
     add a,4
@@ -480,6 +509,38 @@ check_collision_feet:
     cp 12
     jp c,collided_solid_feet
 
+    ld hl,level1
+    ld a,(player_world_y)
+    add a,4
+    ld d,a
+    ld e,WORLD_WIDTH
+    mul d,e
+    add hl,de
+    ld a,(player_world_x)
+    add a,2
+    ld e,a
+    ld d,0
+    add hl,de
+    ld a,(hl)
+    cp 12
+    jp c,collided_solid_feet
+
+    ; ld hl,level1
+    ; ld a,(player_world_y)
+    ; add a,4
+    ; ld d,a
+    ; ld e,WORLD_WIDTH
+    ; mul d,e
+    ; add hl,de
+    ; ld a,(player_world_x)
+    ; add a,3
+    ; ld e,a
+    ; ld d,0
+    ; add hl,de
+    ; ld a,(hl)
+    ; cp 12
+    ; jp c,collided_solid_feet
+
     ret
 
 
@@ -490,6 +551,21 @@ check_grounded:
     ld a,(player_jump_direction)
     cp UP
     ret z
+
+    ld hl,level1
+    ld a,(player_world_y)
+    add a,5
+    ld d,a
+    ld e,WORLD_WIDTH
+    mul d,e
+    add hl,de
+    ld a,(player_world_x)
+    ld e,a
+    ld d,0
+    add hl,de
+    ld a,(hl)
+    cp 12
+    jp c,player_set_grounded ;if under 12, the tile is solid
 
     ld hl,level1
     ld a,(player_world_y)
@@ -516,6 +592,22 @@ check_grounded:
     add hl,de
     ld a,(player_world_x)
     add a,2
+    ld e,a
+    ld d,0
+    add hl,de
+    ld a,(hl)
+    cp 12
+    jp c,player_set_grounded ;if under 12, the tile is solid
+
+    ld hl,level1
+    ld a,(player_world_y)
+    add a,5
+    ld d,a
+    ld e,WORLD_WIDTH
+    mul d,e
+    add hl,de
+    ld a,(player_world_x)
+    add a,3
     ld e,a
     ld d,0
     add hl,de
@@ -584,8 +676,43 @@ check_collision_left:
 
 
 
-
 check_collision_right:
+    ld hl,(px)
+    ld a,h
+    cp 0
+    jp nz, check_collision_right_x8
+
+    ld hl,level1
+    ld a,(player_world_y)
+    ld d,a
+    ld e,WORLD_WIDTH
+    mul d,e
+    add hl,de
+    ld a,(player_world_x)
+    add a,1
+    ld e,a
+    ld d,0
+    add hl,de
+    ld a,(hl)
+    cp 12
+    jp c,collided_solid_sideways
+
+    ld hl,level1
+    ld a,(player_world_y)
+    add a,1
+    ld d,a
+    ld e,WORLD_WIDTH
+    mul d,e
+    add hl,de
+    ld a,(player_world_x)
+    add a,1
+    ld e,a
+    ld d,0
+    add hl,de
+    ld a,(hl)
+    cp 12
+    jp c,collided_solid_sideways
+
     ld hl,level1
     ld a,(player_world_y)
     add a,2
@@ -601,6 +728,95 @@ check_collision_right:
     ld a,(hl)
     cp 12
     jp c,collided_solid_sideways
+
+    ld hl,level1
+    ld a,(player_world_y)
+    add a,3
+    ld d,a
+    ld e,WORLD_WIDTH
+    mul d,e
+    add hl,de
+    ld a,(player_world_x)
+    add a,1
+    ld e,a
+    ld d,0
+    add hl,de
+    ld a,(hl)
+    cp 12
+    jp c,collided_solid_sideways
+
+
+
+    ld a,FALSE
+    ld (player_collided_solid),a
+
+    ret
+
+check_collision_right_x8:
+    ld hl,level1
+    ld a,(player_world_y)
+    ld d,a
+    ld e,WORLD_WIDTH
+    mul d,e
+    add hl,de
+    ld a,(player_world_x)
+    add a,33
+    ld e,a
+    ld d,0
+    add hl,de
+    ld a,(hl)
+    cp 12
+    jp c,collided_solid_sideways
+
+    ld hl,level1
+    ld a,(player_world_y)
+    add a,1
+    ld d,a
+    ld e,WORLD_WIDTH
+    mul d,e
+    add hl,de
+    ld a,(player_world_x)
+    add a,33
+    ld e,a
+    ld d,0
+    add hl,de
+    ld a,(hl)
+    cp 12
+    jp c,collided_solid_sideways
+
+    ld hl,level1
+    ld a,(player_world_y)
+    add a,2
+    ld d,a
+    ld e,WORLD_WIDTH
+    mul d,e
+    add hl,de
+    ld a,(player_world_x)
+    add a,33
+    ld e,a
+    ld d,0
+    add hl,de
+    ld a,(hl)
+    cp 12
+    jp c,collided_solid_sideways
+
+    ld hl,level1
+    ld a,(player_world_y)
+    add a,3
+    ld d,a
+    ld e,WORLD_WIDTH
+    mul d,e
+    add hl,de
+    ld a,(player_world_x)
+    add a,33
+    ld e,a
+    ld d,0
+    add hl,de
+    ld a,(hl)
+    cp 12
+    jp c,collided_solid_sideways
+
+
 
     ld a,FALSE
     ld (player_collided_solid),a
