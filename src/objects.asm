@@ -4,6 +4,7 @@
 OBJECT_PUMPKIN equ 0
 OBJECT_GHOST equ 1
 OBJECT_GHOST_WALKER equ 2
+OBJECT_DEAD equ 100
 
 
 ;::All objects have 2 frame animation::
@@ -114,6 +115,7 @@ object_check_in_view:
     jp c, obj_set_not_inview
 
     ; set to inview=yes
+    ld (ix),TRUE
     ld a,(ix+8)
     set 7,a
     ld (ix+8),a
@@ -122,6 +124,7 @@ object_check_in_view:
     ret
 
 obj_set_not_inview:
+    ld (ix),FALSE
     ld a,(ix+8)
     res 7,a
     ld (ix+8),a
@@ -160,9 +163,9 @@ obj_screen_moving_left:
     add hl,hl  
     ld a,(current_scroll)
     add hl,a
-    ; ld d,(ix+14) ;xpos offset
-    ; ld e,(ix+15) ;xpos offset
-    ; add hl,de  
+    ld d,(ix+14) ;xpos offset
+    ld e,(ix+15) ;xpos offset
+    add hl,de  
     ld (ix+4),l
     ld (ix+5),h ;X8
     ret
@@ -184,9 +187,9 @@ obj_screen_moving_right:
     ld a,8
     sub b
     add hl,a  
-    ; ld d,(ix+14) ;xpos offset
-    ; ld e,(ix+15) ;xpos offset
-    ; add hl,de  
+    ld d,(ix+14) ;xpos offset
+    ld e,(ix+15) ;xpos offset
+    add hl,de  
     ld (ix+4),l
     ld (ix+5),h ;X8
 
@@ -243,6 +246,10 @@ object_draw:
 
 
 handle_behaviour:
+    ld a,(ix)
+    cp FALSE
+    ret z
+
     ld a,(ix+1)
     cp OBJECT_GHOST
     jp z, handle_behaviour_ghost
@@ -278,7 +285,7 @@ ghost_move_left:
 ghost_move_right:
     ld h,(ix+14)
     ld l,(ix+15)
-    add hl,-GHOST_SPEED
+    add hl,GHOST_SPEED
     ld (ix+14),h
     ld (ix+15),l
 
@@ -293,5 +300,20 @@ ghost_move_right:
     ret
 
 
-handle_behaviour_ghost_walker:
+handle_behaviour_ghost_walker: 
+    ld h,(ix+14)
+    ld l,(ix+15)
+    add hl,-GHOST_SPEED
+    ld (ix+14),h
+    ld (ix+15),l
+
+    ;320 = %0000 0001 0100 0000
+    ld a,h
+    cp 0
+    ret z
+    ld a,l
+    cp %01000000
+    ret nz
+
+    ld (ix+1),OBJECT_DEAD
     ret
