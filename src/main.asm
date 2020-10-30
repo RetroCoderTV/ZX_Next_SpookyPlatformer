@@ -5,7 +5,7 @@
 
 
 start:
-	di
+	; di
 	ld sp,0x7FFE
 	nextreg $7,3 ;set Mhz mode (3=28mhz)
 	call game_init	

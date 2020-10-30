@@ -8,6 +8,7 @@ VIEW_SIZE equ VIEW_WIDTH*VIEW_HEIGHT
 
 
 current_scroll db 0
+scroll_direction db RIGHT
 
 LEVEL_START equ 0
 offset db LEVEL_START+VIEW_WIDTH
@@ -79,6 +80,9 @@ view_draw_line:
     
 
 scroll_left:
+    ld a,LEFT
+    ld (scroll_direction),a
+
     ld a,(offset)
     cp LEVEL_START+VIEW_WIDTH+1
     jp c, p_move_left
@@ -126,6 +130,9 @@ columnloop_left:
 
 
 scroll_right:
+    ld a,RIGHT
+    ld (scroll_direction),a
+
     ld a,(offset)
     cp WORLD_WIDTH
     jp nc, p_move_right

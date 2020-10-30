@@ -3,7 +3,7 @@
 
 
 
-PLAYER_SLOT equ 5
+PLAYER_SLOT equ 58
 
 PLAYER_DEFAULT_ATTR3 equ %11000000
 
@@ -547,6 +547,10 @@ check_collision_feet:
 
 
 
+
+
+
+
 check_grounded:
     ld a,(player_jump_direction)
     cp UP
@@ -625,6 +629,8 @@ check_grounded:
     ld (player_jump_direction),a
 
     ret
+
+
 
 player_set_grounded:
     ld a,TRUE
