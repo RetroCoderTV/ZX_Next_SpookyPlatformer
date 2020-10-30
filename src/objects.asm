@@ -87,6 +87,11 @@ objs_draw_start:
 
 
 object_update:
+    ld a,(ix+1)
+    cp OBJECT_DEAD
+    ret z
+
+
     call object_check_in_view
     call animate_object
 
@@ -101,6 +106,8 @@ object_update:
 
 
 object_check_in_view:
+
+
     ld a,(ix+2)
     ld b,a
     ld a,(offset)
@@ -315,5 +322,8 @@ handle_behaviour_ghost_walker:
     cp %01000000
     ret nz
 
+    ;kill ghost
     ld (ix+1),OBJECT_DEAD
+    call obj_set_not_inview
+
     ret
