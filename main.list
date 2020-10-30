@@ -9,12 +9,12 @@
   8   8000              	; di
   9   8000 31 FE 7F     	ld sp,0x7FFE
  10   8003 ED 91 07 03  	nextreg $7,3 ;set Mhz mode (3=28mhz)
- 11   8007 CD AE 86     	call game_init
+ 11   8007 CD BE 86     	call game_init
  12   800A C3 0D 80     	jp main_loop
  13   800D
  14   800D              main_loop:
- 15   800D CD C5 86     	call game_update
- 16   8010 CD D4 86     	call game_draw
+ 15   800D CD D5 86     	call game_update
+ 16   8010 CD E4 86     	call game_draw
  17   8013 C3 0D 80     	jp main_loop
  18   8016
  19   8016
@@ -453,15 +453,15 @@
 197+  813A              player_update_walking:
 198+  813A
 199+  813A
-200+  813A 3A DD 86         ld a,(keypressed_A)
+200+  813A 3A ED 86         ld a,(keypressed_A)
 201+  813D FE 01            cp TRUE
 202+  813F CC D8 81         call z,plyr_move_left_start
 203+  8142
-204+  8142 3A E1 86         ld a,(keypressed_D)
+204+  8142 3A F1 86         ld a,(keypressed_D)
 205+  8145 FE 01            cp TRUE
 206+  8147 CC 20 82         call z,plyr_move_right_start
 207+  814A
-208+  814A 3A E9 86         ld a,(keypressed_Space)
+208+  814A 3A F9 86         ld a,(keypressed_Space)
 209+  814D FE 01            cp TRUE
 210+  814F CC 56 81         call z,player_jump_start
 211+  8152
@@ -493,11 +493,11 @@
 237+  816F
 238+  816F
 239+  816F              player_update_jumping:
-240+  816F 3A DD 86         ld a,(keypressed_A)
+240+  816F 3A ED 86         ld a,(keypressed_A)
 241+  8172 FE 01            cp TRUE
 242+  8174 CC D8 81         call z,plyr_move_left_start
 243+  8177
-244+  8177 3A E1 86         ld a,(keypressed_D)
+244+  8177 3A F1 86         ld a,(keypressed_D)
 245+  817A FE 01            cp TRUE
 246+  817C CC 20 82         call z,plyr_move_right_start
 247+  817F
@@ -598,7 +598,7 @@
 342+  820C C2 18 82         jp nz,p_move_left
 343+  820F 7D               ld a,l
 344+  8210 FE A1            cp SCROLL_MARKER_X+1
-345+  8212 DA C8 92         jp c,scroll_left
+345+  8212 DA D8 92         jp c,scroll_left
 346+  8215 D2 18 82         jp nc,p_move_left
 347+  8218
 348+  8218              p_move_left
@@ -634,7 +634,7 @@
 378+  824E 2A 8F 80         ld hl,(px)
 379+  8251 7D               ld a,l
 380+  8252 FE A0            cp SCROLL_MARKER_X
-381+  8254 D2 20 93         jp nc,scroll_right
+381+  8254 D2 30 93         jp nc,scroll_right
 382+  8257 DA 5A 82         jp c,p_move_right
 383+  825A
 384+  825A              p_move_right
@@ -714,7 +714,7 @@
 458+  82BA 0F               rrca
 459+  82BB 0F               rrca
 460+  82BC 47               ld b,a
-461+  82BD 3A 45 92         ld a,(offset)
+461+  82BD 3A 55 92         ld a,(offset)
 462+  82C0 D6 28            sub VIEW_WIDTH
 463+  82C2 4F               ld c,a
 464+  82C3 78               ld a,b
@@ -749,7 +749,7 @@
 493+  82D5                  ; cp 12
 494+  82D5                  ; jp c,collided_solid_feet
 495+  82D5
-496+  82D5 21 43 88         ld hl,level1
+496+  82D5 21 53 88         ld hl,level1
 497+  82D8 3A 8E 80         ld a,(player_world_y)
 498+  82DB C6 04            add a,4
 499+  82DD 57               ld d,a
@@ -765,7 +765,7 @@
 509+  82ED FE 0C            cp 12
 510+  82EF DA 9E 83         jp c,collided_solid_feet
 511+  82F2
-512+  82F2 21 43 88         ld hl,level1
+512+  82F2 21 53 88         ld hl,level1
 513+  82F5 3A 8E 80         ld a,(player_world_y)
 514+  82F8 C6 04            add a,4
 515+  82FA 57               ld d,a
@@ -812,7 +812,7 @@
 556+  8313 FE 02            cp UP
 557+  8315 C8               ret z
 558+  8316
-559+  8316 21 43 88         ld hl,level1
+559+  8316 21 53 88         ld hl,level1
 560+  8319 3A 8E 80         ld a,(player_world_y)
 561+  831C C6 05            add a,5
 562+  831E 57               ld d,a
@@ -827,7 +827,7 @@
 571+  832C FE 0C            cp 12
 572+  832E DA 98 83         jp c,player_set_grounded ;if under 12, the tile is solid
 573+  8331
-574+  8331 21 43 88         ld hl,level1
+574+  8331 21 53 88         ld hl,level1
 575+  8334 3A 8E 80         ld a,(player_world_y)
 576+  8337 C6 05            add a,5
 577+  8339 57               ld d,a
@@ -843,7 +843,7 @@
 587+  8349 FE 0C            cp 12
 588+  834B DA 98 83         jp c,player_set_grounded ;if under 12, the tile is solid
 589+  834E
-590+  834E 21 43 88         ld hl,level1
+590+  834E 21 53 88         ld hl,level1
 591+  8351 3A 8E 80         ld a,(player_world_y)
 592+  8354 C6 05            add a,5
 593+  8356 57               ld d,a
@@ -859,7 +859,7 @@
 603+  8366 FE 0C            cp 12
 604+  8368 DA 98 83         jp c,player_set_grounded ;if under 12, the tile is solid
 605+  836B
-606+  836B 21 43 88         ld hl,level1
+606+  836B 21 53 88         ld hl,level1
 607+  836E 3A 8E 80         ld a,(player_world_y)
 608+  8371 C6 05            add a,5
 609+  8373 57               ld d,a
@@ -916,7 +916,7 @@
 660+  83B9
 661+  83B9
 662+  83B9              check_collision_left:
-663+  83B9 21 43 88         ld hl,level1
+663+  83B9 21 53 88         ld hl,level1
 664+  83BC 3A 8E 80         ld a,(player_world_y)
 665+  83BF C6 02            add a,2
 666+  83C1 57               ld d,a
@@ -944,7 +944,7 @@
 688+  83DE FE 00            cp 0
 689+  83E0 C2 5B 84         jp nz, check_collision_right_x8
 690+  83E3
-691+  83E3 21 43 88         ld hl,level1
+691+  83E3 21 53 88         ld hl,level1
 692+  83E6 3A 8E 80         ld a,(player_world_y)
 693+  83E9 57               ld d,a
 694+  83EA 1E 50            ld e,WORLD_WIDTH
@@ -959,7 +959,7 @@
 703+  83F9 FE 0C            cp 12
 704+  83FB DA D3 84         jp c,collided_solid_sideways
 705+  83FE
-706+  83FE 21 43 88         ld hl,level1
+706+  83FE 21 53 88         ld hl,level1
 707+  8401 3A 8E 80         ld a,(player_world_y)
 708+  8404 C6 01            add a,1
 709+  8406 57               ld d,a
@@ -975,7 +975,7 @@
 719+  8416 FE 0C            cp 12
 720+  8418 DA D3 84         jp c,collided_solid_sideways
 721+  841B
-722+  841B 21 43 88         ld hl,level1
+722+  841B 21 53 88         ld hl,level1
 723+  841E 3A 8E 80         ld a,(player_world_y)
 724+  8421 C6 02            add a,2
 725+  8423 57               ld d,a
@@ -991,7 +991,7 @@
 735+  8433 FE 0C            cp 12
 736+  8435 DA D3 84         jp c,collided_solid_sideways
 737+  8438
-738+  8438 21 43 88         ld hl,level1
+738+  8438 21 53 88         ld hl,level1
 739+  843B 3A 8E 80         ld a,(player_world_y)
 740+  843E C6 03            add a,3
 741+  8440 57               ld d,a
@@ -1015,7 +1015,7 @@
 759+  845A C9               ret
 760+  845B
 761+  845B              check_collision_right_x8:
-762+  845B 21 43 88         ld hl,level1
+762+  845B 21 53 88         ld hl,level1
 763+  845E 3A 8E 80         ld a,(player_world_y)
 764+  8461 57               ld d,a
 765+  8462 1E 50            ld e,WORLD_WIDTH
@@ -1030,7 +1030,7 @@
 774+  8471 FE 0C            cp 12
 775+  8473 DA D3 84         jp c,collided_solid_sideways
 776+  8476
-777+  8476 21 43 88         ld hl,level1
+777+  8476 21 53 88         ld hl,level1
 778+  8479 3A 8E 80         ld a,(player_world_y)
 779+  847C C6 01            add a,1
 780+  847E 57               ld d,a
@@ -1046,7 +1046,7 @@
 790+  848E FE 0C            cp 12
 791+  8490 DA D3 84         jp c,collided_solid_sideways
 792+  8493
-793+  8493 21 43 88         ld hl,level1
+793+  8493 21 53 88         ld hl,level1
 794+  8496 3A 8E 80         ld a,(player_world_y)
 795+  8499 C6 02            add a,2
 796+  849B 57               ld d,a
@@ -1062,7 +1062,7 @@
 806+  84AB FE 0C            cp 12
 807+  84AD DA D3 84         jp c,collided_solid_sideways
 808+  84B0
-809+  84B0 21 43 88         ld hl,level1
+809+  84B0 21 53 88         ld hl,level1
 810+  84B3 3A 8E 80         ld a,(player_world_y)
 811+  84B6 C6 03            add a,3
 812+  84B8 57               ld d,a
@@ -1149,662 +1149,662 @@
  32+  851F 00 00 52 00    db 0, %00000000,%01010010,%00000000,11,1,RIGHT,0
  32+  8523 0B 01 01 00
  32+  8527 00 00          dw 0
- 33+  8529                  ; db FALSE, OBJECT_GHOST_WALKER, 50, 19 : dw 0 : db 0, %00000000,%01010010,%00000000,11,1,LEFT,0 : dw 0
- 34+  8529 FF               db END_OF_ARRAY
- 35+  852A
- 36+  852A              OBJECTS_DATA_LENGTH equ 16
- 37+  852A
- 38+  852A
- 39+  852A              GHOST_SPEED equ 2
- 40+  852A              GHOST_MAX_MOVEMENT_X equ 30
- 41+  852A
- 42+  852A
- 43+  852A
- 44+  852A              ;sX= wX-(offset-VW)*8
- 45+  852A              ;sY= wY*8
- 46+  852A
- 47+  852A
- 48+  852A
- 49+  852A              objects_init:
- 50+  852A C9               ret
- 51+  852B
- 52+  852B
- 53+  852B
- 54+  852B              objects_update:
- 55+  852B DD 21 D9 84      ld ix,objects
- 56+  852F              objs_update_start:
- 57+  852F DD 7E 00         ld a,(ix)
- 58+  8532 FE FF            cp END_OF_ARRAY
- 59+  8534 C8               ret z
- 60+  8535
- 61+  8535 CD 55 85         call object_update
- 62+  8538
- 63+  8538 11 10 00         ld de,OBJECTS_DATA_LENGTH
- 64+  853B DD 19            add ix,de
- 65+  853D C3 2F 85         jp objs_update_start
- 66+  8540
- 67+  8540
- 68+  8540
- 69+  8540
- 70+  8540              objects_draw:
- 71+  8540 DD 21 D9 84      ld ix,objects
- 72+  8544              objs_draw_start:
- 73+  8544 DD 7E 00         ld a,(ix)
- 74+  8547 FE FF            cp END_OF_ARRAY
- 75+  8549 C8               ret z
- 76+  854A
- 77+  854A CD 12 86         call object_draw
- 78+  854D
- 79+  854D 11 10 00         ld de,OBJECTS_DATA_LENGTH
- 80+  8550 DD 19            add ix,de
- 81+  8552 C3 44 85         jp objs_draw_start
- 82+  8555
- 83+  8555
- 84+  8555
- 85+  8555
- 86+  8555
- 87+  8555
- 88+  8555
- 89+  8555              object_update:
- 90+  8555 CD 65 85         call object_check_in_view
- 91+  8558 CD FF 85         call animate_object
- 92+  855B
- 93+  855B DD 7E 01         ld a,(ix+1)
- 94+  855E FE 00            cp OBJECT_PUMPKIN
- 95+  8560 C8               ret z
- 96+  8561
- 97+  8561 CD 3C 86         call handle_behaviour
- 98+  8564
- 99+  8564 C9               ret
-100+  8565
-101+  8565
-102+  8565
-103+  8565              object_check_in_view:
-104+  8565 DD 7E 02         ld a,(ix+2)
-105+  8568 47               ld b,a
-106+  8569 3A 45 92         ld a,(offset)
-107+  856C B8               cp b
-108+  856D DA 8D 85         jp c, obj_set_not_inview
-109+  8570
-110+  8570 3A 45 92         ld a,(offset)
-111+  8573 D6 28            sub VIEW_WIDTH
-112+  8575 47               ld b,a
-113+  8576 DD 7E 02         ld a,(ix+2)
-114+  8579 B8               cp b
-115+  857A DA 8D 85         jp c, obj_set_not_inview
-116+  857D
-117+  857D                  ; set to inview=yes
-118+  857D DD 36 00 01      ld (ix),TRUE
-119+  8581 DD 7E 08         ld a,(ix+8)
-120+  8584 CB FF            set 7,a
-121+  8586 DD 77 08         ld (ix+8),a
-122+  8589
-123+  8589 CD 9A 85         call object_calculate_screen_pos
-124+  858C C9               ret
-125+  858D
-126+  858D              obj_set_not_inview:
-127+  858D DD 36 00 00      ld (ix),FALSE
-128+  8591 DD 7E 08         ld a,(ix+8)
-129+  8594 CB BF            res 7,a
-130+  8596 DD 77 08         ld (ix+8),a
-131+  8599 C9               ret
-132+  859A
-133+  859A
-134+  859A
-135+  859A
-136+  859A              object_calculate_screen_pos:
-137+  859A                  ;Y
-138+  859A DD 7E 03         ld a,(ix+3)
-139+  859D 87               add a,a
-140+  859E 87               add a,a
-141+  859F 87               add a,a ;A*8
-142+  85A0 DD 77 06         ld (ix+6),a
-143+  85A3
-144+  85A3 3A 44 92         ld a,(scroll_direction)
-145+  85A6 FE 00            cp LEFT
-146+  85A8 CA B1 85         jp z,obj_screen_moving_left
-147+  85AB FE 01            cp RIGHT
-148+  85AD CA D6 85         jp z,obj_screen_moving_right
-149+  85B0
-150+  85B0 C9               ret
-151+  85B1
-152+  85B1              obj_screen_moving_left:
-153+  85B1                  ;X (scroll left)
-154+  85B1 3A 45 92         ld a,(offset)
-155+  85B4 D6 28            sub VIEW_WIDTH
-156+  85B6 47               ld b,a
-157+  85B7 DD 7E 02         ld a,(ix+2) ;wX
-158+  85BA 90               sub b ;wX-camX
-159+  85BB 21 00 00         ld hl,0
-160+  85BE ED 31            add hl,a
-161+  85C0 29               add hl,hl
-162+  85C1 29               add hl,hl
-163+  85C2 29               add hl,hl
-164+  85C3 3A 43 92         ld a,(current_scroll)
-165+  85C6 ED 31            add hl,a
-166+  85C8 DD 56 0E         ld d,(ix+14) ;xpos offset
-167+  85CB DD 5E 0F         ld e,(ix+15) ;xpos offset
-168+  85CE 19               add hl,de
-169+  85CF DD 75 04         ld (ix+4),l
-170+  85D2 DD 74 05         ld (ix+5),h ;X8
-171+  85D5 C9               ret
-172+  85D6
-173+  85D6              obj_screen_moving_right:
-174+  85D6                  ;X (scroll left)
-175+  85D6 3A 45 92         ld a,(offset)
-176+  85D9 D6 28            sub VIEW_WIDTH
-177+  85DB 47               ld b,a
-178+  85DC DD 7E 02         ld a,(ix+2) ;wX
-179+  85DF 90               sub b ;wX-camX
-180+  85E0 21 00 00         ld hl,0
-181+  85E3 ED 31            add hl,a
-182+  85E5 29               add hl,hl
-183+  85E6 29               add hl,hl
-184+  85E7 29               add hl,hl
-185+  85E8 3A 43 92         ld a,(current_scroll)
-186+  85EB 47               ld b,a
-187+  85EC 3E 08            ld a,8
-188+  85EE 90               sub b
-189+  85EF ED 31            add hl,a
-190+  85F1 DD 56 0E         ld d,(ix+14) ;xpos offset
-191+  85F4 DD 5E 0F         ld e,(ix+15) ;xpos offset
-192+  85F7 19               add hl,de
-193+  85F8 DD 75 04         ld (ix+4),l
-194+  85FB DD 74 05         ld (ix+5),h ;X8
-195+  85FE
-196+  85FE C9               ret
-197+  85FF
-198+  85FF
-199+  85FF              animate_object:
-200+  85FF DD 7E 08         ld a,(ix+8)
-201+  8602 E6 C0            and %11000000
-202+  8604 47               ld b,a
-203+  8605 DD 7E 08         ld a,(ix+8)
-204+  8608 E6 3F            and %00111111
-205+  860A DD AE 0B         xor (ix+11)
-206+  860D 80               add a,b
-207+  860E DD 77 08         ld (ix+8),a
-208+  8611 C9               ret
-209+  8612
-210+  8612
-211+  8612
-212+  8612
-213+  8612              object_draw:
-214+  8612 DD 7E 0A         ld a,(ix+10)
-215+  8615 ED 92 34         nextreg $34,a
-216+  8618
-217+  8618                  ;attr 0
-218+  8618 DD 7E 04         ld a,(ix+4)
-219+  861B ED 92 35         nextreg $35,a
-220+  861E
-221+  861E                  ;attr 1
-222+  861E DD 7E 06         ld a,(ix+6)
-223+  8621 ED 92 36         nextreg $36,a
-224+  8624
-225+  8624                  ;attr 2
-226+  8624 DD 7E 07         ld a,(ix+7)
-227+  8627 47               ld b,a
-228+  8628 DD 7E 05         ld a,(ix+5)
-229+  862B B0               or b
-230+  862C ED 92 37         nextreg $37,a
-231+  862F
-232+  862F                  ;attr 3
-233+  862F DD 7E 08         ld a,(ix+8)
-234+  8632 ED 92 38         nextreg $38,a
-235+  8635
-236+  8635                  ;attr 4
-237+  8635 DD 7E 09         ld a,(ix+9)
-238+  8638 ED 92 39         nextreg $39,a
-239+  863B
-240+  863B C9               ret
-241+  863C
-242+  863C
-243+  863C
-244+  863C
-245+  863C
-246+  863C
-247+  863C
-248+  863C              handle_behaviour:
-249+  863C DD 7E 00         ld a,(ix)
-250+  863F FE 00            cp FALSE
-251+  8641 C8               ret z
-252+  8642
-253+  8642 DD 7E 01         ld a,(ix+1)
-254+  8645 FE 01            cp OBJECT_GHOST
-255+  8647 CA 50 86         jp z, handle_behaviour_ghost
-256+  864A FE 02            cp OBJECT_GHOST_WALKER
-257+  864C CA 91 86         jp z, handle_behaviour_ghost_walker
-258+  864F C9               ret
-259+  8650
-260+  8650
-261+  8650              handle_behaviour_ghost:
-262+  8650 DD 7E 0C         ld a,(ix+12)
-263+  8653 FE 00            cp LEFT
-264+  8655 CA 5E 86         jp z,ghost_move_left
-265+  8658 FE 01            cp RIGHT
-266+  865A CA 77 86         jp z,ghost_move_right
-267+  865D
-268+  865D C9               ret
-269+  865E
-270+  865E              ghost_move_left:
-271+  865E DD 66 0E         ld h,(ix+14)
-272+  8661 DD 6E 0F         ld l,(ix+15)
-273+  8664 ED 34 FE FF      add hl,-GHOST_SPEED
-274+  8668 DD 74 0E         ld (ix+14),h
-275+  866B DD 75 0F         ld (ix+15),l
-276+  866E
-277+  866E 7C               ld a,h
-278+  866F B5               or l
-279+  8670 C0               ret nz
-280+  8671
-281+  8671 3E 01            ld a,RIGHT
-282+  8673 DD 77 0C         ld (ix+12),a
-283+  8676
-284+  8676 C9               ret
-285+  8677              ghost_move_right:
-286+  8677 DD 66 0E         ld h,(ix+14)
-287+  867A DD 6E 0F         ld l,(ix+15)
-288+  867D ED 34 02 00      add hl,GHOST_SPEED
-289+  8681 DD 74 0E         ld (ix+14),h
-290+  8684 DD 75 0F         ld (ix+15),l
-291+  8687
-292+  8687 7D               ld a,l
-293+  8688 FE 1E            cp GHOST_MAX_MOVEMENT_X
-294+  868A C0               ret nz
-295+  868B
-296+  868B 3E 00            ld a,LEFT
-297+  868D DD 77 0C         ld (ix+12),a
-298+  8690
-299+  8690
-300+  8690 C9               ret
-301+  8691
-302+  8691
-303+  8691              handle_behaviour_ghost_walker:
-304+  8691 DD 66 0E         ld h,(ix+14)
-305+  8694 DD 6E 0F         ld l,(ix+15)
-306+  8697 ED 34 FE FF      add hl,-GHOST_SPEED
-307+  869B DD 74 0E         ld (ix+14),h
-308+  869E DD 75 0F         ld (ix+15),l
-309+  86A1
-310+  86A1                  ;320 = %0000 0001 0100 0000
-311+  86A1 7C               ld a,h
-312+  86A2 FE 00            cp 0
-313+  86A4 C8               ret z
-314+  86A5 7D               ld a,l
-315+  86A6 FE 40            cp %01000000
-316+  86A8 C0               ret nz
-317+  86A9
-318+  86A9 DD 36 01 64      ld (ix+1),OBJECT_DEAD
-319+  86AD C9               ret
+ 33+  8529 00 02 32 1A      db FALSE, OBJECT_GHOST_WALKER, 50, 26
+ 33+  852D 00 00          dw 0
+ 33+  852F 00 00 52 00    db 0, %00000000,%01010010,%00000000,15,1,LEFT,0
+ 33+  8533 0F 01 00 00
+ 33+  8537 00 00          dw 0
+ 34+  8539 FF               db END_OF_ARRAY
+ 35+  853A
+ 36+  853A              OBJECTS_DATA_LENGTH equ 16
+ 37+  853A
+ 38+  853A
+ 39+  853A              GHOST_SPEED equ 2
+ 40+  853A              GHOST_MAX_MOVEMENT_X equ 30
+ 41+  853A
+ 42+  853A
+ 43+  853A
+ 44+  853A              ;sX= wX-(offset-VW)*8
+ 45+  853A              ;sY= wY*8
+ 46+  853A
+ 47+  853A
+ 48+  853A
+ 49+  853A              objects_init:
+ 50+  853A C9               ret
+ 51+  853B
+ 52+  853B
+ 53+  853B
+ 54+  853B              objects_update:
+ 55+  853B DD 21 D9 84      ld ix,objects
+ 56+  853F              objs_update_start:
+ 57+  853F DD 7E 00         ld a,(ix)
+ 58+  8542 FE FF            cp END_OF_ARRAY
+ 59+  8544 C8               ret z
+ 60+  8545
+ 61+  8545 CD 65 85         call object_update
+ 62+  8548
+ 63+  8548 11 10 00         ld de,OBJECTS_DATA_LENGTH
+ 64+  854B DD 19            add ix,de
+ 65+  854D C3 3F 85         jp objs_update_start
+ 66+  8550
+ 67+  8550
+ 68+  8550
+ 69+  8550
+ 70+  8550              objects_draw:
+ 71+  8550 DD 21 D9 84      ld ix,objects
+ 72+  8554              objs_draw_start:
+ 73+  8554 DD 7E 00         ld a,(ix)
+ 74+  8557 FE FF            cp END_OF_ARRAY
+ 75+  8559 C8               ret z
+ 76+  855A
+ 77+  855A CD 22 86         call object_draw
+ 78+  855D
+ 79+  855D 11 10 00         ld de,OBJECTS_DATA_LENGTH
+ 80+  8560 DD 19            add ix,de
+ 81+  8562 C3 54 85         jp objs_draw_start
+ 82+  8565
+ 83+  8565
+ 84+  8565
+ 85+  8565
+ 86+  8565
+ 87+  8565
+ 88+  8565
+ 89+  8565              object_update:
+ 90+  8565 CD 75 85         call object_check_in_view
+ 91+  8568 CD 0F 86         call animate_object
+ 92+  856B
+ 93+  856B DD 7E 01         ld a,(ix+1)
+ 94+  856E FE 00            cp OBJECT_PUMPKIN
+ 95+  8570 C8               ret z
+ 96+  8571
+ 97+  8571 CD 4C 86         call handle_behaviour
+ 98+  8574
+ 99+  8574 C9               ret
+100+  8575
+101+  8575
+102+  8575
+103+  8575              object_check_in_view:
+104+  8575 DD 7E 02         ld a,(ix+2)
+105+  8578 47               ld b,a
+106+  8579 3A 55 92         ld a,(offset)
+107+  857C B8               cp b
+108+  857D DA 9D 85         jp c, obj_set_not_inview
+109+  8580
+110+  8580 3A 55 92         ld a,(offset)
+111+  8583 D6 28            sub VIEW_WIDTH
+112+  8585 47               ld b,a
+113+  8586 DD 7E 02         ld a,(ix+2)
+114+  8589 B8               cp b
+115+  858A DA 9D 85         jp c, obj_set_not_inview
+116+  858D
+117+  858D                  ; set to inview=yes
+118+  858D DD 36 00 01      ld (ix),TRUE
+119+  8591 DD 7E 08         ld a,(ix+8)
+120+  8594 CB FF            set 7,a
+121+  8596 DD 77 08         ld (ix+8),a
+122+  8599
+123+  8599 CD AA 85         call object_calculate_screen_pos
+124+  859C C9               ret
+125+  859D
+126+  859D              obj_set_not_inview:
+127+  859D DD 36 00 00      ld (ix),FALSE
+128+  85A1 DD 7E 08         ld a,(ix+8)
+129+  85A4 CB BF            res 7,a
+130+  85A6 DD 77 08         ld (ix+8),a
+131+  85A9 C9               ret
+132+  85AA
+133+  85AA
+134+  85AA
+135+  85AA
+136+  85AA              object_calculate_screen_pos:
+137+  85AA                  ;Y
+138+  85AA DD 7E 03         ld a,(ix+3)
+139+  85AD 87               add a,a
+140+  85AE 87               add a,a
+141+  85AF 87               add a,a ;A*8
+142+  85B0 DD 77 06         ld (ix+6),a
+143+  85B3
+144+  85B3 3A 54 92         ld a,(scroll_direction)
+145+  85B6 FE 00            cp LEFT
+146+  85B8 CA C1 85         jp z,obj_screen_moving_left
+147+  85BB FE 01            cp RIGHT
+148+  85BD CA E6 85         jp z,obj_screen_moving_right
+149+  85C0
+150+  85C0 C9               ret
+151+  85C1
+152+  85C1              obj_screen_moving_left:
+153+  85C1                  ;X (scroll left)
+154+  85C1 3A 55 92         ld a,(offset)
+155+  85C4 D6 28            sub VIEW_WIDTH
+156+  85C6 47               ld b,a
+157+  85C7 DD 7E 02         ld a,(ix+2) ;wX
+158+  85CA 90               sub b ;wX-camX
+159+  85CB 21 00 00         ld hl,0
+160+  85CE ED 31            add hl,a
+161+  85D0 29               add hl,hl
+162+  85D1 29               add hl,hl
+163+  85D2 29               add hl,hl
+164+  85D3 3A 53 92         ld a,(current_scroll)
+165+  85D6 ED 31            add hl,a
+166+  85D8 DD 56 0E         ld d,(ix+14) ;xpos offset
+167+  85DB DD 5E 0F         ld e,(ix+15) ;xpos offset
+168+  85DE 19               add hl,de
+169+  85DF DD 75 04         ld (ix+4),l
+170+  85E2 DD 74 05         ld (ix+5),h ;X8
+171+  85E5 C9               ret
+172+  85E6
+173+  85E6              obj_screen_moving_right:
+174+  85E6                  ;X (scroll left)
+175+  85E6 3A 55 92         ld a,(offset)
+176+  85E9 D6 28            sub VIEW_WIDTH
+177+  85EB 47               ld b,a
+178+  85EC DD 7E 02         ld a,(ix+2) ;wX
+179+  85EF 90               sub b ;wX-camX
+180+  85F0 21 00 00         ld hl,0
+181+  85F3 ED 31            add hl,a
+182+  85F5 29               add hl,hl
+183+  85F6 29               add hl,hl
+184+  85F7 29               add hl,hl
+185+  85F8 3A 53 92         ld a,(current_scroll)
+186+  85FB 47               ld b,a
+187+  85FC 3E 08            ld a,8
+188+  85FE 90               sub b
+189+  85FF ED 31            add hl,a
+190+  8601 DD 56 0E         ld d,(ix+14) ;xpos offset
+191+  8604 DD 5E 0F         ld e,(ix+15) ;xpos offset
+192+  8607 19               add hl,de
+193+  8608 DD 75 04         ld (ix+4),l
+194+  860B DD 74 05         ld (ix+5),h ;X8
+195+  860E
+196+  860E C9               ret
+197+  860F
+198+  860F
+199+  860F              animate_object:
+200+  860F DD 7E 08         ld a,(ix+8)
+201+  8612 E6 C0            and %11000000
+202+  8614 47               ld b,a
+203+  8615 DD 7E 08         ld a,(ix+8)
+204+  8618 E6 3F            and %00111111
+205+  861A DD AE 0B         xor (ix+11)
+206+  861D 80               add a,b
+207+  861E DD 77 08         ld (ix+8),a
+208+  8621 C9               ret
+209+  8622
+210+  8622
+211+  8622
+212+  8622
+213+  8622              object_draw:
+214+  8622 DD 7E 0A         ld a,(ix+10)
+215+  8625 ED 92 34         nextreg $34,a
+216+  8628
+217+  8628                  ;attr 0
+218+  8628 DD 7E 04         ld a,(ix+4)
+219+  862B ED 92 35         nextreg $35,a
+220+  862E
+221+  862E                  ;attr 1
+222+  862E DD 7E 06         ld a,(ix+6)
+223+  8631 ED 92 36         nextreg $36,a
+224+  8634
+225+  8634                  ;attr 2
+226+  8634 DD 7E 07         ld a,(ix+7)
+227+  8637 47               ld b,a
+228+  8638 DD 7E 05         ld a,(ix+5)
+229+  863B B0               or b
+230+  863C ED 92 37         nextreg $37,a
+231+  863F
+232+  863F                  ;attr 3
+233+  863F DD 7E 08         ld a,(ix+8)
+234+  8642 ED 92 38         nextreg $38,a
+235+  8645
+236+  8645                  ;attr 4
+237+  8645 DD 7E 09         ld a,(ix+9)
+238+  8648 ED 92 39         nextreg $39,a
+239+  864B
+240+  864B C9               ret
+241+  864C
+242+  864C
+243+  864C
+244+  864C
+245+  864C
+246+  864C
+247+  864C
+248+  864C              handle_behaviour:
+249+  864C DD 7E 00         ld a,(ix)
+250+  864F FE 00            cp FALSE
+251+  8651 C8               ret z
+252+  8652
+253+  8652 DD 7E 01         ld a,(ix+1)
+254+  8655 FE 01            cp OBJECT_GHOST
+255+  8657 CA 60 86         jp z, handle_behaviour_ghost
+256+  865A FE 02            cp OBJECT_GHOST_WALKER
+257+  865C CA A1 86         jp z, handle_behaviour_ghost_walker
+258+  865F C9               ret
+259+  8660
+260+  8660
+261+  8660              handle_behaviour_ghost:
+262+  8660 DD 7E 0C         ld a,(ix+12)
+263+  8663 FE 00            cp LEFT
+264+  8665 CA 6E 86         jp z,ghost_move_left
+265+  8668 FE 01            cp RIGHT
+266+  866A CA 87 86         jp z,ghost_move_right
+267+  866D
+268+  866D C9               ret
+269+  866E
+270+  866E              ghost_move_left:
+271+  866E DD 66 0E         ld h,(ix+14)
+272+  8671 DD 6E 0F         ld l,(ix+15)
+273+  8674 ED 34 FE FF      add hl,-GHOST_SPEED
+274+  8678 DD 74 0E         ld (ix+14),h
+275+  867B DD 75 0F         ld (ix+15),l
+276+  867E
+277+  867E 7C               ld a,h
+278+  867F B5               or l
+279+  8680 C0               ret nz
+280+  8681
+281+  8681 3E 01            ld a,RIGHT
+282+  8683 DD 77 0C         ld (ix+12),a
+283+  8686
+284+  8686 C9               ret
+285+  8687              ghost_move_right:
+286+  8687 DD 66 0E         ld h,(ix+14)
+287+  868A DD 6E 0F         ld l,(ix+15)
+288+  868D ED 34 02 00      add hl,GHOST_SPEED
+289+  8691 DD 74 0E         ld (ix+14),h
+290+  8694 DD 75 0F         ld (ix+15),l
+291+  8697
+292+  8697 7D               ld a,l
+293+  8698 FE 1E            cp GHOST_MAX_MOVEMENT_X
+294+  869A C0               ret nz
+295+  869B
+296+  869B 3E 00            ld a,LEFT
+297+  869D DD 77 0C         ld (ix+12),a
+298+  86A0
+299+  86A0
+300+  86A0 C9               ret
+301+  86A1
+302+  86A1
+303+  86A1              handle_behaviour_ghost_walker:
+304+  86A1 DD 66 0E         ld h,(ix+14)
+305+  86A4 DD 6E 0F         ld l,(ix+15)
+306+  86A7 ED 34 FE FF      add hl,-GHOST_SPEED
+307+  86AB DD 74 0E         ld (ix+14),h
+308+  86AE DD 75 0F         ld (ix+15),l
+309+  86B1
+310+  86B1                  ;320 = %0000 0001 0100 0000
+311+  86B1 7C               ld a,h
+312+  86B2 FE 00            cp 0
+313+  86B4 C8               ret z
+314+  86B5 7D               ld a,l
+315+  86B6 FE 40            cp %01000000
+316+  86B8 C0               ret nz
+317+  86B9
+318+  86B9 DD 36 01 64      ld (ix+1),OBJECT_DEAD
+319+  86BD C9               ret
 # file closed: src/objects.asm
- 31   86AE              	include 'game.asm'
+ 31   86BE              	include 'game.asm'
 # file opened: src/game.asm
-  1+  86AE
-  2+  86AE              game_init:
-  3+  86AE
-  4+  86AE ED 91 56 0E      nextreg $56,14
-  5+  86B2 06 14            ld b,SPRITE_COUNT
-  6+  86B4 21 00 C0         ld hl,$c000
-  7+  86B7 CD 1B 88         call init_sprites
-  8+  86BA
-  9+  86BA ED 91 15 03      nextreg $15,%00000011
- 10+  86BE CD 47 92         call init_tiles
- 11+  86C1
- 12+  86C1 CD 9D 80         call player_init
- 13+  86C4
- 14+  86C4 C9               ret
- 15+  86C5
- 16+  86C5
- 17+  86C5              game_update:
- 18+  86C5 06 0C            ld b,12
- 19+  86C7 CD 33 80         call WaitRasterLine
- 20+  86CA CD EB 86         call check_keys
- 21+  86CD CD 25 81         call player_update
- 22+  86D0 CD 2B 85         call objects_update
- 23+  86D3 C9               ret
- 24+  86D4
- 25+  86D4              game_draw:
- 26+  86D4 CD 62 82         call player_draw
- 27+  86D7 CD 40 85         call objects_draw
- 28+  86DA C9               ret
- 29+  86DB
- 30+  86DB
+  1+  86BE
+  2+  86BE              game_init:
+  3+  86BE
+  4+  86BE ED 91 56 0E      nextreg $56,14
+  5+  86C2 06 14            ld b,SPRITE_COUNT
+  6+  86C4 21 00 C0         ld hl,$c000
+  7+  86C7 CD 2B 88         call init_sprites
+  8+  86CA
+  9+  86CA ED 91 15 03      nextreg $15,%00000011
+ 10+  86CE CD 57 92         call init_tiles
+ 11+  86D1
+ 12+  86D1 CD 9D 80         call player_init
+ 13+  86D4
+ 14+  86D4 C9               ret
+ 15+  86D5
+ 16+  86D5
+ 17+  86D5              game_update:
+ 18+  86D5 06 0C            ld b,12
+ 19+  86D7 CD 33 80         call WaitRasterLine
+ 20+  86DA CD FB 86         call check_keys
+ 21+  86DD CD 25 81         call player_update
+ 22+  86E0 CD 3B 85         call objects_update
+ 23+  86E3 C9               ret
+ 24+  86E4
+ 25+  86E4              game_draw:
+ 26+  86E4 CD 62 82         call player_draw
+ 27+  86E7 CD 50 85         call objects_draw
+ 28+  86EA C9               ret
+ 29+  86EB
+ 30+  86EB
 # file closed: src/game.asm
- 32   86DB              	include 'retrotools\keycacher.asm'
+ 32   86EB              	include 'retrotools\keycacher.asm'
 # file opened: src/retrotools/keycacher.asm
-  1+  86DB              ;Usage:
-  2+  86DB              ;first call check_keys
-  3+  86DB              ;compare states of cached values (eg. keypressed_W) before doing movement/actions etc.
-  4+  86DB              ;after all actions, call reset_keys
-  5+  86DB
-  6+  86DB
-  7+  86DB              ; 32766 B, N, M, Symbol Shift, Space
-  8+  86DB              ; 49150 H, J, K, L, Enter
-  9+  86DB              ; 57342 Y, U, I, O, P
- 10+  86DB              ; 61438 6, 7, 8, 9, 0
- 11+  86DB              ; 63486 5, 4, 3, 2, 1
- 12+  86DB              ; 64510 T, R, E, W, Q
- 13+  86DB              ; 65022 G, F, D, S, A
- 14+  86DB              ; 65278 V, C, X, Z, Caps Shift
- 15+  86DB
- 16+  86DB
- 17+  86DB 00           keypressed_W db FALSE
- 18+  86DC 00           keypressed_W_Held db FALSE
- 19+  86DD 00           keypressed_A db FALSE
- 20+  86DE 00           keypressed_A_Held db FALSE
- 21+  86DF 00           keypressed_S db FALSE
- 22+  86E0 00           keypressed_S_Held db FALSE
- 23+  86E1 00           keypressed_D db FALSE
- 24+  86E2
- 25+  86E2 00           keypressed_F db FALSE
- 26+  86E3 00           keypressed_F_Held db FALSE
- 27+  86E4 00           keypressed_I db FALSE
- 28+  86E5 00           keypressed_Q db FALSE
- 29+  86E6 00           keypressed_Q_Held db FALSE
- 30+  86E7 00           keypressed_O db FALSE
- 31+  86E8 00           keypressed_P db FALSE
- 32+  86E9 00           keypressed_Space db FALSE
- 33+  86EA 00           keypressed_Space_Held db FALSE
- 34+  86EB
- 35+  86EB              check_keys:
- 36+  86EB 3A DB 86         ld a,(keypressed_W)
- 37+  86EE FE 01            cp TRUE
- 38+  86F0 CC A3 87         call z,set_W_Held
- 39+  86F3 C4 A9 87         call nz, reset_W_Held
- 40+  86F6
- 41+  86F6 3A DF 86         ld a,(keypressed_S)
- 42+  86F9 FE 01            cp TRUE
- 43+  86FB CC C5 87         call z,set_S_Held
- 44+  86FE C4 CB 87         call nz, reset_S_Held
- 45+  8701
- 46+  8701 3A E2 86         ld a,(keypressed_F)
- 47+  8704 FE 01            cp TRUE
- 48+  8706 CC DC 87         call z, set_F_Held
- 49+  8709 C4 E2 87         call nz, reset_F_Held
- 50+  870C
- 51+  870C 3A DD 86         ld a,(keypressed_A)
- 52+  870F FE 01            cp TRUE
- 53+  8711 CC B4 87         call z,set_A_Held
- 54+  8714 C4 BA 87         call nz, reset_A_Held
- 55+  8717
- 56+  8717 3A E5 86         ld a,(keypressed_Q)
- 57+  871A FE 01            cp TRUE
- 58+  871C CC F3 87         call z,set_Q_Held
- 59+  871F C4 F9 87         call nz, reset_Q_Held
- 60+  8722
- 61+  8722 3A E9 86         ld a,(keypressed_Space)
- 62+  8725 FE 01            cp TRUE
- 63+  8727 CC 10 88         call z,set_Space_Held
- 64+  872A C4 16 88         call nz, reset_Space_Held
- 65+  872D
- 66+  872D
- 67+  872D
- 68+  872D AF               xor a
- 69+  872E 32 DB 86         ld (keypressed_W),a
- 70+  8731 32 DD 86         ld (keypressed_A),a
- 71+  8734 32 DF 86         ld (keypressed_S),a
- 72+  8737 32 E1 86         ld (keypressed_D),a
- 73+  873A 32 E2 86         ld (keypressed_F),a
- 74+  873D 32 E4 86         ld (keypressed_I),a
- 75+  8740 32 E5 86         ld (keypressed_Q),a
- 76+  8743 32 E7 86         ld (keypressed_O),a
- 77+  8746 32 E8 86         ld (keypressed_P),a
- 78+  8749 32 E9 86         ld (keypressed_Space),a
- 79+  874C
- 80+  874C
- 81+  874C 01 FE FD         ld bc,0xFDFE ;ASDFG
- 82+  874F ED 78            in a,(c)
- 83+  8751 1F               rra
- 84+  8752 F5               push af
- 85+  8753 D4 AE 87         call nc, set_A
- 86+  8756 F1               pop af
- 87+  8757 1F               rra
- 88+  8758 F5               push af
- 89+  8759 D4 BF 87         call nc, set_S
- 90+  875C F1               pop af
- 91+  875D 1F               rra
- 92+  875E F5               push af
- 93+  875F D4 D0 87         call nc, set_D
- 94+  8762 F1               pop af
- 95+  8763 1F               rra
- 96+  8764 F5               push af
- 97+  8765 D4 D6 87         call nc, set_F
- 98+  8768 F1               pop af
- 99+  8769
-100+  8769 01 FE FB         ld bc,0xFBFE ;QWERT
-101+  876C ED 78            in a,(c)
-102+  876E 1F               rra ;Q
-103+  876F F5               push af
-104+  8770 D4 ED 87         call nc, set_Q
-105+  8773 F1               pop af
-106+  8774 1F               rra ;W
-107+  8775 F5               push af
-108+  8776 D4 9D 87         call nc, set_W
-109+  8779 F1               pop af
-110+  877A
-111+  877A 01 FE DF         ld bc,0xDFFE ;POIUY
-112+  877D ED 78            in a,(c)
-113+  877F 1F               rra ;P
-114+  8780 F5               push af
-115+  8781 D4 04 88         call nc, set_P
-116+  8784 F1               pop af
-117+  8785 1F               rra ;O
-118+  8786 F5               push af
-119+  8787 D4 FE 87         call nc, set_O
-120+  878A F1               pop af
-121+  878B 1F               rra ;I
-122+  878C F5               push af
-123+  878D D4 E7 87         call nc, set_I
-124+  8790 F1               pop af
-125+  8791
-126+  8791 01 FE 7F         ld bc,32766
-127+  8794 ED 78            in a,(c)
-128+  8796 1F               rra
-129+  8797 F5               push af
-130+  8798 D4 0A 88         call nc, set_Space
-131+  879B F1               pop af
-132+  879C
-133+  879C
-134+  879C C9               ret
-135+  879D
-136+  879D              set_W:
-137+  879D 3E 01            ld a,TRUE
-138+  879F 32 DB 86         ld (keypressed_W),a
-139+  87A2 C9               ret
-140+  87A3
-141+  87A3              set_W_Held:
-142+  87A3 3E 01            ld a,TRUE
-143+  87A5 32 DC 86         ld (keypressed_W_Held),a
-144+  87A8 C9               ret
-145+  87A9              reset_W_Held:
-146+  87A9 AF               xor a
-147+  87AA 32 DC 86         ld (keypressed_W_Held),a
-148+  87AD C9               ret
-149+  87AE
-150+  87AE              set_A:
-151+  87AE 3E 01            ld a,TRUE
-152+  87B0 32 DD 86         ld (keypressed_A),a
-153+  87B3 C9               ret
-154+  87B4
-155+  87B4              set_A_Held:
-156+  87B4 3E 01            ld a,TRUE
-157+  87B6 32 DE 86         ld (keypressed_A_Held),a
-158+  87B9 C9               ret
-159+  87BA
-160+  87BA              reset_A_Held:
-161+  87BA AF               xor a
-162+  87BB 32 DE 86         ld (keypressed_A_Held),a
-163+  87BE C9               ret
-164+  87BF
-165+  87BF              set_S:
-166+  87BF 3E 01            ld a,TRUE
-167+  87C1 32 DF 86         ld (keypressed_S),a
-168+  87C4 C9               ret
-169+  87C5              set_S_Held:
-170+  87C5 3E 01            ld a,TRUE
-171+  87C7 32 E0 86         ld (keypressed_S_Held),a
-172+  87CA C9               ret
-173+  87CB              reset_S_Held:
-174+  87CB AF               xor a
-175+  87CC 32 E0 86         ld (keypressed_S_Held),a
-176+  87CF C9               ret
-177+  87D0
-178+  87D0              set_D:
-179+  87D0 3E 01            ld a,TRUE
-180+  87D2 32 E1 86         ld (keypressed_D),a
-181+  87D5 C9               ret
-182+  87D6
-183+  87D6              set_F:
-184+  87D6 3E 01            ld a,TRUE
-185+  87D8 32 E2 86         ld (keypressed_F),a
-186+  87DB C9               ret
-187+  87DC
-188+  87DC
-189+  87DC              set_F_Held:
-190+  87DC 3E 01            ld a,TRUE
-191+  87DE 32 E3 86         ld (keypressed_F_Held),a
-192+  87E1 C9               ret
-193+  87E2
-194+  87E2              reset_F_Held:
-195+  87E2 AF               xor a
-196+  87E3 32 E3 86         ld (keypressed_F_Held),a
-197+  87E6 C9               ret
-198+  87E7
-199+  87E7
-200+  87E7
-201+  87E7              set_I:
-202+  87E7 3E 01            ld a,TRUE
-203+  87E9 32 E4 86         ld (keypressed_I),a
-204+  87EC C9               ret
-205+  87ED
-206+  87ED
-207+  87ED              set_Q:
-208+  87ED 3E 01            ld a,TRUE
-209+  87EF 32 E5 86         ld (keypressed_Q),a
-210+  87F2 C9               ret
-211+  87F3
-212+  87F3              set_Q_Held:
-213+  87F3 3E 01            ld a,TRUE
-214+  87F5 32 E6 86         ld (keypressed_Q_Held),a
-215+  87F8 C9               ret
-216+  87F9
-217+  87F9              reset_Q_Held:
-218+  87F9 AF               xor a
-219+  87FA 32 E6 86         ld (keypressed_Q_Held),a
-220+  87FD C9               ret
-221+  87FE
-222+  87FE              set_O:
-223+  87FE 3E 01            ld a,TRUE
-224+  8800 32 E7 86         ld (keypressed_O),a
-225+  8803 C9               ret
-226+  8804
-227+  8804              set_P:
-228+  8804 3E 01            ld a,TRUE
-229+  8806 32 E8 86         ld (keypressed_P),a
-230+  8809 C9               ret
-231+  880A
-232+  880A              set_Space:
-233+  880A 3E 01            ld a,TRUE
-234+  880C 32 E9 86         ld (keypressed_Space),a
-235+  880F C9               ret
-236+  8810              set_Space_Held:
-237+  8810 3E 01            ld a,TRUE
-238+  8812 32 EA 86         ld (keypressed_Space_Held),a
-239+  8815 C9               ret
-240+  8816
-241+  8816              reset_Space_Held:
-242+  8816 AF               xor a
-243+  8817 32 EA 86         ld (keypressed_Space_Held),a
-244+  881A C9               ret
-245+  881B
+  1+  86EB              ;Usage:
+  2+  86EB              ;first call check_keys
+  3+  86EB              ;compare states of cached values (eg. keypressed_W) before doing movement/actions etc.
+  4+  86EB              ;after all actions, call reset_keys
+  5+  86EB
+  6+  86EB
+  7+  86EB              ; 32766 B, N, M, Symbol Shift, Space
+  8+  86EB              ; 49150 H, J, K, L, Enter
+  9+  86EB              ; 57342 Y, U, I, O, P
+ 10+  86EB              ; 61438 6, 7, 8, 9, 0
+ 11+  86EB              ; 63486 5, 4, 3, 2, 1
+ 12+  86EB              ; 64510 T, R, E, W, Q
+ 13+  86EB              ; 65022 G, F, D, S, A
+ 14+  86EB              ; 65278 V, C, X, Z, Caps Shift
+ 15+  86EB
+ 16+  86EB
+ 17+  86EB 00           keypressed_W db FALSE
+ 18+  86EC 00           keypressed_W_Held db FALSE
+ 19+  86ED 00           keypressed_A db FALSE
+ 20+  86EE 00           keypressed_A_Held db FALSE
+ 21+  86EF 00           keypressed_S db FALSE
+ 22+  86F0 00           keypressed_S_Held db FALSE
+ 23+  86F1 00           keypressed_D db FALSE
+ 24+  86F2
+ 25+  86F2 00           keypressed_F db FALSE
+ 26+  86F3 00           keypressed_F_Held db FALSE
+ 27+  86F4 00           keypressed_I db FALSE
+ 28+  86F5 00           keypressed_Q db FALSE
+ 29+  86F6 00           keypressed_Q_Held db FALSE
+ 30+  86F7 00           keypressed_O db FALSE
+ 31+  86F8 00           keypressed_P db FALSE
+ 32+  86F9 00           keypressed_Space db FALSE
+ 33+  86FA 00           keypressed_Space_Held db FALSE
+ 34+  86FB
+ 35+  86FB              check_keys:
+ 36+  86FB 3A EB 86         ld a,(keypressed_W)
+ 37+  86FE FE 01            cp TRUE
+ 38+  8700 CC B3 87         call z,set_W_Held
+ 39+  8703 C4 B9 87         call nz, reset_W_Held
+ 40+  8706
+ 41+  8706 3A EF 86         ld a,(keypressed_S)
+ 42+  8709 FE 01            cp TRUE
+ 43+  870B CC D5 87         call z,set_S_Held
+ 44+  870E C4 DB 87         call nz, reset_S_Held
+ 45+  8711
+ 46+  8711 3A F2 86         ld a,(keypressed_F)
+ 47+  8714 FE 01            cp TRUE
+ 48+  8716 CC EC 87         call z, set_F_Held
+ 49+  8719 C4 F2 87         call nz, reset_F_Held
+ 50+  871C
+ 51+  871C 3A ED 86         ld a,(keypressed_A)
+ 52+  871F FE 01            cp TRUE
+ 53+  8721 CC C4 87         call z,set_A_Held
+ 54+  8724 C4 CA 87         call nz, reset_A_Held
+ 55+  8727
+ 56+  8727 3A F5 86         ld a,(keypressed_Q)
+ 57+  872A FE 01            cp TRUE
+ 58+  872C CC 03 88         call z,set_Q_Held
+ 59+  872F C4 09 88         call nz, reset_Q_Held
+ 60+  8732
+ 61+  8732 3A F9 86         ld a,(keypressed_Space)
+ 62+  8735 FE 01            cp TRUE
+ 63+  8737 CC 20 88         call z,set_Space_Held
+ 64+  873A C4 26 88         call nz, reset_Space_Held
+ 65+  873D
+ 66+  873D
+ 67+  873D
+ 68+  873D AF               xor a
+ 69+  873E 32 EB 86         ld (keypressed_W),a
+ 70+  8741 32 ED 86         ld (keypressed_A),a
+ 71+  8744 32 EF 86         ld (keypressed_S),a
+ 72+  8747 32 F1 86         ld (keypressed_D),a
+ 73+  874A 32 F2 86         ld (keypressed_F),a
+ 74+  874D 32 F4 86         ld (keypressed_I),a
+ 75+  8750 32 F5 86         ld (keypressed_Q),a
+ 76+  8753 32 F7 86         ld (keypressed_O),a
+ 77+  8756 32 F8 86         ld (keypressed_P),a
+ 78+  8759 32 F9 86         ld (keypressed_Space),a
+ 79+  875C
+ 80+  875C
+ 81+  875C 01 FE FD         ld bc,0xFDFE ;ASDFG
+ 82+  875F ED 78            in a,(c)
+ 83+  8761 1F               rra
+ 84+  8762 F5               push af
+ 85+  8763 D4 BE 87         call nc, set_A
+ 86+  8766 F1               pop af
+ 87+  8767 1F               rra
+ 88+  8768 F5               push af
+ 89+  8769 D4 CF 87         call nc, set_S
+ 90+  876C F1               pop af
+ 91+  876D 1F               rra
+ 92+  876E F5               push af
+ 93+  876F D4 E0 87         call nc, set_D
+ 94+  8772 F1               pop af
+ 95+  8773 1F               rra
+ 96+  8774 F5               push af
+ 97+  8775 D4 E6 87         call nc, set_F
+ 98+  8778 F1               pop af
+ 99+  8779
+100+  8779 01 FE FB         ld bc,0xFBFE ;QWERT
+101+  877C ED 78            in a,(c)
+102+  877E 1F               rra ;Q
+103+  877F F5               push af
+104+  8780 D4 FD 87         call nc, set_Q
+105+  8783 F1               pop af
+106+  8784 1F               rra ;W
+107+  8785 F5               push af
+108+  8786 D4 AD 87         call nc, set_W
+109+  8789 F1               pop af
+110+  878A
+111+  878A 01 FE DF         ld bc,0xDFFE ;POIUY
+112+  878D ED 78            in a,(c)
+113+  878F 1F               rra ;P
+114+  8790 F5               push af
+115+  8791 D4 14 88         call nc, set_P
+116+  8794 F1               pop af
+117+  8795 1F               rra ;O
+118+  8796 F5               push af
+119+  8797 D4 0E 88         call nc, set_O
+120+  879A F1               pop af
+121+  879B 1F               rra ;I
+122+  879C F5               push af
+123+  879D D4 F7 87         call nc, set_I
+124+  87A0 F1               pop af
+125+  87A1
+126+  87A1 01 FE 7F         ld bc,32766
+127+  87A4 ED 78            in a,(c)
+128+  87A6 1F               rra
+129+  87A7 F5               push af
+130+  87A8 D4 1A 88         call nc, set_Space
+131+  87AB F1               pop af
+132+  87AC
+133+  87AC
+134+  87AC C9               ret
+135+  87AD
+136+  87AD              set_W:
+137+  87AD 3E 01            ld a,TRUE
+138+  87AF 32 EB 86         ld (keypressed_W),a
+139+  87B2 C9               ret
+140+  87B3
+141+  87B3              set_W_Held:
+142+  87B3 3E 01            ld a,TRUE
+143+  87B5 32 EC 86         ld (keypressed_W_Held),a
+144+  87B8 C9               ret
+145+  87B9              reset_W_Held:
+146+  87B9 AF               xor a
+147+  87BA 32 EC 86         ld (keypressed_W_Held),a
+148+  87BD C9               ret
+149+  87BE
+150+  87BE              set_A:
+151+  87BE 3E 01            ld a,TRUE
+152+  87C0 32 ED 86         ld (keypressed_A),a
+153+  87C3 C9               ret
+154+  87C4
+155+  87C4              set_A_Held:
+156+  87C4 3E 01            ld a,TRUE
+157+  87C6 32 EE 86         ld (keypressed_A_Held),a
+158+  87C9 C9               ret
+159+  87CA
+160+  87CA              reset_A_Held:
+161+  87CA AF               xor a
+162+  87CB 32 EE 86         ld (keypressed_A_Held),a
+163+  87CE C9               ret
+164+  87CF
+165+  87CF              set_S:
+166+  87CF 3E 01            ld a,TRUE
+167+  87D1 32 EF 86         ld (keypressed_S),a
+168+  87D4 C9               ret
+169+  87D5              set_S_Held:
+170+  87D5 3E 01            ld a,TRUE
+171+  87D7 32 F0 86         ld (keypressed_S_Held),a
+172+  87DA C9               ret
+173+  87DB              reset_S_Held:
+174+  87DB AF               xor a
+175+  87DC 32 F0 86         ld (keypressed_S_Held),a
+176+  87DF C9               ret
+177+  87E0
+178+  87E0              set_D:
+179+  87E0 3E 01            ld a,TRUE
+180+  87E2 32 F1 86         ld (keypressed_D),a
+181+  87E5 C9               ret
+182+  87E6
+183+  87E6              set_F:
+184+  87E6 3E 01            ld a,TRUE
+185+  87E8 32 F2 86         ld (keypressed_F),a
+186+  87EB C9               ret
+187+  87EC
+188+  87EC
+189+  87EC              set_F_Held:
+190+  87EC 3E 01            ld a,TRUE
+191+  87EE 32 F3 86         ld (keypressed_F_Held),a
+192+  87F1 C9               ret
+193+  87F2
+194+  87F2              reset_F_Held:
+195+  87F2 AF               xor a
+196+  87F3 32 F3 86         ld (keypressed_F_Held),a
+197+  87F6 C9               ret
+198+  87F7
+199+  87F7
+200+  87F7
+201+  87F7              set_I:
+202+  87F7 3E 01            ld a,TRUE
+203+  87F9 32 F4 86         ld (keypressed_I),a
+204+  87FC C9               ret
+205+  87FD
+206+  87FD
+207+  87FD              set_Q:
+208+  87FD 3E 01            ld a,TRUE
+209+  87FF 32 F5 86         ld (keypressed_Q),a
+210+  8802 C9               ret
+211+  8803
+212+  8803              set_Q_Held:
+213+  8803 3E 01            ld a,TRUE
+214+  8805 32 F6 86         ld (keypressed_Q_Held),a
+215+  8808 C9               ret
+216+  8809
+217+  8809              reset_Q_Held:
+218+  8809 AF               xor a
+219+  880A 32 F6 86         ld (keypressed_Q_Held),a
+220+  880D C9               ret
+221+  880E
+222+  880E              set_O:
+223+  880E 3E 01            ld a,TRUE
+224+  8810 32 F7 86         ld (keypressed_O),a
+225+  8813 C9               ret
+226+  8814
+227+  8814              set_P:
+228+  8814 3E 01            ld a,TRUE
+229+  8816 32 F8 86         ld (keypressed_P),a
+230+  8819 C9               ret
+231+  881A
+232+  881A              set_Space:
+233+  881A 3E 01            ld a,TRUE
+234+  881C 32 F9 86         ld (keypressed_Space),a
+235+  881F C9               ret
+236+  8820              set_Space_Held:
+237+  8820 3E 01            ld a,TRUE
+238+  8822 32 FA 86         ld (keypressed_Space_Held),a
+239+  8825 C9               ret
+240+  8826
+241+  8826              reset_Space_Held:
+242+  8826 AF               xor a
+243+  8827 32 FA 86         ld (keypressed_Space_Held),a
+244+  882A C9               ret
+245+  882B
 # file closed: src/retrotools/keycacher.asm
- 33   881B              	include 'retrotools\spritetools.asm'
+ 33   882B              	include 'retrotools\spritetools.asm'
 # file opened: src/retrotools/spritetools.asm
-  1+  881B              VISIBILITY equ %10000000
-  2+  881B              EXTENDED equ %01000000
-  3+  881B              MIRROR_X equ %00001000
-  4+  881B              MIRROR_Y equ %00000100
-  5+  881B
-  6+  881B
-  7+  881B
-  8+  881B              ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  9+  881B              ;; Upload spritesheet to 16K FPGA Internal Memory
- 10+  881B              ;; Inputs: B=Sprite Count HL=Sprite data Ptr
- 11+  881B              ;; Outputs: none
- 12+  881B              ;; Destroys: A,BC,HL
- 13+  881B              ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
- 14+  881B              init_sprites:
- 15+  881B C5           	push bc
- 16+  881C 3E 00        	ld a,0
- 17+  881E 01 3B 30     	ld bc,$303b
- 18+  8821 ED 79        	out (c),a
- 19+  8823 C1           	pop bc
- 20+  8824              is_loop:
- 21+  8824 C5           	push bc
- 22+  8825 01 5B 00     	ld bc,$005b
- 23+  8828 ED B3        	otir
- 24+  882A C1           	pop bc
- 25+  882B 10 F7        	djnz is_loop
- 26+  882D C9           	ret
+  1+  882B              VISIBILITY equ %10000000
+  2+  882B              EXTENDED equ %01000000
+  3+  882B              MIRROR_X equ %00001000
+  4+  882B              MIRROR_Y equ %00000100
+  5+  882B
+  6+  882B
+  7+  882B
+  8+  882B              ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  9+  882B              ;; Upload spritesheet to 16K FPGA Internal Memory
+ 10+  882B              ;; Inputs: B=Sprite Count HL=Sprite data Ptr
+ 11+  882B              ;; Outputs: none
+ 12+  882B              ;; Destroys: A,BC,HL
+ 13+  882B              ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+ 14+  882B              init_sprites:
+ 15+  882B C5           	push bc
+ 16+  882C 3E 00        	ld a,0
+ 17+  882E 01 3B 30     	ld bc,$303b
+ 18+  8831 ED 79        	out (c),a
+ 19+  8833 C1           	pop bc
+ 20+  8834              is_loop:
+ 21+  8834 C5           	push bc
+ 22+  8835 01 5B 00     	ld bc,$005b
+ 23+  8838 ED B3        	otir
+ 24+  883A C1           	pop bc
+ 25+  883B 10 F7        	djnz is_loop
+ 26+  883D C9           	ret
 # file closed: src/retrotools/spritetools.asm
- 34   882E              	include 'levels\levels.asm'
+ 34   883E              	include 'levels\levels.asm'
 # file opened: src/levels/levels.asm
-  1+  882E              solids:
-  2+  882E 00 01 02 03      db 0,1,2,3,4,5,6,7,8,9,10,11
-  2+  8832 04 05 06 07
-  2+  8836 08 09 0A 0B
-  3+  883A              SOLIDS_LENGTH equ 10
-  4+  883A
-  5+  883A              check_solid:
-  6+  883A 21 2E 88         ld hl,solids
-  7+  883D 01 0A 00         ld bc,SOLIDS_LENGTH
-  8+  8840 ED B1            cpir
-  9+  8842 C9               ret
- 10+  8843
- 11+  8843              ;solids:
- 12+  8843              ;0-9
- 13+  8843
- 14+  8843              ;grave (solid)
- 15+  8843              ;6,7
- 16+  8843              ;8,9
- 17+  8843              ;(10,11)
- 18+  8843              ;(10,11)
- 19+  8843              ;(10,11)
- 20+  8843
- 21+  8843
- 22+  8843              ;ground layout
- 23+  8843              ;32,33
- 24+  8843              ;00,01 =solid
- 25+  8843              ;34,35
- 26+  8843              ;36,37
- 27+  8843              ;38,39
- 28+  8843
- 29+  8843
- 30+  8843              ;left edge ground
- 31+  8843              ;40,41
- 32+  8843              ;02,03 =solid
- 33+  8843              ;42,43
- 34+  8843              ;44,45
- 35+  8843              ;46,47
- 36+  8843
- 37+  8843              ;right edge ground
- 38+  8843              ;48,49
- 39+  8843              ;04,05 =solid
- 40+  8843              ;50,51
- 41+  8843              ;52,53
- 42+  8843              ;54,55
- 43+  8843
- 44+  8843              ;sky
- 45+  8843              ;56 (black)
- 46+  8843
- 47+  8843
- 48+  8843
- 49+  8843              level1:
- 50+  8843 38 38 38 38      db 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56, 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56
- 50+  8847 38 38 38 38
- 50+  884B 38 38 38 38
- 50+  884F 38 38 38 38
- 50+  8853 38 38 38 38
+  1+  883E              solids:
+  2+  883E 00 01 02 03      db 0,1,2,3,4,5,6,7,8,9,10,11
+  2+  8842 04 05 06 07
+  2+  8846 08 09 0A 0B
+  3+  884A              SOLIDS_LENGTH equ 10
+  4+  884A
+  5+  884A              check_solid:
+  6+  884A 21 3E 88         ld hl,solids
+  7+  884D 01 0A 00         ld bc,SOLIDS_LENGTH
+  8+  8850 ED B1            cpir
+  9+  8852 C9               ret
+ 10+  8853
+ 11+  8853              ;solids:
+ 12+  8853              ;0-9
+ 13+  8853
+ 14+  8853              ;grave (solid)
+ 15+  8853              ;6,7
+ 16+  8853              ;8,9
+ 17+  8853              ;(10,11)
+ 18+  8853              ;(10,11)
+ 19+  8853              ;(10,11)
+ 20+  8853
+ 21+  8853
+ 22+  8853              ;ground layout
+ 23+  8853              ;32,33
+ 24+  8853              ;00,01 =solid
+ 25+  8853              ;34,35
+ 26+  8853              ;36,37
+ 27+  8853              ;38,39
+ 28+  8853
+ 29+  8853
+ 30+  8853              ;left edge ground
+ 31+  8853              ;40,41
+ 32+  8853              ;02,03 =solid
+ 33+  8853              ;42,43
+ 34+  8853              ;44,45
+ 35+  8853              ;46,47
+ 36+  8853
+ 37+  8853              ;right edge ground
+ 38+  8853              ;48,49
+ 39+  8853              ;04,05 =solid
+ 40+  8853              ;50,51
+ 41+  8853              ;52,53
+ 42+  8853              ;54,55
+ 43+  8853
+ 44+  8853              ;sky
+ 45+  8853              ;56 (black)
+ 46+  8853
+ 47+  8853
+ 48+  8853
+ 49+  8853              level1:
+ 50+  8853 38 38 38 38      db 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56, 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56
  50+  8857 38 38 38 38
  50+  885B 38 38 38 38
  50+  885F 38 38 38 38
@@ -1820,51 +1820,51 @@
  50+  8887 38 38 38 38
  50+  888B 38 38 38 38
  50+  888F 38 38 38 38
- 51+  8893 38 38 38 38      db 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56, 06,07,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56
- 51+  8897 38 38 38 38
- 51+  889B 38 38 38 38
- 51+  889F 38 38 38 38
- 51+  88A3 38 38 38 38
+ 50+  8893 38 38 38 38
+ 50+  8897 38 38 38 38
+ 50+  889B 38 38 38 38
+ 50+  889F 38 38 38 38
+ 51+  88A3 38 38 38 38      db 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56, 06,07,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56
  51+  88A7 38 38 38 38
  51+  88AB 38 38 38 38
  51+  88AF 38 38 38 38
  51+  88B3 38 38 38 38
  51+  88B7 38 38 38 38
- 51+  88BB 06 07 38 38
+ 51+  88BB 38 38 38 38
  51+  88BF 38 38 38 38
  51+  88C3 38 38 38 38
  51+  88C7 38 38 38 38
- 51+  88CB 38 38 38 38
+ 51+  88CB 06 07 38 38
  51+  88CF 38 38 38 38
  51+  88D3 38 38 38 38
  51+  88D7 38 38 38 38
  51+  88DB 38 38 38 38
  51+  88DF 38 38 38 38
- 52+  88E3 38 38 38 38      db 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56, 08,09,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56
- 52+  88E7 38 38 38 38
- 52+  88EB 38 38 38 38
- 52+  88EF 38 38 38 38
- 52+  88F3 38 38 38 38
+ 51+  88E3 38 38 38 38
+ 51+  88E7 38 38 38 38
+ 51+  88EB 38 38 38 38
+ 51+  88EF 38 38 38 38
+ 52+  88F3 38 38 38 38      db 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56, 08,09,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56
  52+  88F7 38 38 38 38
  52+  88FB 38 38 38 38
  52+  88FF 38 38 38 38
  52+  8903 38 38 38 38
  52+  8907 38 38 38 38
- 52+  890B 08 09 38 38
+ 52+  890B 38 38 38 38
  52+  890F 38 38 38 38
  52+  8913 38 38 38 38
  52+  8917 38 38 38 38
- 52+  891B 38 38 38 38
+ 52+  891B 08 09 38 38
  52+  891F 38 38 38 38
  52+  8923 38 38 38 38
  52+  8927 38 38 38 38
  52+  892B 38 38 38 38
  52+  892F 38 38 38 38
- 53+  8933 38 38 38 38      db 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56, 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56
- 53+  8937 38 38 38 38
- 53+  893B 38 38 38 38
- 53+  893F 38 38 38 38
- 53+  8943 38 38 38 38
+ 52+  8933 38 38 38 38
+ 52+  8937 38 38 38 38
+ 52+  893B 38 38 38 38
+ 52+  893F 38 38 38 38
+ 53+  8943 38 38 38 38      db 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56, 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56
  53+  8947 38 38 38 38
  53+  894B 38 38 38 38
  53+  894F 38 38 38 38
@@ -1880,11 +1880,11 @@
  53+  8977 38 38 38 38
  53+  897B 38 38 38 38
  53+  897F 38 38 38 38
- 54+  8983 38 38 38 38      db 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56, 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56
- 54+  8987 38 38 38 38
- 54+  898B 38 38 38 38
- 54+  898F 38 38 38 38
- 54+  8993 38 38 38 38
+ 53+  8983 38 38 38 38
+ 53+  8987 38 38 38 38
+ 53+  898B 38 38 38 38
+ 53+  898F 38 38 38 38
+ 54+  8993 38 38 38 38      db 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56, 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56
  54+  8997 38 38 38 38
  54+  899B 38 38 38 38
  54+  899F 38 38 38 38
@@ -1900,11 +1900,11 @@
  54+  89C7 38 38 38 38
  54+  89CB 38 38 38 38
  54+  89CF 38 38 38 38
- 55+  89D3 38 38 38 38      db 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56, 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56
- 55+  89D7 38 38 38 38
- 55+  89DB 38 38 38 38
- 55+  89DF 38 38 38 38
- 55+  89E3 38 38 38 38
+ 54+  89D3 38 38 38 38
+ 54+  89D7 38 38 38 38
+ 54+  89DB 38 38 38 38
+ 54+  89DF 38 38 38 38
+ 55+  89E3 38 38 38 38      db 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56, 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56
  55+  89E7 38 38 38 38
  55+  89EB 38 38 38 38
  55+  89EF 38 38 38 38
@@ -1920,11 +1920,11 @@
  55+  8A17 38 38 38 38
  55+  8A1B 38 38 38 38
  55+  8A1F 38 38 38 38
- 56+  8A23 38 38 38 38      db 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56, 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56
- 56+  8A27 38 38 38 38
- 56+  8A2B 38 38 38 38
- 56+  8A2F 38 38 38 38
- 56+  8A33 38 38 38 38
+ 55+  8A23 38 38 38 38
+ 55+  8A27 38 38 38 38
+ 55+  8A2B 38 38 38 38
+ 55+  8A2F 38 38 38 38
+ 56+  8A33 38 38 38 38      db 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56, 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56
  56+  8A37 38 38 38 38
  56+  8A3B 38 38 38 38
  56+  8A3F 38 38 38 38
@@ -1940,11 +1940,11 @@
  56+  8A67 38 38 38 38
  56+  8A6B 38 38 38 38
  56+  8A6F 38 38 38 38
- 57+  8A73 38 38 38 38      db 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56, 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56
- 57+  8A77 38 38 38 38
- 57+  8A7B 38 38 38 38
- 57+  8A7F 38 38 38 38
- 57+  8A83 38 38 38 38
+ 56+  8A73 38 38 38 38
+ 56+  8A77 38 38 38 38
+ 56+  8A7B 38 38 38 38
+ 56+  8A7F 38 38 38 38
+ 57+  8A83 38 38 38 38      db 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56, 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56
  57+  8A87 38 38 38 38
  57+  8A8B 38 38 38 38
  57+  8A8F 38 38 38 38
@@ -1960,11 +1960,11 @@
  57+  8AB7 38 38 38 38
  57+  8ABB 38 38 38 38
  57+  8ABF 38 38 38 38
- 58+  8AC3 38 38 38 38      db 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56, 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56
- 58+  8AC7 38 38 38 38
- 58+  8ACB 38 38 38 38
- 58+  8ACF 38 38 38 38
- 58+  8AD3 38 38 38 38
+ 57+  8AC3 38 38 38 38
+ 57+  8AC7 38 38 38 38
+ 57+  8ACB 38 38 38 38
+ 57+  8ACF 38 38 38 38
+ 58+  8AD3 38 38 38 38      db 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56, 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56
  58+  8AD7 38 38 38 38
  58+  8ADB 38 38 38 38
  58+  8ADF 38 38 38 38
@@ -1980,11 +1980,11 @@
  58+  8B07 38 38 38 38
  58+  8B0B 38 38 38 38
  58+  8B0F 38 38 38 38
- 59+  8B13 38 38 38 38      db 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56, 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56
- 59+  8B17 38 38 38 38
- 59+  8B1B 38 38 38 38
- 59+  8B1F 38 38 38 38
- 59+  8B23 38 38 38 38
+ 58+  8B13 38 38 38 38
+ 58+  8B17 38 38 38 38
+ 58+  8B1B 38 38 38 38
+ 58+  8B1F 38 38 38 38
+ 59+  8B23 38 38 38 38      db 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56, 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56
  59+  8B27 38 38 38 38
  59+  8B2B 38 38 38 38
  59+  8B2F 38 38 38 38
@@ -2000,11 +2000,11 @@
  59+  8B57 38 38 38 38
  59+  8B5B 38 38 38 38
  59+  8B5F 38 38 38 38
- 60+  8B63 38 38 38 38      db 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56, 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56
- 60+  8B67 38 38 38 38
- 60+  8B6B 38 38 38 38
- 60+  8B6F 38 38 38 38
- 60+  8B73 38 38 38 38
+ 59+  8B63 38 38 38 38
+ 59+  8B67 38 38 38 38
+ 59+  8B6B 38 38 38 38
+ 59+  8B6F 38 38 38 38
+ 60+  8B73 38 38 38 38      db 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56, 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56
  60+  8B77 38 38 38 38
  60+  8B7B 38 38 38 38
  60+  8B7F 38 38 38 38
@@ -2020,11 +2020,11 @@
  60+  8BA7 38 38 38 38
  60+  8BAB 38 38 38 38
  60+  8BAF 38 38 38 38
- 61+  8BB3 38 38 38 38      db 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56, 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56
- 61+  8BB7 38 38 38 38
- 61+  8BBB 38 38 38 38
- 61+  8BBF 38 38 38 38
- 61+  8BC3 38 38 38 38
+ 60+  8BB3 38 38 38 38
+ 60+  8BB7 38 38 38 38
+ 60+  8BBB 38 38 38 38
+ 60+  8BBF 38 38 38 38
+ 61+  8BC3 38 38 38 38      db 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56, 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56
  61+  8BC7 38 38 38 38
  61+  8BCB 38 38 38 38
  61+  8BCF 38 38 38 38
@@ -2040,11 +2040,11 @@
  61+  8BF7 38 38 38 38
  61+  8BFB 38 38 38 38
  61+  8BFF 38 38 38 38
- 62+  8C03 38 38 38 38      db 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56, 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56
- 62+  8C07 38 38 38 38
- 62+  8C0B 38 38 38 38
- 62+  8C0F 38 38 38 38
- 62+  8C13 38 38 38 38
+ 61+  8C03 38 38 38 38
+ 61+  8C07 38 38 38 38
+ 61+  8C0B 38 38 38 38
+ 61+  8C0F 38 38 38 38
+ 62+  8C13 38 38 38 38      db 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56, 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56
  62+  8C17 38 38 38 38
  62+  8C1B 38 38 38 38
  62+  8C1F 38 38 38 38
@@ -2060,11 +2060,11 @@
  62+  8C47 38 38 38 38
  62+  8C4B 38 38 38 38
  62+  8C4F 38 38 38 38
- 63+  8C53 38 38 38 38      db 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56, 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56
- 63+  8C57 38 38 38 38
- 63+  8C5B 38 38 38 38
- 63+  8C5F 38 38 38 38
- 63+  8C63 38 38 38 38
+ 62+  8C53 38 38 38 38
+ 62+  8C57 38 38 38 38
+ 62+  8C5B 38 38 38 38
+ 62+  8C5F 38 38 38 38
+ 63+  8C63 38 38 38 38      db 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56, 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56
  63+  8C67 38 38 38 38
  63+  8C6B 38 38 38 38
  63+  8C6F 38 38 38 38
@@ -2080,11 +2080,11 @@
  63+  8C97 38 38 38 38
  63+  8C9B 38 38 38 38
  63+  8C9F 38 38 38 38
- 64+  8CA3 38 38 38 38      db 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56, 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56
- 64+  8CA7 38 38 38 38
- 64+  8CAB 38 38 38 38
- 64+  8CAF 38 38 38 38
- 64+  8CB3 38 38 38 38
+ 63+  8CA3 38 38 38 38
+ 63+  8CA7 38 38 38 38
+ 63+  8CAB 38 38 38 38
+ 63+  8CAF 38 38 38 38
+ 64+  8CB3 38 38 38 38      db 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56, 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56
  64+  8CB7 38 38 38 38
  64+  8CBB 38 38 38 38
  64+  8CBF 38 38 38 38
@@ -2100,11 +2100,11 @@
  64+  8CE7 38 38 38 38
  64+  8CEB 38 38 38 38
  64+  8CEF 38 38 38 38
- 65+  8CF3 38 38 38 38      db 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56, 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56
- 65+  8CF7 38 38 38 38
- 65+  8CFB 38 38 38 38
- 65+  8CFF 38 38 38 38
- 65+  8D03 38 38 38 38
+ 64+  8CF3 38 38 38 38
+ 64+  8CF7 38 38 38 38
+ 64+  8CFB 38 38 38 38
+ 64+  8CFF 38 38 38 38
+ 65+  8D03 38 38 38 38      db 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56, 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56
  65+  8D07 38 38 38 38
  65+  8D0B 38 38 38 38
  65+  8D0F 38 38 38 38
@@ -2120,11 +2120,11 @@
  65+  8D37 38 38 38 38
  65+  8D3B 38 38 38 38
  65+  8D3F 38 38 38 38
- 66+  8D43 38 38 38 38      db 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56, 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56
- 66+  8D47 38 38 38 38
- 66+  8D4B 38 38 38 38
- 66+  8D4F 38 38 38 38
- 66+  8D53 38 38 38 38
+ 65+  8D43 38 38 38 38
+ 65+  8D47 38 38 38 38
+ 65+  8D4B 38 38 38 38
+ 65+  8D4F 38 38 38 38
+ 66+  8D53 38 38 38 38      db 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56, 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56
  66+  8D57 38 38 38 38
  66+  8D5B 38 38 38 38
  66+  8D5F 38 38 38 38
@@ -2140,11 +2140,11 @@
  66+  8D87 38 38 38 38
  66+  8D8B 38 38 38 38
  66+  8D8F 38 38 38 38
- 67+  8D93 38 38 38 38      db 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56, 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,00,01,56,56,56,56,56,56,56,56,56,56
- 67+  8D97 38 38 38 38
- 67+  8D9B 38 38 38 38
- 67+  8D9F 38 38 38 38
- 67+  8DA3 38 38 38 38
+ 66+  8D93 38 38 38 38
+ 66+  8D97 38 38 38 38
+ 66+  8D9B 38 38 38 38
+ 66+  8D9F 38 38 38 38
+ 67+  8DA3 38 38 38 38      db 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56, 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,00,01,56,56,56,56,56,56,56,56,56,56
  67+  8DA7 38 38 38 38
  67+  8DAB 38 38 38 38
  67+  8DAF 38 38 38 38
@@ -2157,14 +2157,14 @@
  67+  8DCB 38 38 38 38
  67+  8DCF 38 38 38 38
  67+  8DD3 38 38 38 38
- 67+  8DD7 00 01 38 38
+ 67+  8DD7 38 38 38 38
  67+  8DDB 38 38 38 38
  67+  8DDF 38 38 38 38
- 68+  8DE3 38 38 38 38      db 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56, 56,56,56,56,56,56,56,56,06,07,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,06,07,06,07
- 68+  8DE7 38 38 38 38
- 68+  8DEB 38 38 38 38
- 68+  8DEF 38 38 38 38
- 68+  8DF3 38 38 38 38
+ 67+  8DE3 38 38 38 38
+ 67+  8DE7 00 01 38 38
+ 67+  8DEB 38 38 38 38
+ 67+  8DEF 38 38 38 38
+ 68+  8DF3 38 38 38 38      db 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56, 56,56,56,56,56,56,56,56,06,07,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,06,07,06,07
  68+  8DF7 38 38 38 38
  68+  8DFB 38 38 38 38
  68+  8DFF 38 38 38 38
@@ -2172,19 +2172,19 @@
  68+  8E07 38 38 38 38
  68+  8E0B 38 38 38 38
  68+  8E0F 38 38 38 38
- 68+  8E13 06 07 38 38
+ 68+  8E13 38 38 38 38
  68+  8E17 38 38 38 38
  68+  8E1B 38 38 38 38
  68+  8E1F 38 38 38 38
- 68+  8E23 38 38 38 38
+ 68+  8E23 06 07 38 38
  68+  8E27 38 38 38 38
  68+  8E2B 38 38 38 38
- 68+  8E2F 06 07 06 07
- 69+  8E33 38 38 38 38      db 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56, 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,08,09,08,09
- 69+  8E37 38 38 38 38
- 69+  8E3B 38 38 38 38
- 69+  8E3F 38 38 38 38
- 69+  8E43 38 38 38 38
+ 68+  8E2F 38 38 38 38
+ 68+  8E33 38 38 38 38
+ 68+  8E37 38 38 38 38
+ 68+  8E3B 38 38 38 38
+ 68+  8E3F 06 07 06 07
+ 69+  8E43 38 38 38 38      db 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56, 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,08,09,08,09
  69+  8E47 38 38 38 38
  69+  8E4B 38 38 38 38
  69+  8E4F 38 38 38 38
@@ -2199,12 +2199,12 @@
  69+  8E73 38 38 38 38
  69+  8E77 38 38 38 38
  69+  8E7B 38 38 38 38
- 69+  8E7F 08 09 08 09
- 70+  8E83 38 38 38 38      db 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56, 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,10,11,10,11
- 70+  8E87 38 38 38 38
- 70+  8E8B 38 38 38 38
- 70+  8E8F 38 38 38 38
- 70+  8E93 38 38 38 38
+ 69+  8E7F 38 38 38 38
+ 69+  8E83 38 38 38 38
+ 69+  8E87 38 38 38 38
+ 69+  8E8B 38 38 38 38
+ 69+  8E8F 08 09 08 09
+ 70+  8E93 38 38 38 38      db 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56, 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,10,11,10,11
  70+  8E97 38 38 38 38
  70+  8E9B 38 38 38 38
  70+  8E9F 38 38 38 38
@@ -2219,12 +2219,12 @@
  70+  8EC3 38 38 38 38
  70+  8EC7 38 38 38 38
  70+  8ECB 38 38 38 38
- 70+  8ECF 0A 0B 0A 0B
- 71+  8ED3 38 38 38 38      db 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56, 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,10,11,10,11
- 71+  8ED7 38 38 38 38
- 71+  8EDB 38 38 38 38
- 71+  8EDF 38 38 38 38
- 71+  8EE3 38 38 38 38
+ 70+  8ECF 38 38 38 38
+ 70+  8ED3 38 38 38 38
+ 70+  8ED7 38 38 38 38
+ 70+  8EDB 38 38 38 38
+ 70+  8EDF 0A 0B 0A 0B
+ 71+  8EE3 38 38 38 38      db 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56, 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,10,11,10,11
  71+  8EE7 38 38 38 38
  71+  8EEB 38 38 38 38
  71+  8EEF 38 38 38 38
@@ -2239,15 +2239,15 @@
  71+  8F13 38 38 38 38
  71+  8F17 38 38 38 38
  71+  8F1B 38 38 38 38
- 71+  8F1F 0A 0B 0A 0B
- 72+  8F23 38 38 38 38      db 56,56,56,56,56,56,56,56,56,00,01,00,01,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56, 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,10,11,10,11
- 72+  8F27 38 38 38 38
- 72+  8F2B 38 00 01 00
- 72+  8F2F 01 38 38 38
- 72+  8F33 38 38 38 38
+ 71+  8F1F 38 38 38 38
+ 71+  8F23 38 38 38 38
+ 71+  8F27 38 38 38 38
+ 71+  8F2B 38 38 38 38
+ 71+  8F2F 0A 0B 0A 0B
+ 72+  8F33 38 38 38 38      db 56,56,56,56,56,56,56,56,56,00,01,00,01,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56, 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,10,11,10,11
  72+  8F37 38 38 38 38
- 72+  8F3B 38 38 38 38
- 72+  8F3F 38 38 38 38
+ 72+  8F3B 38 00 01 00
+ 72+  8F3F 01 38 38 38
  72+  8F43 38 38 38 38
  72+  8F47 38 38 38 38
  72+  8F4B 38 38 38 38
@@ -2259,457 +2259,461 @@
  72+  8F63 38 38 38 38
  72+  8F67 38 38 38 38
  72+  8F6B 38 38 38 38
- 72+  8F6F 0A 0B 0A 0B
- 73+  8F73 38 38 38 38      db 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,06,07,56,56,56, 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,10,11,10,11
- 73+  8F77 38 38 38 38
- 73+  8F7B 38 38 38 38
- 73+  8F7F 38 38 38 38
- 73+  8F83 38 38 38 38
+ 72+  8F6F 38 38 38 38
+ 72+  8F73 38 38 38 38
+ 72+  8F77 38 38 38 38
+ 72+  8F7B 38 38 38 38
+ 72+  8F7F 0A 0B 0A 0B
+ 73+  8F83 38 38 38 38      db 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,06,07,56,56,56, 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,10,11,10,11
  73+  8F87 38 38 38 38
  73+  8F8B 38 38 38 38
  73+  8F8F 38 38 38 38
- 73+  8F93 38 38 38 06
- 73+  8F97 07 38 38 38
+ 73+  8F93 38 38 38 38
+ 73+  8F97 38 38 38 38
  73+  8F9B 38 38 38 38
  73+  8F9F 38 38 38 38
- 73+  8FA3 38 38 38 38
- 73+  8FA7 38 38 38 38
+ 73+  8FA3 38 38 38 06
+ 73+  8FA7 07 38 38 38
  73+  8FAB 38 38 38 38
  73+  8FAF 38 38 38 38
  73+  8FB3 38 38 38 38
  73+  8FB7 38 38 38 38
  73+  8FBB 38 38 38 38
- 73+  8FBF 0A 0B 0A 0B
- 74+  8FC3 38 38 38 38      db 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,08,09,56,56,56, 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,10,11,10,11
- 74+  8FC7 38 38 38 38
- 74+  8FCB 38 38 38 38
- 74+  8FCF 38 38 38 38
- 74+  8FD3 38 38 38 38
+ 73+  8FBF 38 38 38 38
+ 73+  8FC3 38 38 38 38
+ 73+  8FC7 38 38 38 38
+ 73+  8FCB 38 38 38 38
+ 73+  8FCF 0A 0B 0A 0B
+ 74+  8FD3 38 38 38 38      db 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,08,09,56,56,56, 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,10,11,10,11
  74+  8FD7 38 38 38 38
  74+  8FDB 38 38 38 38
  74+  8FDF 38 38 38 38
- 74+  8FE3 38 38 38 08
- 74+  8FE7 09 38 38 38
+ 74+  8FE3 38 38 38 38
+ 74+  8FE7 38 38 38 38
  74+  8FEB 38 38 38 38
  74+  8FEF 38 38 38 38
- 74+  8FF3 38 38 38 38
- 74+  8FF7 38 38 38 38
+ 74+  8FF3 38 38 38 08
+ 74+  8FF7 09 38 38 38
  74+  8FFB 38 38 38 38
  74+  8FFF 38 38 38 38
  74+  9003 38 38 38 38
  74+  9007 38 38 38 38
  74+  900B 38 38 38 38
- 74+  900F 0A 0B 0A 0B
- 75+  9013 38 38 38 38      db 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,10,11,56,56,56, 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,10,11,10,11
- 75+  9017 38 38 38 38
- 75+  901B 38 38 38 38
- 75+  901F 38 38 38 38
- 75+  9023 38 38 38 38
+ 74+  900F 38 38 38 38
+ 74+  9013 38 38 38 38
+ 74+  9017 38 38 38 38
+ 74+  901B 38 38 38 38
+ 74+  901F 0A 0B 0A 0B
+ 75+  9023 38 38 38 38      db 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,10,11,56,56,56, 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,10,11,10,11
  75+  9027 38 38 38 38
  75+  902B 38 38 38 38
  75+  902F 38 38 38 38
- 75+  9033 38 38 38 0A
- 75+  9037 0B 38 38 38
+ 75+  9033 38 38 38 38
+ 75+  9037 38 38 38 38
  75+  903B 38 38 38 38
  75+  903F 38 38 38 38
- 75+  9043 38 38 38 38
- 75+  9047 38 38 38 38
+ 75+  9043 38 38 38 0A
+ 75+  9047 0B 38 38 38
  75+  904B 38 38 38 38
  75+  904F 38 38 38 38
  75+  9053 38 38 38 38
  75+  9057 38 38 38 38
  75+  905B 38 38 38 38
- 75+  905F 0A 0B 0A 0B
- 76+  9063 38 38 38 38      db 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,10,11,56,56,56, 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,06,07,56,56,56,10,11,10,11
- 76+  9067 38 38 38 38
- 76+  906B 38 38 38 38
- 76+  906F 38 38 38 38
- 76+  9073 38 38 38 38
+ 75+  905F 38 38 38 38
+ 75+  9063 38 38 38 38
+ 75+  9067 38 38 38 38
+ 75+  906B 38 38 38 38
+ 75+  906F 0A 0B 0A 0B
+ 76+  9073 38 38 38 38      db 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,10,11,56,56,56, 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,06,07,56,56,56,10,11,10,11
  76+  9077 38 38 38 38
  76+  907B 38 38 38 38
  76+  907F 38 38 38 38
- 76+  9083 38 38 38 0A
- 76+  9087 0B 38 38 38
+ 76+  9083 38 38 38 38
+ 76+  9087 38 38 38 38
  76+  908B 38 38 38 38
  76+  908F 38 38 38 38
- 76+  9093 38 38 38 38
- 76+  9097 38 38 38 38
+ 76+  9093 38 38 38 0A
+ 76+  9097 0B 38 38 38
  76+  909B 38 38 38 38
  76+  909F 38 38 38 38
  76+  90A3 38 38 38 38
- 76+  90A7 38 38 38 06
- 76+  90AB 07 38 38 38
- 76+  90AF 0A 0B 0A 0B
- 77+  90B3 20 20 20 21      db 32,32,32,33,32,33,32,33,32,33,32,33,32,33,32,33,32,33,32,48,49,33,32,33,40,41,32,33,32,33,32,33,32,33,32,10,11,33,32,33, 40,41,32,33,32,33,32,33,32,33,32,33,32,33,32,33,32,33,32,48,49,33,32,33,40,41,32,33,32,33,32,08,09,33,32,33,10,11,10,11
- 77+  90B7 20 21 20 21
- 77+  90BB 20 21 20 21
- 77+  90BF 20 21 20 21
- 77+  90C3 20 21 20 30
- 77+  90C7 31 21 20 21
- 77+  90CB 28 29 20 21
+ 76+  90A7 38 38 38 38
+ 76+  90AB 38 38 38 38
+ 76+  90AF 38 38 38 38
+ 76+  90B3 38 38 38 38
+ 76+  90B7 38 38 38 06
+ 76+  90BB 07 38 38 38
+ 76+  90BF 0A 0B 0A 0B
+ 77+  90C3 20 20 20 21      db 32,32,32,33,32,33,32,33,32,33,32,33,32,33,32,33,32,33,32,48,49,33,32,33,40,41,32,33,32,33,32,33,32,33,32,10,11,33,32,33, 40,41,32,33,32,33,32,33,32,33,32,33,32,33,32,33,32,33,32,48,49,33,32,33,40,41,32,33,32,33,32,08,09,33,32,33,10,11,10,11
+ 77+  90C7 20 21 20 21
+ 77+  90CB 20 21 20 21
  77+  90CF 20 21 20 21
- 77+  90D3 20 21 20 0A
- 77+  90D7 0B 21 20 21
+ 77+  90D3 20 21 20 30
+ 77+  90D7 31 21 20 21
  77+  90DB 28 29 20 21
  77+  90DF 20 21 20 21
- 77+  90E3 20 21 20 21
- 77+  90E7 20 21 20 21
- 77+  90EB 20 21 20 30
- 77+  90EF 31 21 20 21
- 77+  90F3 28 29 20 21
- 77+  90F7 20 21 20 08
- 77+  90FB 09 21 20 21
- 77+  90FF 0A 0B 0A 0B
- 78+  9103 02 03 00 01      db 02,03,00,01,00,01,00,01,00,01,00,01,00,01,00,01,00,01,00,04,05,01,00,01,02,03,00,01,00,01,00,01,00,01,00,01,00,01,00,01, 02,03,00,01,00,01,00,01,00,01,00,01,00,01,00,01,00,01,00,04,05,01,00,01,02,03,00,01,00,01,00,01,00,01,00,01,00,01,00,01
- 78+  9107 00 01 00 01
- 78+  910B 00 01 00 01
- 78+  910F 00 01 00 01
- 78+  9113 00 01 00 04
- 78+  9117 05 01 00 01
- 78+  911B 02 03 00 01
+ 77+  90E3 20 21 20 0A
+ 77+  90E7 0B 21 20 21
+ 77+  90EB 28 29 20 21
+ 77+  90EF 20 21 20 21
+ 77+  90F3 20 21 20 21
+ 77+  90F7 20 21 20 21
+ 77+  90FB 20 21 20 30
+ 77+  90FF 31 21 20 21
+ 77+  9103 28 29 20 21
+ 77+  9107 20 21 20 08
+ 77+  910B 09 21 20 21
+ 77+  910F 0A 0B 0A 0B
+ 78+  9113 02 03 00 01      db 02,03,00,01,00,01,00,01,00,01,00,01,00,01,00,01,00,01,00,04,05,01,00,01,02,03,00,01,00,01,00,01,00,01,00,01,00,01,00,01, 02,03,00,01,00,01,00,01,00,01,00,01,00,01,00,01,00,01,00,04,05,01,00,01,02,03,00,01,00,01,00,01,00,01,00,01,00,01,00,01
+ 78+  9117 00 01 00 01
+ 78+  911B 00 01 00 01
  78+  911F 00 01 00 01
- 78+  9123 00 01 00 01
- 78+  9127 00 01 00 01
+ 78+  9123 00 01 00 04
+ 78+  9127 05 01 00 01
  78+  912B 02 03 00 01
  78+  912F 00 01 00 01
  78+  9133 00 01 00 01
  78+  9137 00 01 00 01
- 78+  913B 00 01 00 04
- 78+  913F 05 01 00 01
- 78+  9143 02 03 00 01
+ 78+  913B 02 03 00 01
+ 78+  913F 00 01 00 01
+ 78+  9143 00 01 00 01
  78+  9147 00 01 00 01
- 78+  914B 00 01 00 01
- 78+  914F 00 01 00 01
- 79+  9153 2A 2B 22 23      db 42,43,34,35,34,35,34,35,34,35,34,35,34,35,34,35,34,35,34,50,51,35,34,35,42,43,34,35,34,35,34,35,34,35,34,35,34,35,34,35, 42,43,34,35,34,35,34,35,34,35,34,35,34,35,34,35,34,35,34,50,51,35,34,35,42,43,34,35,34,35,34,35,34,35,34,35,34,35,34,35
- 79+  9157 22 23 22 23
- 79+  915B 22 23 22 23
- 79+  915F 22 23 22 23
- 79+  9163 22 23 22 32
- 79+  9167 33 23 22 23
- 79+  916B 2A 2B 22 23
+ 78+  914B 00 01 00 04
+ 78+  914F 05 01 00 01
+ 78+  9153 02 03 00 01
+ 78+  9157 00 01 00 01
+ 78+  915B 00 01 00 01
+ 78+  915F 00 01 00 01
+ 79+  9163 2A 2B 22 23      db 42,43,34,35,34,35,34,35,34,35,34,35,34,35,34,35,34,35,34,50,51,35,34,35,42,43,34,35,34,35,34,35,34,35,34,35,34,35,34,35, 42,43,34,35,34,35,34,35,34,35,34,35,34,35,34,35,34,35,34,50,51,35,34,35,42,43,34,35,34,35,34,35,34,35,34,35,34,35,34,35
+ 79+  9167 22 23 22 23
+ 79+  916B 22 23 22 23
  79+  916F 22 23 22 23
- 79+  9173 22 23 22 23
- 79+  9177 22 23 22 23
+ 79+  9173 22 23 22 32
+ 79+  9177 33 23 22 23
  79+  917B 2A 2B 22 23
  79+  917F 22 23 22 23
  79+  9183 22 23 22 23
  79+  9187 22 23 22 23
- 79+  918B 22 23 22 32
- 79+  918F 33 23 22 23
- 79+  9193 2A 2B 22 23
+ 79+  918B 2A 2B 22 23
+ 79+  918F 22 23 22 23
+ 79+  9193 22 23 22 23
  79+  9197 22 23 22 23
- 79+  919B 22 23 22 23
- 79+  919F 22 23 22 23
- 80+  91A3 2C 2D 24 25      db 44,45,36,37,36,37,36,37,36,37,36,37,36,37,36,37,36,37,36,52,53,37,36,37,44,45,36,37,36,37,36,37,36,37,36,37,36,37,36,37, 44,45,36,37,36,37,36,37,36,37,36,37,36,37,36,37,36,37,36,52,53,37,36,37,44,45,36,37,36,37,36,37,36,37,36,37,36,37,36,37
- 80+  91A7 24 25 24 25
- 80+  91AB 24 25 24 25
- 80+  91AF 24 25 24 25
- 80+  91B3 24 25 24 34
- 80+  91B7 35 25 24 25
- 80+  91BB 2C 2D 24 25
+ 79+  919B 22 23 22 32
+ 79+  919F 33 23 22 23
+ 79+  91A3 2A 2B 22 23
+ 79+  91A7 22 23 22 23
+ 79+  91AB 22 23 22 23
+ 79+  91AF 22 23 22 23
+ 80+  91B3 2C 2D 24 25      db 44,45,36,37,36,37,36,37,36,37,36,37,36,37,36,37,36,37,36,52,53,37,36,37,44,45,36,37,36,37,36,37,36,37,36,37,36,37,36,37, 44,45,36,37,36,37,36,37,36,37,36,37,36,37,36,37,36,37,36,52,53,37,36,37,44,45,36,37,36,37,36,37,36,37,36,37,36,37,36,37
+ 80+  91B7 24 25 24 25
+ 80+  91BB 24 25 24 25
  80+  91BF 24 25 24 25
- 80+  91C3 24 25 24 25
- 80+  91C7 24 25 24 25
+ 80+  91C3 24 25 24 34
+ 80+  91C7 35 25 24 25
  80+  91CB 2C 2D 24 25
  80+  91CF 24 25 24 25
  80+  91D3 24 25 24 25
  80+  91D7 24 25 24 25
- 80+  91DB 24 25 24 34
- 80+  91DF 35 25 24 25
- 80+  91E3 2C 2D 24 25
+ 80+  91DB 2C 2D 24 25
+ 80+  91DF 24 25 24 25
+ 80+  91E3 24 25 24 25
  80+  91E7 24 25 24 25
- 80+  91EB 24 25 24 25
- 80+  91EF 24 25 24 25
- 81+  91F3 2E 2F 26 27      db 46,47,38,39,38,39,38,39,38,39,38,39,38,39,38,39,38,39,38,54,55,39,38,39,46,47,38,39,38,39,38,39,38,39,38,39,38,39,38,39, 46,47,38,39,38,39,38,39,38,39,38,39,38,39,38,39,38,39,38,54,55,39,38,39,46,47,38,39,38,39,38,39,38,39,38,39,38,39,38,39
- 81+  91F7 26 27 26 27
- 81+  91FB 26 27 26 27
- 81+  91FF 26 27 26 27
- 81+  9203 26 27 26 36
- 81+  9207 37 27 26 27
- 81+  920B 2E 2F 26 27
+ 80+  91EB 24 25 24 34
+ 80+  91EF 35 25 24 25
+ 80+  91F3 2C 2D 24 25
+ 80+  91F7 24 25 24 25
+ 80+  91FB 24 25 24 25
+ 80+  91FF 24 25 24 25
+ 81+  9203 2E 2F 26 27      db 46,47,38,39,38,39,38,39,38,39,38,39,38,39,38,39,38,39,38,54,55,39,38,39,46,47,38,39,38,39,38,39,38,39,38,39,38,39,38,39, 46,47,38,39,38,39,38,39,38,39,38,39,38,39,38,39,38,39,38,54,55,39,38,39,46,47,38,39,38,39,38,39,38,39,38,39,38,39,38,39
+ 81+  9207 26 27 26 27
+ 81+  920B 26 27 26 27
  81+  920F 26 27 26 27
- 81+  9213 26 27 26 27
- 81+  9217 26 27 26 27
+ 81+  9213 26 27 26 36
+ 81+  9217 37 27 26 27
  81+  921B 2E 2F 26 27
  81+  921F 26 27 26 27
  81+  9223 26 27 26 27
  81+  9227 26 27 26 27
- 81+  922B 26 27 26 36
- 81+  922F 37 27 26 27
- 81+  9233 2E 2F 26 27
+ 81+  922B 2E 2F 26 27
+ 81+  922F 26 27 26 27
+ 81+  9233 26 27 26 27
  81+  9237 26 27 26 27
- 81+  923B 26 27 26 27
- 81+  923F 26 27 26 27
- 82+  9243
- 83+  9243
- 84+  9243
- 85+  9243
- 86+  9243              ; check_collision_solid_down:
- 87+  9243              ; 	ld hl,thedwarf
- 88+  9243              ; 	ld a,(player_world_y)
- 89+  9243              ; 	add a,2
- 90+  9243              ; 	ld d,a
- 91+  9243              ; 	ld e,WORLD_WIDTH
- 92+  9243              ; 	mul d,e
- 93+  9243              ; 	add hl,de
- 94+  9243              ; 	ld a,(player_world_x)
- 95+  9243              ; 	ld e,a
- 96+  9243              ; 	ld d,0
- 97+  9243              ; 	add hl,de
- 98+  9243              ; 	ld a,(hl)
- 99+  9243              ; 	cp $3a
-100+  9243              ; 	jp c,collided
-101+  9243
-102+  9243              ; 	ld hl,thedwarf
-103+  9243              ; 	ld a,(player_world_y)
-104+  9243              ; 	add a,2
-105+  9243              ; 	ld d,a
-106+  9243              ; 	ld e,WORLD_WIDTH
-107+  9243              ; 	mul d,e
-108+  9243              ; 	add hl,de
-109+  9243              ; 	ld a,(player_world_x)
-110+  9243              ; 	add a,2
-111+  9243              ; 	ld e,a
-112+  9243              ; 	ld d,0
-113+  9243              ; 	add hl,de
-114+  9243              ; 	ld a,(hl)
-115+  9243              ; 	cp $3a
-116+  9243              ; 	jp c,collided
-117+  9243
-118+  9243              ; 	ret
+ 81+  923B 26 27 26 36
+ 81+  923F 37 27 26 27
+ 81+  9243 2E 2F 26 27
+ 81+  9247 26 27 26 27
+ 81+  924B 26 27 26 27
+ 81+  924F 26 27 26 27
+ 82+  9253
+ 83+  9253
+ 84+  9253
+ 85+  9253
+ 86+  9253              ; check_collision_solid_down:
+ 87+  9253              ; 	ld hl,thedwarf
+ 88+  9253              ; 	ld a,(player_world_y)
+ 89+  9253              ; 	add a,2
+ 90+  9253              ; 	ld d,a
+ 91+  9253              ; 	ld e,WORLD_WIDTH
+ 92+  9253              ; 	mul d,e
+ 93+  9253              ; 	add hl,de
+ 94+  9253              ; 	ld a,(player_world_x)
+ 95+  9253              ; 	ld e,a
+ 96+  9253              ; 	ld d,0
+ 97+  9253              ; 	add hl,de
+ 98+  9253              ; 	ld a,(hl)
+ 99+  9253              ; 	cp $3a
+100+  9253              ; 	jp c,collided
+101+  9253
+102+  9253              ; 	ld hl,thedwarf
+103+  9253              ; 	ld a,(player_world_y)
+104+  9253              ; 	add a,2
+105+  9253              ; 	ld d,a
+106+  9253              ; 	ld e,WORLD_WIDTH
+107+  9253              ; 	mul d,e
+108+  9253              ; 	add hl,de
+109+  9253              ; 	ld a,(player_world_x)
+110+  9253              ; 	add a,2
+111+  9253              ; 	ld e,a
+112+  9253              ; 	ld d,0
+113+  9253              ; 	add hl,de
+114+  9253              ; 	ld a,(hl)
+115+  9253              ; 	cp $3a
+116+  9253              ; 	jp c,collided
+117+  9253
+118+  9253              ; 	ret
 # file closed: src/levels/levels.asm
- 35   9243              	include 'levels\levelmanager.asm'
+ 35   9253              	include 'levels\levelmanager.asm'
 # file opened: src/levels/levelmanager.asm
-  1+  9243              GGTILES_SIZE equ 2048
-  2+  9243
-  3+  9243              WORLD_WIDTH equ 80
-  4+  9243              VIEW_WIDTH equ 40
-  5+  9243              VIEW_HEIGHT equ 32
-  6+  9243
-  7+  9243              VIEW_SIZE equ VIEW_WIDTH*VIEW_HEIGHT
-  8+  9243
-  9+  9243
- 10+  9243 00           current_scroll db 0
- 11+  9244 01           scroll_direction db RIGHT
- 12+  9245
- 13+  9245              LEVEL_START equ 0
- 14+  9245 28           offset db LEVEL_START+VIEW_WIDTH
- 15+  9246 00           cam_x db LEVEL_START
- 16+  9247
- 17+  9247
- 18+  9247              init_tiles:
- 19+  9247 CD 98 92         call set_palette
- 20+  924A
- 21+  924A                  ;load the tile defs
- 22+  924A ED 91 56 10      nextreg $56, 16
- 23+  924E 21 00 C0         ld hl,$c000
- 24+  9251 11 00 60         ld de,$6000
- 25+  9254 01 00 08         ld bc,GGTILES_SIZE
- 26+  9257 ED B0            ldir
- 27+  9259
- 28+  9259 ED 91 6B A0      nextreg $6b, %10100000
- 29+  925D ED 91 6C 00      nextreg $6c, 0
- 30+  9261 ED 91 6E 40      nextreg $6e, $40
- 31+  9265 ED 91 6F 60      nextreg $6f, $60
- 32+  9269 ED 91 68 80      nextreg $68, %10000000
- 33+  926D ED 91 43 30      nextreg $43, %00110000
- 34+  9271
- 35+  9271                  CLIPTILES 4,155,0,255
- 35+  9271 3E 04       >		ld a,4
- 35+  9273 ED 92 1B    >		nextreg 27,a
- 35+  9276 3E 9B       >		ld a,155
- 35+  9278 ED 92 1B    >		nextreg 27,a
- 35+  927B 3E 00       >		ld a,0
- 35+  927D ED 92 1B    >		nextreg 27,a
- 35+  9280 3E FF       >		ld a,255
- 35+  9282 ED 92 1B    >		nextreg 27,a
- 35+  9285             >
- 36+  9285
- 37+  9285 3E 04            ld a,4 ;magenta
- 38+  9287 ED 92 4C         nextreg $4c,a ;tilemap transparency colour
- 39+  928A
- 40+  928A AF               xor a ;black
- 41+  928B ED 92 14         nextreg $14,a; global transparency colour
- 42+  928E ED 92 31         nextreg $31,a ;tiles y offset
- 43+  9291 ED 92 30         nextreg $30,a ;tiles x offset
- 44+  9294
- 45+  9294
- 46+  9294 CD B2 92         call view_draw
- 47+  9297
- 48+  9297 C9               ret
- 49+  9298
- 50+  9298              set_palette:
- 51+  9298 21 8A 93         ld hl,gg_palette
- 52+  929B ED 91 43 30      nextreg $43,%00110000
- 53+  929F AF               xor a
- 54+  92A0 06 10            ld b,16
- 55+  92A2 ED 92 40         nextreg $40,a
- 56+  92A5              uploadpal:
- 57+  92A5 7E               ld a,(hl)
- 58+  92A6 ED 92 44         nextreg $44,a
- 59+  92A9 23               inc hl
- 60+  92AA 7E               ld a,(hl)
- 61+  92AB ED 92 44         nextreg $44,a
- 62+  92AE 23               inc hl
- 63+  92AF 10 F4            djnz uploadpal
- 64+  92B1 C9               ret
- 65+  92B2
- 66+  92B2
- 67+  92B2
- 68+  92B2              view_draw:
- 69+  92B2 21 43 88         ld hl,level1
- 70+  92B5 11 00 40         ld de,0x4000
- 71+  92B8              view_draw_line:
- 72+  92B8 01 28 00         ld bc,VIEW_WIDTH
- 73+  92BB ED B0            ldir
- 74+  92BD ED 34 28 00      add hl,WORLD_WIDTH-VIEW_WIDTH
- 75+  92C1 7A               ld a,d
- 76+  92C2 FE 45            cp $45
- 77+  92C4 C2 B8 92         jp nz, view_draw_line
- 78+  92C7 C9               ret
- 79+  92C8
- 80+  92C8
- 81+  92C8
- 82+  92C8              scroll_left:
- 83+  92C8 3E 00            ld a,LEFT
- 84+  92CA 32 44 92         ld (scroll_direction),a
- 85+  92CD
- 86+  92CD 3A 45 92         ld a,(offset)
- 87+  92D0 FE 29            cp LEVEL_START+VIEW_WIDTH+1
- 88+  92D2 DA 18 82         jp c, p_move_left
- 89+  92D5
- 90+  92D5 3A 45 92         ld a,(offset)
- 91+  92D8 D6 28            sub VIEW_WIDTH
- 92+  92DA 32 46 92         ld (cam_x),a
- 93+  92DD
- 94+  92DD 3A 43 92         ld a,(current_scroll)
- 95+  92E0 3C               inc a
- 96+  92E1 FE 08            cp 8
- 97+  92E3 CC F1 92         call z,drawcolumn_left
- 98+  92E6 32 43 92         ld (current_scroll),a
- 99+  92E9 47               ld b,a
-100+  92EA 3E 08            ld a,8
-101+  92EC 90               sub b
-102+  92ED ED 92 30         nextreg $30,a
-103+  92F0 C9               ret
-104+  92F1              drawcolumn_left:
-105+  92F1                  ; ld hl,$4000+1279
-106+  92F1                  ; ld de,$4001+1279
-107+  92F1 21 FF 44         ld hl,$44FF
-108+  92F4 11 00 45         ld de,$4500
-109+  92F7 01 00 05         ld bc,40*32
-110+  92FA ED B8            lddr  ; move whole screen to right 1 tile
-111+  92FC 21 43 88         ld hl,level1            ; start of tiles
-112+  92FF 3A 46 92         ld a,(cam_x)           ; current offset
-113+  9302 3D               dec a
-114+  9303 ED 31            add hl,a                ; add this to tile offset
-115+  9305                  ; dec a                   ; dec the offset
-116+  9305 C6 28            add a,VIEW_WIDTH
-117+  9307 32 45 92         ld (offset),a
-118+  930A 11 00 40         ld de,$4000              ; top left cell
-119+  930D 06 20            ld b,VIEW_HEIGHT
-120+  930F              columnloop_left:
-121+  930F 7E               ld a,(hl)                   ; get tile from (hl)
-122+  9310 12               ld (de),a                   ; put in (de)
-123+  9311 ED 35 28 00      add de,VIEW_WIDTH                  ; move de to next line
-124+  9315 ED 34 50 00      add hl,WORLD_WIDTH          ; move hl to next map line
-125+  9319 10 F4            djnz columnloop_left             ; loop for 32 lines
-126+  931B AF               xor a
-127+  931C 32 43 92         ld (current_scroll),a
-128+  931F C9               ret
-129+  9320
-130+  9320
-131+  9320
-132+  9320              scroll_right:
-133+  9320 3E 01            ld a,RIGHT
-134+  9322 32 44 92         ld (scroll_direction),a
-135+  9325
-136+  9325 3A 45 92         ld a,(offset)
-137+  9328 FE 50            cp WORLD_WIDTH
-138+  932A D2 5A 82         jp nc, p_move_right
-139+  932D 3A 43 92         ld a,(current_scroll)
-140+  9330 3C               inc a
-141+  9331 FE 08            cp 8
-142+  9333 CC 3D 93         call z,nowdrawcolumn
-143+  9336 32 43 92         ld (current_scroll),a
-144+  9339 ED 92 30         nextreg $30,a
-145+  933C C9               ret
-146+  933D              nowdrawcolumn:
-147+  933D 21 01 40         ld hl,$4001
-148+  9340 11 00 40         ld de,$4000
-149+  9343 01 00 05         ld bc,1280
-150+  9346 ED B0            ldir  ; move whole screen to left 1 tile
-151+  9348 21 43 88         ld hl,level1            ; start of tiles
-152+  934B 3A 45 92         ld a,(offset)           ; current offset
-153+  934E ED 31            add hl,a                ; add this to tile offset
-154+  9350 3C               inc a                   ; inc the offset
-155+  9351 32 45 92         ld (offset),a
-156+  9354 11 27 40         ld de,$4027              ; top right cell
-157+  9357 06 20            ld b,VIEW_HEIGHT
-158+  9359              columnloop:
-159+  9359 7E               ld a,(hl)                   ; get tile from (hl)
-160+  935A 12               ld (de),a                   ; put in (de)
-161+  935B ED 35 28 00      add de,VIEW_WIDTH                  ; move de to next line
-162+  935F ED 34 50 00      add hl,WORLD_WIDTH          ; move hl to next map line
-163+  9363 10 F4            djnz columnloop             ; loop for 32 lines
-164+  9365 AF               xor a
-165+  9366 32 43 92         ld (current_scroll),a
-166+  9369 C9               ret
-167+  936A
-168+  936A
-169+  936A
-170+  936A
-171+  936A
-172+  936A
-173+  936A
-174+  936A
-175+  936A
-176+  936A
-177+  936A
-178+  936A
+  1+  9253              GGTILES_SIZE equ 2048
+  2+  9253
+  3+  9253              WORLD_WIDTH equ 80
+  4+  9253              VIEW_WIDTH equ 40
+  5+  9253              VIEW_HEIGHT equ 32
+  6+  9253
+  7+  9253              VIEW_SIZE equ VIEW_WIDTH*VIEW_HEIGHT
+  8+  9253
+  9+  9253
+ 10+  9253 00           current_scroll db 0
+ 11+  9254 01           scroll_direction db RIGHT
+ 12+  9255
+ 13+  9255              LEVEL_START equ 0
+ 14+  9255 28           offset db LEVEL_START+VIEW_WIDTH
+ 15+  9256 00           cam_x db LEVEL_START
+ 16+  9257
+ 17+  9257
+ 18+  9257              init_tiles:
+ 19+  9257 CD A8 92         call set_palette
+ 20+  925A
+ 21+  925A                  ;load the tile defs
+ 22+  925A ED 91 56 10      nextreg $56, 16
+ 23+  925E 21 00 C0         ld hl,$c000
+ 24+  9261 11 00 60         ld de,$6000
+ 25+  9264 01 00 08         ld bc,GGTILES_SIZE
+ 26+  9267 ED B0            ldir
+ 27+  9269
+ 28+  9269 ED 91 6B A0      nextreg $6b, %10100000
+ 29+  926D ED 91 6C 00      nextreg $6c, 0
+ 30+  9271 ED 91 6E 40      nextreg $6e, $40
+ 31+  9275 ED 91 6F 60      nextreg $6f, $60
+ 32+  9279 ED 91 68 80      nextreg $68, %10000000
+ 33+  927D ED 91 43 30      nextreg $43, %00110000
+ 34+  9281
+ 35+  9281                  CLIPTILES 4,155,0,255
+ 35+  9281 3E 04       >		ld a,4
+ 35+  9283 ED 92 1B    >		nextreg 27,a
+ 35+  9286 3E 9B       >		ld a,155
+ 35+  9288 ED 92 1B    >		nextreg 27,a
+ 35+  928B 3E 00       >		ld a,0
+ 35+  928D ED 92 1B    >		nextreg 27,a
+ 35+  9290 3E FF       >		ld a,255
+ 35+  9292 ED 92 1B    >		nextreg 27,a
+ 35+  9295             >
+ 36+  9295
+ 37+  9295 3E 04            ld a,4 ;magenta
+ 38+  9297 ED 92 4C         nextreg $4c,a ;tilemap transparency colour
+ 39+  929A
+ 40+  929A AF               xor a ;black
+ 41+  929B ED 92 14         nextreg $14,a; global transparency colour
+ 42+  929E ED 92 31         nextreg $31,a ;tiles y offset
+ 43+  92A1 ED 92 30         nextreg $30,a ;tiles x offset
+ 44+  92A4
+ 45+  92A4
+ 46+  92A4 CD C2 92         call view_draw
+ 47+  92A7
+ 48+  92A7 C9               ret
+ 49+  92A8
+ 50+  92A8              set_palette:
+ 51+  92A8 21 9A 93         ld hl,gg_palette
+ 52+  92AB ED 91 43 30      nextreg $43,%00110000
+ 53+  92AF AF               xor a
+ 54+  92B0 06 10            ld b,16
+ 55+  92B2 ED 92 40         nextreg $40,a
+ 56+  92B5              uploadpal:
+ 57+  92B5 7E               ld a,(hl)
+ 58+  92B6 ED 92 44         nextreg $44,a
+ 59+  92B9 23               inc hl
+ 60+  92BA 7E               ld a,(hl)
+ 61+  92BB ED 92 44         nextreg $44,a
+ 62+  92BE 23               inc hl
+ 63+  92BF 10 F4            djnz uploadpal
+ 64+  92C1 C9               ret
+ 65+  92C2
+ 66+  92C2
+ 67+  92C2
+ 68+  92C2              view_draw:
+ 69+  92C2 21 53 88         ld hl,level1
+ 70+  92C5 11 00 40         ld de,0x4000
+ 71+  92C8              view_draw_line:
+ 72+  92C8 01 28 00         ld bc,VIEW_WIDTH
+ 73+  92CB ED B0            ldir
+ 74+  92CD ED 34 28 00      add hl,WORLD_WIDTH-VIEW_WIDTH
+ 75+  92D1 7A               ld a,d
+ 76+  92D2 FE 45            cp $45
+ 77+  92D4 C2 C8 92         jp nz, view_draw_line
+ 78+  92D7 C9               ret
+ 79+  92D8
+ 80+  92D8
+ 81+  92D8
+ 82+  92D8              scroll_left:
+ 83+  92D8 3E 00            ld a,LEFT
+ 84+  92DA 32 54 92         ld (scroll_direction),a
+ 85+  92DD
+ 86+  92DD 3A 55 92         ld a,(offset)
+ 87+  92E0 FE 29            cp LEVEL_START+VIEW_WIDTH+1
+ 88+  92E2 DA 18 82         jp c, p_move_left
+ 89+  92E5
+ 90+  92E5 3A 55 92         ld a,(offset)
+ 91+  92E8 D6 28            sub VIEW_WIDTH
+ 92+  92EA 32 56 92         ld (cam_x),a
+ 93+  92ED
+ 94+  92ED 3A 53 92         ld a,(current_scroll)
+ 95+  92F0 3C               inc a
+ 96+  92F1 FE 08            cp 8
+ 97+  92F3 CC 01 93         call z,drawcolumn_left
+ 98+  92F6 32 53 92         ld (current_scroll),a
+ 99+  92F9 47               ld b,a
+100+  92FA 3E 08            ld a,8
+101+  92FC 90               sub b
+102+  92FD ED 92 30         nextreg $30,a
+103+  9300 C9               ret
+104+  9301              drawcolumn_left:
+105+  9301                  ; ld hl,$4000+1279
+106+  9301                  ; ld de,$4001+1279
+107+  9301 21 FF 44         ld hl,$44FF
+108+  9304 11 00 45         ld de,$4500
+109+  9307 01 00 05         ld bc,40*32
+110+  930A ED B8            lddr  ; move whole screen to right 1 tile
+111+  930C 21 53 88         ld hl,level1            ; start of tiles
+112+  930F 3A 56 92         ld a,(cam_x)           ; current offset
+113+  9312 3D               dec a
+114+  9313 ED 31            add hl,a                ; add this to tile offset
+115+  9315                  ; dec a                   ; dec the offset
+116+  9315 C6 28            add a,VIEW_WIDTH
+117+  9317 32 55 92         ld (offset),a
+118+  931A 11 00 40         ld de,$4000              ; top left cell
+119+  931D 06 20            ld b,VIEW_HEIGHT
+120+  931F              columnloop_left:
+121+  931F 7E               ld a,(hl)                   ; get tile from (hl)
+122+  9320 12               ld (de),a                   ; put in (de)
+123+  9321 ED 35 28 00      add de,VIEW_WIDTH                  ; move de to next line
+124+  9325 ED 34 50 00      add hl,WORLD_WIDTH          ; move hl to next map line
+125+  9329 10 F4            djnz columnloop_left             ; loop for 32 lines
+126+  932B AF               xor a
+127+  932C 32 53 92         ld (current_scroll),a
+128+  932F C9               ret
+129+  9330
+130+  9330
+131+  9330
+132+  9330              scroll_right:
+133+  9330 3E 01            ld a,RIGHT
+134+  9332 32 54 92         ld (scroll_direction),a
+135+  9335
+136+  9335 3A 55 92         ld a,(offset)
+137+  9338 FE 50            cp WORLD_WIDTH
+138+  933A D2 5A 82         jp nc, p_move_right
+139+  933D 3A 53 92         ld a,(current_scroll)
+140+  9340 3C               inc a
+141+  9341 FE 08            cp 8
+142+  9343 CC 4D 93         call z,nowdrawcolumn
+143+  9346 32 53 92         ld (current_scroll),a
+144+  9349 ED 92 30         nextreg $30,a
+145+  934C C9               ret
+146+  934D              nowdrawcolumn:
+147+  934D 21 01 40         ld hl,$4001
+148+  9350 11 00 40         ld de,$4000
+149+  9353 01 00 05         ld bc,1280
+150+  9356 ED B0            ldir  ; move whole screen to left 1 tile
+151+  9358 21 53 88         ld hl,level1            ; start of tiles
+152+  935B 3A 55 92         ld a,(offset)           ; current offset
+153+  935E ED 31            add hl,a                ; add this to tile offset
+154+  9360 3C               inc a                   ; inc the offset
+155+  9361 32 55 92         ld (offset),a
+156+  9364 11 27 40         ld de,$4027              ; top right cell
+157+  9367 06 20            ld b,VIEW_HEIGHT
+158+  9369              columnloop:
+159+  9369 7E               ld a,(hl)                   ; get tile from (hl)
+160+  936A 12               ld (de),a                   ; put in (de)
+161+  936B ED 35 28 00      add de,VIEW_WIDTH                  ; move de to next line
+162+  936F ED 34 50 00      add hl,WORLD_WIDTH          ; move hl to next map line
+163+  9373 10 F4            djnz columnloop             ; loop for 32 lines
+164+  9375 AF               xor a
+165+  9376 32 53 92         ld (current_scroll),a
+166+  9379 C9               ret
+167+  937A
+168+  937A
+169+  937A
+170+  937A
+171+  937A
+172+  937A
+173+  937A
+174+  937A
+175+  937A
+176+  937A
+177+  937A
+178+  937A
 # file closed: src/levels/levelmanager.asm
- 36   936A              	include 'assets\sprites.asm'
+ 36   937A              	include 'assets\sprites.asm'
 # file opened: src/assets/sprites.asm
-  1+  936A              ; Sprite Attribute 0
-  2+  936A              ;     X X X X X X X X
-  3+  936A
-  4+  936A              ; Sprite Attribute 1
-  5+  936A              ;     Y Y Y Y Y Y Y Y
-  6+  936A
-  7+  936A              ; Sprite Attribute 2
-  8+  936A              ;     P P P P XM YM R X8/PR
-  9+  936A
- 10+  936A              ; Sprite Attribute 3
- 11+  936A              ;     V E N5 N4 N3 N2 N1 N0 (NNNNN=Pattern ID)
- 12+  936A
- 13+  936A              ; Sprite Attribute 4
- 14+  936A              ; A. Extended Anchor Sprite
- 15+  936A              ;     H N6 T X X Y Y Y8
- 16+  936A              ; B. Relative Sprite, Composite Type
- 17+  936A              ;     0 1 N6 X X Y Y PO
- 18+  936A              ; C. Relative Sprite, Unified Type
- 19+  936A              ;     0 1 N6 0 0 0 0 PO
- 20+  936A
- 21+  936A
- 22+  936A
+  1+  937A              ; Sprite Attribute 0
+  2+  937A              ;     X X X X X X X X
+  3+  937A
+  4+  937A              ; Sprite Attribute 1
+  5+  937A              ;     Y Y Y Y Y Y Y Y
+  6+  937A
+  7+  937A              ; Sprite Attribute 2
+  8+  937A              ;     P P P P XM YM R X8/PR
+  9+  937A
+ 10+  937A              ; Sprite Attribute 3
+ 11+  937A              ;     V E N5 N4 N3 N2 N1 N0 (NNNNN=Pattern ID)
+ 12+  937A
+ 13+  937A              ; Sprite Attribute 4
+ 14+  937A              ; A. Extended Anchor Sprite
+ 15+  937A              ;     H N6 T X X Y Y Y8
+ 16+  937A              ; B. Relative Sprite, Composite Type
+ 17+  937A              ;     0 1 N6 X X Y Y PO
+ 18+  937A              ; C. Relative Sprite, Unified Type
+ 19+  937A              ;     0 1 N6 0 0 0 0 PO
+ 20+  937A
+ 21+  937A
+ 22+  937A
 # file closed: src/assets/sprites.asm
- 37   936A
- 38   936A
- 39   936A              	include 'loadbins.asm'
+ 37   937A
+ 38   937A
+ 39   937A              	include 'loadbins.asm'
 # file opened: src/loadbins.asm
-  1+  936A
-  2+  936A
-  3+  936A              ;;;;;Tiles
-  4+  936A
-  5+  936A                  incbin 'assets/ggtiles.nxp',0
-  6+  938A
-  7+  938A
-  8+  938A
-  9+  938A              gg_palette:
- 10+  938A                  incbin 'assets/ggtiles.nxp',0
- 11+  93AA
- 12+  93AA                  MMU 6,16
- 13+  93AA                  org $c000
+  1+  937A
+  2+  937A
+  3+  937A              ;;;;;Tiles
+  4+  937A
+  5+  937A                  incbin 'assets/ggtiles.nxp',0
+  6+  939A
+  7+  939A
+  8+  939A
+  9+  939A              gg_palette:
+ 10+  939A                  incbin 'assets/ggtiles.nxp',0
+ 11+  93BA
+ 12+  93BA                  MMU 6,16
+ 13+  93BA                  org $c000
  14+  C000
  15+  C000                  incbin 'assets/ggtiles.til',0,GGTILES_SIZE
  16+  C800
