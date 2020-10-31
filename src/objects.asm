@@ -5,6 +5,8 @@ OBJECT_PUMPKIN equ 0
 OBJECT_GHOST equ 1
 OBJECT_GHOST_WALKER equ 2
 OBJECT_DEAD equ 100
+OBJECT_COLLIDED equ $FF
+OBJECT_HEIGHT equ 16
 
 
 ;::All objects have 2 frame animation::
@@ -20,7 +22,6 @@ OBJECT_DEAD equ 100
 ;9=att4
 ;10=slot_ID
 ;11=sprites specific XOR value
-
 ;12=direction
 ;13=positional offset y
 ;14,15=positional offset x
@@ -30,7 +31,10 @@ objects:
     db FALSE, OBJECT_PUMPKIN, 54, 26  : dw 0 : db 0,  %00000000,%01010000,%00000000,2,1,RIGHT,0 : dw 0
     db FALSE, OBJECT_PUMPKIN, 58, 26  : dw 0 : db 0,  %00000000,%01010000,%00000000,3,1,RIGHT,0 : dw 0
     db FALSE, OBJECT_GHOST, 50, 19 : dw 0 : db 0, %00000000,%01010010,%00000000,11,1,RIGHT,0 : dw 0
+    db FALSE, OBJECT_GHOST_WALKER, 39, 24 : dw 0 : db 0, %00000000,%01010010,%00000000,15,1,LEFT,0 : dw 0
     db FALSE, OBJECT_GHOST_WALKER, 50, 26 : dw 0 : db 0, %00000000,%01010010,%00000000,15,1,LEFT,0 : dw 0
+    db FALSE, OBJECT_GHOST_WALKER, 72, 26 : dw 0 : db 0, %00000000,%01010010,%00000000,15,1,LEFT,0 : dw 0
+    db FALSE, OBJECT_GHOST_WALKER, 110, 26 : dw 0 : db 0, %00000000,%01010010,%00000000,15,1,LEFT,0 : dw 0
     db END_OF_ARRAY
 
 OBJECTS_DATA_LENGTH equ 16
@@ -91,7 +95,7 @@ object_update:
     cp OBJECT_DEAD
     ret z
 
-
+    
     call object_check_in_view
     call animate_object
 
@@ -100,6 +104,7 @@ object_update:
     ret z
 
     call handle_behaviour
+    call object_check_collision_player
 
     ret
 
@@ -135,6 +140,7 @@ obj_set_not_inview:
     ld a,(ix+8)
     res 7,a
     ld (ix+8),a
+    call obj_drw
     ret
 
 
@@ -215,9 +221,11 @@ animate_object:
     ret
 
 
-
-
 object_draw:
+    ld a,(ix)
+    cp TRUE
+    ret nz
+obj_drw:  
     ld a,(ix+10)
     nextreg $34,a
 
@@ -314,16 +322,90 @@ handle_behaviour_ghost_walker:
     ld (ix+14),h
     ld (ix+15),l
 
-    ;320 = %0000 0001 0100 0000
+    ;-320 (16-bit): %1111 1110 1100 0000
     ld a,h
-    cp 0
-    ret z
+    cp %11111110
+    ret nz
     ld a,l
-    cp %01000000
+    cp %11000000
     ret nz
 
+  
     ;kill ghost
     ld (ix+1),OBJECT_DEAD
     call obj_set_not_inview
 
+    ret
+
+
+
+
+
+object_check_collision_player
+    ld a,(ix)
+    cp TRUE
+    ret nz
+
+    ld a,(ix+1)
+    cp OBJECT_GHOST
+    jp z,checkcollision_player_ghost
+    cp OBJECT_GHOST_WALKER
+    jp z,checkcollision_player_ghostwalker
+obj_check_coll_y:
+    ;player above object:
+    ld a,(ix+6)
+    ld b,a
+    ld a,(py)
+    add a,PLAYER_HEIGHT
+    cp b
+    jr c,obj_nocollision
+
+    ;player below object:
+    ld a,(py)
+    ld b,a
+    ld a,(ix+6)
+    add a,OBJECT_HEIGHT
+    cp b
+    jr c,obj_nocollision
+
+    ld hl,(px)
+    ld a,(ix+5)
+    cp h
+    jr nz,obj_nocollision
+
+    BREAKPOINT
+
+
+obj_nocollision:
+    ret
+
+checkcollision_player_ghost:
+    ;x axis collision check:
+    ld h,(ix+4)
+    ld l,(ix+5)
+    ld d,(ix+14)
+    ld e,(ix+15)
+    add hl,de
+    ld de,(px)
+    or a
+    sbc hl,de
+    ld a,l
+    cp 28
+    jp c,obj_check_coll_y
+    ret
+
+checkcollision_player_ghostwalker:
+    ;x axis collision check:
+    ld h,(ix+4)
+    ld l,(ix+5)
+    ld d,(ix+14)
+    ld e,(ix+15)
+    or a
+    sbc hl,de
+    ld de,(px)
+    or a
+    sbc hl,de
+    ld a,l
+    cp 28
+    jp c,obj_check_coll_y
     ret

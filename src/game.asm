@@ -15,7 +15,7 @@ game_init:
 
 
 game_update:
-    ld b,12
+    ld b,11
     call WaitRasterLine
     call check_keys
     call player_update
