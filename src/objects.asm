@@ -23,21 +23,20 @@ OBJECT_HEIGHT equ 16
 ;10=slot_ID
 ;11=sprites specific XOR value
 ;12=direction
-;13=positional offset y
-;14,15=positional offset x
+
 objects:
-    db FALSE, OBJECT_PUMPKIN, 04, 26  : dw 0 : db 0,  %00000000,%01010000,%00000000,0,1,RIGHT,0 : dw 0
-    db FALSE, OBJECT_PUMPKIN, 12, 26  : dw 0 : db 0,  %00000000,%01010000,%00000000,1,1,RIGHT,0 : dw 0
-    db FALSE, OBJECT_PUMPKIN, 54, 26  : dw 0 : db 0,  %00000000,%01010000,%00000000,2,1,RIGHT,0 : dw 0
-    db FALSE, OBJECT_PUMPKIN, 58, 26  : dw 0 : db 0,  %00000000,%01010000,%00000000,3,1,RIGHT,0 : dw 0
-    db FALSE, OBJECT_GHOST, 50, 19 : dw 0 : db 0, %00000000,%01010010,%00000000,11,1,RIGHT,0 : dw 0
-    db FALSE, OBJECT_GHOST_WALKER, 39, 24 : dw 0 : db 0, %00000000,%01010010,%00000000,15,1,LEFT,0 : dw 0
-    db FALSE, OBJECT_GHOST_WALKER, 50, 26 : dw 0 : db 0, %00000000,%01010010,%00000000,15,1,LEFT,0 : dw 0
-    db FALSE, OBJECT_GHOST_WALKER, 72, 26 : dw 0 : db 0, %00000000,%01010010,%00000000,15,1,LEFT,0 : dw 0
-    db FALSE, OBJECT_GHOST_WALKER, 110, 26 : dw 0 : db 0, %00000000,%01010010,%00000000,15,1,LEFT,0 : dw 0
+    db FALSE, OBJECT_PUMPKIN, 04, 26  : dw 0 : db 0,  %00000000,%01010000,%00000000,0,1,RIGHT
+    db FALSE, OBJECT_PUMPKIN, 12, 26  : dw 0 : db 0,  %00000000,%01010000,%00000000,1,1,RIGHT
+    db FALSE, OBJECT_PUMPKIN, 54, 26  : dw 0 : db 0,  %00000000,%01010000,%00000000,2,1,RIGHT
+    db FALSE, OBJECT_PUMPKIN, 58, 26  : dw 0 : db 0,  %00000000,%01010000,%00000000,3,1,RIGHT
+    db FALSE, OBJECT_GHOST, 50, 19 : dw 0 : db 0, %00000000,%01010010,%00000000,11,1,RIGHT
+    db FALSE, OBJECT_GHOST_WALKER, 39, 24 : dw 0 : db 0, %00000000,%01010010,%00000000,15,1,LEFT
+    db FALSE, OBJECT_GHOST_WALKER, 50, 26 : dw 0 : db 0, %00000000,%01010010,%00000000,15,1,LEFT
+    db FALSE, OBJECT_GHOST_WALKER, 72, 26 : dw 0 : db 0, %00000000,%01010010,%00000000,15,1,LEFT
+    db FALSE, OBJECT_GHOST_WALKER, 110, 26 : dw 0 : db 0, %00000000,%01010010,%00000000,15,1,LEFT
     db END_OF_ARRAY
 
-OBJECTS_DATA_LENGTH equ 16
+OBJECTS_DATA_LENGTH equ 13
 
 
 GHOST_SPEED equ 2
@@ -176,9 +175,6 @@ obj_screen_moving_left:
     add hl,hl  
     ld a,(current_scroll)
     add hl,a
-    ld d,(ix+14) ;xpos offset
-    ld e,(ix+15) ;xpos offset
-    add hl,de  
     ld (ix+4),l
     ld (ix+5),h ;X8
     ret
@@ -200,9 +196,6 @@ obj_screen_moving_right:
     ld a,8
     sub b
     add hl,a  
-    ld d,(ix+14) ;xpos offset
-    ld e,(ix+15) ;xpos offset
-    add hl,de  
     ld (ix+4),l
     ld (ix+5),h ;X8
 
@@ -283,54 +276,47 @@ handle_behaviour_ghost:
     ret
 
 ghost_move_left:
-    ld h,(ix+14)
-    ld l,(ix+15)
-    add hl,-GHOST_SPEED
-    ld (ix+14),h
-    ld (ix+15),l
+    ; ld a,(ix+2)
+    ; dec a
+    ; ld (ix+2),a
 
-    ld a,h
-    or l
-    ret nz
+    ; ; ld a,h
+    ; ; or l
+    ; ; ret nz
 
-    ld a,RIGHT
-    ld (ix+12),a
+    ; ; ld a,RIGHT
+    ; ; ld (ix+12),a
 
     ret
 ghost_move_right:
-    ld h,(ix+14)
-    ld l,(ix+15)
-    add hl,GHOST_SPEED
-    ld (ix+14),h
-    ld (ix+15),l
+    ; ld h,(ix+14)
+    ; ld l,(ix+15)
+    ; add hl,GHOST_SPEED
+    ; ld (ix+14),h
+    ; ld (ix+15),l
 
-    ld a,l
-    cp GHOST_MAX_MOVEMENT_X
-    ret nz
+    ; ld a,l
+    ; cp GHOST_MAX_MOVEMENT_X
+    ; ret nz
 
-    ld a,LEFT
-    ld (ix+12),a
+    ; ld a,LEFT
+    ; ld (ix+12),a
 
 
     ret
 
 
 handle_behaviour_ghost_walker: 
-    ld h,(ix+14)
-    ld l,(ix+15)
-    add hl,-GHOST_SPEED
-    ld (ix+14),h
-    ld (ix+15),l
+    ld a,(ix+2)
+    dec a
+    ld (ix+2),a
 
-    ;-320 (16-bit): %1111 1110 1100 0000
-    ld a,h
-    cp %11111110
-    ret nz
-    ld a,l
-    cp %11000000
-    ret nz
-
+    ld b,a
+    ld a,(cam_x)
+    cp b
+    ret c
   
+   
     ;kill ghost
     ld (ix+1),OBJECT_DEAD
     call obj_set_not_inview
