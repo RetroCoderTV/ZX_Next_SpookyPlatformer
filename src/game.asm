@@ -7,9 +7,16 @@ game_init:
     call init_sprites
 
     call init_layer2
+
     call init_tiles
     
     call player_init
+
+    ; ;supposed to reset all clip window settings??? doesnt seem to work (i only put it here to test it)
+    ; nextreg $1c,%00001001
+    ; nextreg $1c,%00001001
+    ; nextreg $1c,%00001001
+    ; nextreg $1c,%00001001
 
     ret
 
@@ -20,6 +27,7 @@ game_update:
     call check_keys
     call player_update
     call objects_update
+    call layer2_update
     ret
 
 game_draw:

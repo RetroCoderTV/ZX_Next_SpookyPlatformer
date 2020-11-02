@@ -17,21 +17,31 @@ LEVEL_START equ 0
 offset db LEVEL_START+VIEW_WIDTH
 cam_x db LEVEL_START
 
+test_layer2_scroll db 0
+
 
 init_layer2:
-    ; nextreg $69, %10000000 ;bit7=enable layer2
-    ld bc,$123b
-    ld a,%00000010
-    out (c),a
+    CLIP_LAYER2 0,255,0,255 ;why cant i go past 192 on Y? (also where is X MSB)
+    nextreg $70, %00010000 ;bit5-4=320x256x8bpp mode
+    nextreg $69, %10000000 ;bit7=enable layer2
 	nextreg $12,20 ;layer2 ram page register
 
-    CLIP_LAYER2 0,255,0,255
-    nextreg $1c,%00000001
+
+    ret
+
+
+layer2_update:
+    ; ld a,(test_layer2_scroll)
+    ; nextreg $16, a
+    ; inc a
+    ; ld (test_layer2_scroll),a
 
     ret
 
 
 init_tiles:
+    CLIPTILES 4,155,0,255
+
     call set_palette
 
     ;load the tile defs
@@ -48,7 +58,7 @@ init_tiles:
     nextreg $68, %10000000
     nextreg $43, %00110000
 
-    CLIPTILES 4,155,0,255
+    
 
     ; ld a,4 ;magenta
     ; nextreg $4c,a ;tilemap transparency colour
