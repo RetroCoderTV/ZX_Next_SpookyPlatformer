@@ -37,11 +37,10 @@ init_tiles:
 
     CLIPTILES 4,155,0,255
 
-    ld a,4 ;magenta
-    nextreg $4c,a ;tilemap transparency colour
-    
-
+    ; ld a,4 ;magenta
+    ; nextreg $4c,a ;tilemap transparency colour
     xor a ;black
+    nextreg $4c,a ;tilemap transparency colour
     nextreg $14,a; global transparency colour
     nextreg $31,a ;tiles y offset
     nextreg $30,a ;tiles x offset

@@ -451,3 +451,12 @@ pacghost_2:
 	; ; incbin "fonts/font17.spr"
 	; incbin "fonts/font18.spr" *not mapped same as others (?)
 	
+
+
+
+;; Layer2
+
+	MMU 7 n,64
+	org $e000
+	incbin "assets/sky.bmp", 1078
+
