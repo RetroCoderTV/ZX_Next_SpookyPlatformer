@@ -1,8 +1,11 @@
-GGTILES_SIZE equ 2048
+TILE_DEFINITIONS_SIZE equ 4096
 
 WORLD_WIDTH equ 160
 VIEW_WIDTH equ 40
 VIEW_HEIGHT equ 32
+
+VIEW_WIDTH_META equ 20
+
 
 VIEW_SIZE equ VIEW_WIDTH*VIEW_HEIGHT
 
@@ -22,7 +25,7 @@ init_tiles:
     nextreg $56, 16
     ld hl,$c000
     ld de,$6000
-    ld bc,GGTILES_SIZE
+    ld bc,TILE_DEFINITIONS_SIZE
     ldir
 
     nextreg $6b, %10100000
@@ -36,6 +39,7 @@ init_tiles:
 
     ld a,4 ;magenta
     nextreg $4c,a ;tilemap transparency colour
+    
 
     xor a ;black
     nextreg $14,a; global transparency colour
@@ -43,7 +47,7 @@ init_tiles:
     nextreg $30,a ;tiles x offset
    
 
-    call view_draw
+    call view_drawmeta
 
     ret
 
@@ -65,105 +69,177 @@ uploadpal:
 
 
 
-view_draw:
-    ld hl,level1
-    ld de,0x4000
-view_draw_line:
-    ld bc,VIEW_WIDTH
-    ldir
-    add hl,WORLD_WIDTH-VIEW_WIDTH
-    ld a,d
-    cp $45
-    jp nz, view_draw_line
+; view_draw:
+;     ld hl,level1
+;     ld de,0x4000
+; view_draw_line:
+;     ld bc,VIEW_WIDTH
+;     ldir
+;     add hl,WORLD_WIDTH-VIEW_WIDTH
+;     ld a,d
+;     cp $45
+;     jp nz, view_draw_line
+;     ret
+    
+    
+
+;ml=metalevel key value
+;current metatile= ml*4
+
+    ;iterate through metalevel line
+        ;put first 2 to screen
+    ;iterate through same line again
+        ;put latter 2 to screen
+view_drawmeta:
+    ld ix,metalevel
+    ld de,$4280
+    ld c,0
+view_drw_screen:
+    ld b,VIEW_WIDTH_META
+view_drw_line_firstpass:
+    ld hl,metatiles
+    ld a,(ix)
+    add a,a
+    add a,a ;A*4 (metatile size)
+    add hl,a
+    ld a,(hl)
+    ld (de),a
+    inc hl
+    inc de
+    ld a,(hl)
+    ld (de),a
+    inc de
+    inc ix
+    djnz view_drw_line_firstpass
+    ld b,VIEW_WIDTH_META
+view_lineback:
+    dec ix
+    djnz view_lineback
+    ld b,VIEW_WIDTH_META
+view_drw_line_secondpass:
+    ld hl,metatiles
+    ld a,(ix)
+    add a,a
+    add a,a ;A*4 (metatile size)
+    add hl,a
+    inc hl
+    inc hl
+    ld a,(hl)
+    ld (de),a
+    inc hl
+    inc de
+    ld a,(hl)
+    ld (de),a
+    inc de
+    inc ix
+    djnz view_drw_line_secondpass
+    push de
+    ld de,LEVEL_WIDTH_META-VIEW_WIDTH_META
+    add ix,de
+    pop de
+    inc c
+    ld a,c
+    cp LEVEL_HEIGHT_META
+    jp c,view_drw_screen
     ret
-    
-    
+
+
+        
+
+
+
+
+
+
+
+
+
 
 scroll_left:
-    ld a,LEFT
-    ld (scroll_direction),a
+    ; ld a,LEFT
+    ; ld (scroll_direction),a
 
-    ld a,(offset)
-    cp LEVEL_START+VIEW_WIDTH+1
-    jp c, p_move_left
+    ; ld a,(offset)
+    ; cp LEVEL_START+VIEW_WIDTH+1
+    ; jp c, p_move_left
 
-    ld a,(offset)
-    sub VIEW_WIDTH
-    ld (cam_x),a
+    ; ld a,(offset)
+    ; sub VIEW_WIDTH
+    ; ld (cam_x),a
 
-    ld a,(current_scroll)
-    inc a
-    cp 8          
-    call z,drawcolumn_left 
-    ld (current_scroll),a
-    ld b,a
-    ld a,8
-    sub b
-    nextreg $30,a
+    ; ld a,(current_scroll)
+    ; inc a
+    ; cp 8          
+    ; call z,drawcolumn_left 
+    ; ld (current_scroll),a
+    ; ld b,a
+    ; ld a,8
+    ; sub b
+    ; nextreg $30,a
     ret
-drawcolumn_left:
-    ; ld hl,$4000+1279
-    ; ld de,$4001+1279
-    ld hl,$44FF
-    ld de,$4500
-    ld bc,40*32
-    lddr  ; move whole screen to right 1 tile 
-    ld hl,level1            ; start of tiles 
-    ld a,(cam_x)           ; current offset 
-    dec a
-    add hl,a                ; add this to tile offset 
-    ; dec a                   ; dec the offset 
-    add a,VIEW_WIDTH
-    ld (offset),a
-    ld de,$4000              ; top left cell 
-    ld b,VIEW_HEIGHT
-columnloop_left:
-    ld a,(hl)                   ; get tile from (hl)
-    ld (de),a                   ; put in (de)
-    add de,VIEW_WIDTH                  ; move de to next line
-    add hl,WORLD_WIDTH          ; move hl to next map line
-    djnz columnloop_left             ; loop for 32 lines 
-    xor a
-    ld (current_scroll),a
-    ret 
+; drawcolumn_left:
+;     ; ld hl,$4000+1279
+;     ; ld de,$4001+1279
+;     ld hl,$44FF
+;     ld de,$4500
+;     ld bc,40*32
+;     lddr  ; move whole screen to right 1 tile 
+;     ld hl,level1            ; start of tiles 
+;     ld a,(cam_x)           ; current offset 
+;     dec a
+;     add hl,a                ; add this to tile offset 
+;     ; dec a                   ; dec the offset 
+;     add a,VIEW_WIDTH
+;     ld (offset),a
+;     ld de,$4000              ; top left cell 
+;     ld b,VIEW_HEIGHT
+; columnloop_left:
+;     ld a,(hl)                   ; get tile from (hl)
+;     ld (de),a                   ; put in (de)
+;     add de,VIEW_WIDTH                  ; move de to next line
+;     add hl,WORLD_WIDTH          ; move hl to next map line
+;     djnz columnloop_left             ; loop for 32 lines 
+;     xor a
+;     ld (current_scroll),a
+;     ret 
 
 
 
 scroll_right:
-    ld a,RIGHT
-    ld (scroll_direction),a
+    ; ld a,RIGHT
+    ; ld (scroll_direction),a
 
-    ld a,(offset)
-    cp WORLD_WIDTH
-    jp nc, p_move_right
-    ld a,(current_scroll)
-    inc a
-    cp 8            
-    call z,nowdrawcolumn 
-    ld (current_scroll),a
-    nextreg $30,a
+    ; ld a,(offset)
+    ; cp WORLD_WIDTH
+    ; jp nc, p_move_right
+    ; ld a,(current_scroll)
+    ; inc a
+    ; cp 8            
+    ; call z,nowdrawcolumn 
+    ; ld (current_scroll),a
+    ; nextreg $30,a
     ret
-nowdrawcolumn:
-    ld hl,$4001
-    ld de,$4000
-    ld bc,1280
-    ldir  ; move whole screen to left 1 tile 
-    ld hl,level1            ; start of tiles 
-    ld a,(offset)           ; current offset 
-    add hl,a                ; add this to tile offset 
-    inc a                   ; inc the offset 
-    ld (offset),a
-    ld de,$4027              ; top right cell 
-    ld b,VIEW_HEIGHT
-columnloop:
-    ld a,(hl)                   ; get tile from (hl)
-    ld (de),a                   ; put in (de)
-    add de,VIEW_WIDTH                  ; move de to next line
-    add hl,WORLD_WIDTH          ; move hl to next map line
-    djnz columnloop             ; loop for 32 lines 
-    xor a
-    ld (current_scroll),a
-    ret 
+; nowdrawcolumn:
+;     ld hl,$4001
+;     ld de,$4000
+;     ld bc,1280
+;     ldir  ; move whole screen to left 1 tile 
+;     ld hl,level1            ; start of tiles 
+;     ld a,(offset)           ; current offset 
+;     add hl,a                ; add this to tile offset 
+;     inc a                   ; inc the offset 
+;     ld (offset),a
+;     ld de,$4027              ; top right cell 
+;     ld b,VIEW_HEIGHT
+; columnloop:
+;     ld a,(hl)                   ; get tile from (hl)
+;     ld (de),a                   ; put in (de)
+;     add de,VIEW_WIDTH                  ; move de to next line
+;     add hl,WORLD_WIDTH          ; move hl to next map line
+;     djnz columnloop             ; loop for 32 lines 
+;     xor a
+;     ld (current_scroll),a
+;     ret 
 
 
 
