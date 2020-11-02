@@ -11,7 +11,7 @@ MIRROR_Y equ %00000100
 ;; Outputs: none
 ;; Destroys: A,BC,HL
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-init_sprites:
+sprites_init:
 	push bc
 	ld a,0							
 	ld bc,$303b					

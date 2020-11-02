@@ -6,13 +6,13 @@
 
 
 
-gg_palette:
-    incbin 'assets/caveman.nxp',0
+caveman_palette:
+    incbin 'assets/cavemantiles.nxp',0
 
     MMU 6,16
     org $c000
 
-    incbin 'assets/caveman.til',0,TILE_DEFINITIONS_SIZE
+    incbin 'assets/cavemantiles.til',0,TILE_DEFINITIONS_SIZE
 
 
 

@@ -20,29 +20,16 @@ cam_x db LEVEL_START
 test_layer2_scroll db 0
 
 
-init_layer2:
-    CLIP_LAYER2 0,255,0,255 ;why cant i go past 192 on Y? (also where is X MSB)
+layer2_init:
+    CLIP_LAYER2 4,155,0,255 ;layer 2 is basically rotated to do 320x256 mode
     nextreg $70, %00010000 ;bit5-4=320x256x8bpp mode
     nextreg $69, %10000000 ;bit7=enable layer2
 	nextreg $12,20 ;layer2 ram page register
-
-
     ret
 
-
-layer2_update:
-    ld a,(test_layer2_scroll)
-    nextreg $16, a
-    inc a
-    ld (test_layer2_scroll),a
-
-    ret
-
-
-init_tiles:
+tiles_init:
     CLIPTILES 4,155,0,255
-
-    call set_palette
+    call tiles_set_palette
 
     ;load the tile defs
     nextreg $56, 16
@@ -58,23 +45,32 @@ init_tiles:
     nextreg $68, %10000000
     nextreg $43, %00110000
 
+    ; ld a,3
     
-
-    ; ld a,4 ;magenta
-    ; nextreg $4c,a ;tilemap transparency colour
     xor a ;black
-    nextreg $4c,a ;tilemap transparency colour
+    nextreg $4c,a ;tilemap transparency colour 
     nextreg $14,a; global transparency colour
     nextreg $31,a ;tiles y offset
     nextreg $30,a ;tiles x offset
    
 
-    call view_drawmeta
+    call view_init
 
     ret
 
-set_palette:
-    ld hl,gg_palette
+
+layer2_update:
+    ld a,(test_layer2_scroll)
+    nextreg $16, a
+    inc a
+    ld (test_layer2_scroll),a
+    ret
+
+
+
+
+tiles_set_palette:
+    ld hl,caveman_palette
     nextreg $43,%00110000
     xor a
     ld b,16
@@ -90,35 +86,14 @@ uploadpal:
     ret
 
 
-
-; view_draw:
-;     ld hl,level1
-;     ld de,0x4000
-; view_draw_line:
-;     ld bc,VIEW_WIDTH
-;     ldir
-;     add hl,WORLD_WIDTH-VIEW_WIDTH
-;     ld a,d
-;     cp $45
-;     jp nz, view_draw_line
-;     ret
-    
-    
-
-;ml=metalevel key value
-;current metatile= ml*4
-
-    ;iterate through metalevel line
-        ;put first 2 to screen
-    ;iterate through same line again
-        ;put latter 2 to screen
-view_drawmeta:
+;does 2 passes per 'map' line, due to 2 rows within each supertile
+view_init:
     ld ix,metalevel
     ld de,$4280
     ld c,0
-view_drw_screen:
+view_init_screen:
     ld b,VIEW_WIDTH_META
-view_drw_line_firstpass:
+view_init_line_pass1:
     ld hl,metatiles
     ld a,(ix)
     add a,a
@@ -132,13 +107,13 @@ view_drw_line_firstpass:
     ld (de),a
     inc de
     inc ix
-    djnz view_drw_line_firstpass
+    djnz view_init_line_pass1
     ld b,VIEW_WIDTH_META
-view_lineback:
+view_init_golineback:
     dec ix
-    djnz view_lineback
+    djnz view_init_golineback
     ld b,VIEW_WIDTH_META
-view_drw_line_secondpass:
+view_init_line_pass2:
     ld hl,metatiles
     ld a,(ix)
     add a,a
@@ -154,7 +129,7 @@ view_drw_line_secondpass:
     ld (de),a
     inc de
     inc ix
-    djnz view_drw_line_secondpass
+    djnz view_init_line_pass2
     push de
     ld de,LEVEL_WIDTH_META-VIEW_WIDTH_META
     add ix,de
@@ -162,43 +137,48 @@ view_drw_line_secondpass:
     inc c
     ld a,c
     cp LEVEL_HEIGHT_META
-    jp c,view_drw_screen
+    jp c,view_init_screen
     ret
 
 
         
 
 
-
-
-
-
-
-
-
-
 scroll_left:
-    ; ld a,LEFT
-    ; ld (scroll_direction),a
-
-    ; ld a,(offset)
-    ; cp LEVEL_START+VIEW_WIDTH+1
-    ; jp c, p_move_left
-
-    ; ld a,(offset)
-    ; sub VIEW_WIDTH
-    ; ld (cam_x),a
-
-    ; ld a,(current_scroll)
-    ; inc a
-    ; cp 8          
-    ; call z,drawcolumn_left 
-    ; ld (current_scroll),a
-    ; ld b,a
-    ; ld a,8
-    ; sub b
-    ; nextreg $30,a
     ret
+
+scroll_right:
+    ret
+
+
+
+
+
+
+
+
+; scroll_left:
+;     ld a,LEFT
+;     ld (scroll_direction),a
+
+;     ld a,(offset)
+;     cp LEVEL_START+VIEW_WIDTH+1
+;     jp c, p_move_left
+
+;     ld a,(offset)
+;     sub VIEW_WIDTH
+;     ld (cam_x),a
+
+;     ld a,(current_scroll)
+;     inc a
+;     cp 8          
+;     call z,drawcolumn_left 
+;     ld (current_scroll),a
+;     ld b,a
+;     ld a,8
+;     sub b
+;     nextreg $30,a
+;     ret
 ; drawcolumn_left:
 ;     ; ld hl,$4000+1279
 ;     ; ld de,$4001+1279
@@ -227,20 +207,20 @@ scroll_left:
 
 
 
-scroll_right:
-    ; ld a,RIGHT
-    ; ld (scroll_direction),a
+; scroll_right:
+;     ld a,RIGHT
+;     ld (scroll_direction),a
 
-    ; ld a,(offset)
-    ; cp WORLD_WIDTH
-    ; jp nc, p_move_right
-    ; ld a,(current_scroll)
-    ; inc a
-    ; cp 8            
-    ; call z,nowdrawcolumn 
-    ; ld (current_scroll),a
-    ; nextreg $30,a
-    ret
+;     ld a,(offset)
+;     cp WORLD_WIDTH
+;     jp nc, p_move_right
+;     ld a,(current_scroll)
+;     inc a
+;     cp 8            
+;     call z,nowdrawcolumn 
+;     ld (current_scroll),a
+;     nextreg $30,a
+;     ret
 ; nowdrawcolumn:
 ;     ld hl,$4001
 ;     ld de,$4000

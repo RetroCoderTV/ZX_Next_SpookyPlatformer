@@ -18,8 +18,8 @@ PLAYER_WALK_SPEED equ 1
 player_world_x db 0 ;in cells
 player_world_y db 0
 
-px dw 32
-py db 160
+px dw 48
+py db 0
 player_attr_2 db %00001000
 player_attr_3 db PLAYER_DEFAULT_ATTR3
 player_attr_4 db %00100000
