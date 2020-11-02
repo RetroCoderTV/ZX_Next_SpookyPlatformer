@@ -2382,9 +2382,9 @@
   8+  89DD
   9+  89DD              gg_palette:
  10+  89DD                  incbin 'assets/caveman.nxp',0
- 11+  89F7
- 12+  89F7                  MMU 6,16
- 13+  89F7                  org $c000
+ 11+  89F9
+ 12+  89F9                  MMU 6,16
+ 13+  89F9                  org $c000
  14+  C000
  15+  C000                  incbin 'assets/caveman.til',0,TILE_DEFINITIONS_SIZE
  16+  D000
