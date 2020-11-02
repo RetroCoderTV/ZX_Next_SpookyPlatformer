@@ -462,4 +462,4 @@ pacghost_2:
 
 	MMU 7 n,40
 	org $e000
-	incbin "assets/skybig.bmp", 1078
+	incbin "assets/skybigrotated.bmp", 1078

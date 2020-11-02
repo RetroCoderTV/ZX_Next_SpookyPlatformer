@@ -31,10 +31,10 @@ init_layer2:
 
 
 layer2_update:
-    ; ld a,(test_layer2_scroll)
-    ; nextreg $16, a
-    ; inc a
-    ; ld (test_layer2_scroll),a
+    ld a,(test_layer2_scroll)
+    nextreg $16, a
+    inc a
+    ld (test_layer2_scroll),a
 
     ret
 
