@@ -6,7 +6,7 @@ game_init:
     ld hl,$c000
     call init_sprites
 
-    nextreg $15,%00001011
+    call init_layer2
     call init_tiles
     
     call player_init

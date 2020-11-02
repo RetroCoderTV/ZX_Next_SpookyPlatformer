@@ -456,7 +456,10 @@ pacghost_2:
 
 ;; Layer2
 
-	MMU 7 n,64
-	org $e000
-	incbin "assets/sky.bmp", 1078
+	; MMU 7 n,40
+	; org $e000
+	; incbin "assets/sky.bmp", 1078
 
+	MMU 7 n,40
+	org $e000
+	incbin "assets/skybig.bmp", 1078

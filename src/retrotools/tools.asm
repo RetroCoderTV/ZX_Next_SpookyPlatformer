@@ -5,13 +5,25 @@
 
 	MACRO CLIPTILES x1,y1,x2,y2
 		ld a,x1
-		nextreg 27,a
+		nextreg $1b,a
 		ld a,y1
-		nextreg 27,a
+		nextreg $1b,a
 		ld a,x2
-		nextreg 27,a
+		nextreg $1b,a
 		ld a,y2
-		nextreg 27,a
+		nextreg $1b,a
+
+	ENDM
+
+	MACRO CLIP_LAYER2 x1,x2,y1,y2
+		ld a,x1
+		nextreg $18,a
+		ld a,x2
+		nextreg $18,a
+		ld a,y1
+		nextreg $18,a
+		ld a,y2
+		nextreg $18,a
 
 	ENDM
 

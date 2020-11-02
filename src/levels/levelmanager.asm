@@ -18,6 +18,19 @@ offset db LEVEL_START+VIEW_WIDTH
 cam_x db LEVEL_START
 
 
+init_layer2:
+    ; nextreg $69, %10000000 ;bit7=enable layer2
+    ld bc,$123b
+    ld a,%00000010
+    out (c),a
+	nextreg $12,20 ;layer2 ram page register
+
+    CLIP_LAYER2 0,255,0,255
+    nextreg $1c,%00000001
+
+    ret
+
+
 init_tiles:
     call set_palette
 
