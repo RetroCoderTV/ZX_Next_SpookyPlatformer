@@ -247,6 +247,7 @@ player_update_jumping:
 
     call player_calculate_world_position
     ; ; ; ; ; ; ; call check_collision_feet
+    call check_collision_jumping
     
     ld a,(player_jump_point)
     sub PLAYER_JUMP_HEIGHT
@@ -444,22 +445,27 @@ player_set_to_default_frame:
 
 
 player_calculate_world_position:
+
     ld a,(py)
-    and %11111000
+    sub 16
+    and %11100000
     rrca
     rrca
     rrca
+    rrca
+    rrca ;extra divide on Y as map is only half screen height (and starts half way down)
     ld (player_world_y),a
-    
+ 
     ld hl,(px)
     ld a,l
-    and %11111000
+    and %11110000
     rrca
     rrca
     rrca 
+    rrca
     ld b,a
-    ld a,(offset)
-    sub VIEW_WIDTH
+    ld a,(cam_edge_r)
+    sub VIEW_WIDTH_META
     ld c,a
     ld a,b
     add a,c    
@@ -468,6 +474,58 @@ player_calculate_world_position:
     ret
 
 
+
+check_collision_jumping:
+    ld a,(player_animation_state)
+    cp JUMPING
+    ret nz
+
+    ld a,(player_jump_direction)
+    cp DOWN
+    ret nz
+
+
+    ld hl,metalevel
+    ld a,(player_world_y)
+    ld d,a
+    ld e,LEVEL_WIDTH_META
+    mul d,e
+    add hl,de
+    ld a,(player_world_x)
+    ld e,a
+    ld d,0
+    add hl,de
+    ld a,(hl)
+    call check_solid
+    jp z,collided_jumping
+
+    
+
+    ret
+
+
+collided_jumping:
+    
+    ld a,(player_world_y)
+    add a,a
+    add a,a
+    add a,a
+    add a,a
+    add a,a
+    add a,16
+    ld (py),a
+   
+    ld a,(player_jump_direction)
+    cp UP
+    ret z
+
+    ld a,WALKING
+    ld (player_animation_state),a
+    ld hl,0
+    ld (vy),hl
+
+    
+    ret
 
 ; check_collision_feet:
 ;     ld a,(player_animation_state)

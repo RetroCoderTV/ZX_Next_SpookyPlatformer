@@ -41,7 +41,7 @@ GHOST_MAX_MOVEMENT_X equ 30
 
 
 
-;sX= wX-(offset-VW)*8
+;sX= wX-(cam_edge_r-VW)*8
 ;sY= wY*8
 
 
@@ -111,11 +111,11 @@ object_check_in_view:
 
     ld a,(ix+2)
     ld b,a
-    ld a,(offset)
+    ld a,(cam_edge_r)
     cp b
     jp c, obj_set_not_inview
 
-    ld a,(offset)
+    ld a,(cam_edge_r)
     sub VIEW_WIDTH
     ld b,a
     ld a,(ix+2)
@@ -160,7 +160,7 @@ object_calculate_screen_pos:
 
 obj_screen_moving_left:
     ;X (scroll left)
-    ld a,(offset)
+    ld a,(cam_edge_r)
     sub VIEW_WIDTH
     ld b,a
     ld a,(ix+2) ;wX
@@ -178,7 +178,7 @@ obj_screen_moving_left:
 
 obj_screen_moving_right:
     ;X (scroll left)
-    ld a,(offset)
+    ld a,(cam_edge_r)
     sub VIEW_WIDTH
     ld b,a
     ld a,(ix+2) ;wX
@@ -356,8 +356,7 @@ obj_check_coll_y:
     cp h
     jr nz,obj_nocollision
 
-    BREAKPOINT
-
+    ;collided...
 
 obj_nocollision:
     ret

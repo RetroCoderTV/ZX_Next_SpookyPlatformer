@@ -14,21 +14,22 @@ current_scroll db 0
 scroll_direction db RIGHT
 
 LEVEL_START equ 0
-offset db LEVEL_START+VIEW_WIDTH
+cam_edge_r db LEVEL_START+VIEW_WIDTH_META
 cam_x db LEVEL_START
 
-test_layer2_scroll db 0
+test_layer2_scroll dw 0
 
 
 layer2_init:
-    CLIP_LAYER2 4,155,0,255 ;layer 2 is basically rotated to do 320x256 mode
+    CLIP_LAYER2 0,255,0,255 ;layer 2 is basically rotated to do 320x256 mode
+
     nextreg $70, %00010000 ;bit5-4=320x256x8bpp mode
     nextreg $69, %10000000 ;bit7=enable layer2
 	nextreg $12,20 ;layer2 ram page register
     ret
 
 tiles_init:
-    CLIPTILES 4,155,0,255
+    ; CLIPTILES 4,155,0,255
     call tiles_set_palette
 
     ;load the tile defs
@@ -50,8 +51,7 @@ tiles_init:
     xor a ;black
     nextreg $4c,a ;tilemap transparency colour 
     nextreg $14,a; global transparency colour
-    nextreg $31,a ;tiles y offset
-    nextreg $30,a ;tiles x offset
+
    
 
     call view_init
@@ -60,10 +60,13 @@ tiles_init:
 
 
 layer2_update:
-    ld a,(test_layer2_scroll)
+    ld hl,(test_layer2_scroll)
+    ld a,l
     nextreg $16, a
-    inc a
-    ld (test_layer2_scroll),a
+    ld a,h
+    nextreg $71, a
+    inc hl
+    ld (test_layer2_scroll),hl
     ret
 
 
@@ -89,7 +92,8 @@ uploadpal:
 ;does 2 passes per 'map' line, due to 2 rows within each supertile
 view_init:
     ld ix,metalevel
-    ld de,$4280
+    ; ld de,$4000
+    ld de,LEVEL_Y_START_ADDRESS
     ld c,0
 view_init_screen:
     ld b,VIEW_WIDTH_META
@@ -141,15 +145,89 @@ view_init_line_pass2:
     ret
 
 
-        
+meta_tile_offset db 0      
 
 
 scroll_left:
     ret
 
 scroll_right:
-    ret
+    ld a,RIGHT
+    ld (scroll_direction),a
 
+    ld a,(cam_edge_r)
+    sub VIEW_WIDTH_META
+    ld (cam_x),a
+
+    ld a,(cam_edge_r)
+    cp LEVEL_WIDTH_META
+    jp nc, p_move_right
+
+    ld a,(current_scroll)
+    inc a
+    cp 8
+    ld (current_scroll),a
+    call z,sr_scrollmax
+    nextreg $30,a
+    ret
+sr_scrollmax:
+    ld hl,LEVEL_Y_START_ADDRESS+1
+    ld de,LEVEL_Y_START_ADDRESS
+    ld bc,640
+    ldir
+    ld hl,metalevel
+    ld a,(cam_edge_r)
+    add hl,a
+    ld de,LEVEL_Y_START_ADDRESS+39 ;top right cell
+    ld b,LEVEL_HEIGHT_META
+    ld a,(meta_tile_offset)
+    cp 0
+    jp z,sr_putcolumn
+    jp nz,sr_putcolumn_2nd
+sr_putcolumn:
+    ld a,(hl)
+    ld (de),a
+    add de,VIEW_WIDTH
+    inc hl
+    inc hl
+    ld a,(hl)
+    ld (de),a
+    add de,VIEW_WIDTH
+    add hl,LEVEL_WIDTH_META
+    djnz sr_putcolumn
+    
+    ld a,(meta_tile_offset)
+    xor 1
+    ld (meta_tile_offset),a
+
+    xor a
+    ld (current_scroll),a
+
+    ret
+sr_putcolumn_2nd:
+    inc hl
+    ld a,(hl)
+    ld (de),a
+    add de,VIEW_WIDTH
+    inc hl
+    inc hl
+    ld a,(hl)
+    ld (de),a
+    add hl,LEVEL_WIDTH_META
+    djnz sr_putcolumn
+
+    ld a,(cam_edge_r)
+    inc a
+    ld (cam_edge_r),a
+    
+    ld a,(meta_tile_offset)
+    xor 1
+    ld (meta_tile_offset),a
+
+    xor a
+    ld (current_scroll),a
+
+    ret
 
 
 
@@ -161,11 +239,11 @@ scroll_right:
 ;     ld a,LEFT
 ;     ld (scroll_direction),a
 
-;     ld a,(offset)
+;     ld a,(cam_edge_r)
 ;     cp LEVEL_START+VIEW_WIDTH+1
 ;     jp c, p_move_left
 
-;     ld a,(offset)
+;     ld a,(cam_edge_r)
 ;     sub VIEW_WIDTH
 ;     ld (cam_x),a
 
@@ -187,12 +265,12 @@ scroll_right:
 ;     ld bc,40*32
 ;     lddr  ; move whole screen to right 1 tile 
 ;     ld hl,level1            ; start of tiles 
-;     ld a,(cam_x)           ; current offset 
+;     ld a,(cam_x)           ; current cam_edge_r 
 ;     dec a
-;     add hl,a                ; add this to tile offset 
-;     ; dec a                   ; dec the offset 
+;     add hl,a                ; add this to tile cam_edge_r 
+;     ; dec a                   ; dec the cam_edge_r 
 ;     add a,VIEW_WIDTH
-;     ld (offset),a
+;     ld (cam_edge_r),a
 ;     ld de,$4000              ; top left cell 
 ;     ld b,VIEW_HEIGHT
 ; columnloop_left:
@@ -211,7 +289,7 @@ scroll_right:
 ;     ld a,RIGHT
 ;     ld (scroll_direction),a
 
-;     ld a,(offset)
+;     ld a,(cam_edge_r)
 ;     cp WORLD_WIDTH
 ;     jp nc, p_move_right
 ;     ld a,(current_scroll)
@@ -227,10 +305,10 @@ scroll_right:
 ;     ld bc,1280
 ;     ldir  ; move whole screen to left 1 tile 
 ;     ld hl,level1            ; start of tiles 
-;     ld a,(offset)           ; current offset 
-;     add hl,a                ; add this to tile offset 
-;     inc a                   ; inc the offset 
-;     ld (offset),a
+;     ld a,(cam_edge_r)           ; current cam_edge_r 
+;     add hl,a                ; add this to tile cam_edge_r 
+;     inc a                   ; inc the cam_edge_r 
+;     ld (cam_edge_r),a
 ;     ld de,$4027              ; top right cell 
 ;     ld b,VIEW_HEIGHT
 ; columnloop:

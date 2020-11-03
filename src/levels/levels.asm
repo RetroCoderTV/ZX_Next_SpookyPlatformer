@@ -1,9 +1,9 @@
 ; another way to check solids (if not in order)
-solids:
-    db 0,1,2,3,4,5,6,7,8,9,10,11
-SOLIDS_LENGTH equ 10
+meta_solids:
+    db 17,19
+SOLIDS_LENGTH equ 2
 check_solid:
-    ld hl,solids
+    ld hl,meta_solids
     ld bc,SOLIDS_LENGTH
     cpir
     ret
@@ -15,6 +15,8 @@ check_solid:
 ;02 04 04 02*
 ;18 20 20 18*
 
+
+LEVEL_Y_START_ADDRESS equ $4280 ;half way down
 LEVEL_WIDTH_META equ 80
 LEVEL_HEIGHT_META equ 8
 
