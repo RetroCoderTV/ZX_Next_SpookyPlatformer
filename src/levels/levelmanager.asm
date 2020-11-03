@@ -21,7 +21,7 @@ test_layer2_scroll dw 0
 
 
 layer2_init:
-    CLIP_LAYER2 0,255,0,255 ;layer 2 is basically rotated to do 320x256 mode
+    CLIP_LAYER2 4,155,0,255 ;layer 2 is basically rotated to do 320x256 mode
 
     nextreg $70, %00010000 ;bit5-4=320x256x8bpp mode
     nextreg $69, %10000000 ;bit7=enable layer2
@@ -29,7 +29,7 @@ layer2_init:
     ret
 
 tiles_init:
-    ; CLIPTILES 4,155,0,255
+    CLIPTILES 4,155,0,255
     call tiles_set_palette
 
     ;load the tile defs
@@ -46,8 +46,7 @@ tiles_init:
     nextreg $68, %10000000
     nextreg $43, %00110000
 
-    ; ld a,3
-    
+ 
     xor a ;black
     nextreg $4c,a ;tilemap transparency colour 
     nextreg $14,a; global transparency colour

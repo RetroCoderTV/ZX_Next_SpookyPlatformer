@@ -52,7 +52,7 @@ player_collided_solid db FALSE
 
 player_jump_direction db DOWN
 player_jump_point db 208
-PLAYER_JUMP_HEIGHT equ 9
+PLAYER_JUMP_HEIGHT equ 15
 player_grounded db FALSE
 
 
@@ -447,13 +447,11 @@ player_set_to_default_frame:
 player_calculate_world_position:
 
     ld a,(py)
-    sub 16
-    and %11100000
+    and %11110000
     rrca
     rrca
     rrca
     rrca
-    rrca ;extra divide on Y as map is only half screen height (and starts half way down)
     ld (player_world_y),a
  
     ld hl,(px)
@@ -487,6 +485,9 @@ check_collision_jumping:
 
     ld hl,metalevel
     ld a,(player_world_y)
+    cp 6
+    ret c
+    sub 6
     ld d,a
     ld e,LEVEL_WIDTH_META
     mul d,e
@@ -506,14 +507,12 @@ check_collision_jumping:
 
 collided_jumping:
     
-    ld a,(player_world_y)
-    add a,a
-    add a,a
-    add a,a
-    add a,a
-    add a,a
-    add a,16
-    ld (py),a
+    ; ld a,(player_world_y)
+    ; add a,a
+    ; add a,a
+    ; add a,a
+    ; add a,a
+    ; ld (py),a
    
     ld a,(player_jump_direction)
     cp UP
