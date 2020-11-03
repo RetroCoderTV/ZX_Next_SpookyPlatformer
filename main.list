@@ -2188,7 +2188,7 @@
  73+  89E8
  74+  89E8
  75+  89E8              tiles_set_palette:
- 76+  89E8 21 E0 8A         ld hl,caveman_palette
+ 76+  89E8 21 0A 8B         ld hl,caveman_palette
  77+  89EB ED 91 43 30      nextreg $43,%00110000
  78+  89EF AF               xor a
  79+  89F0 06 10            ld b,16
@@ -2282,214 +2282,242 @@
 167+  8A6A 3C               inc a
 168+  8A6B FE 08            cp 8
 169+  8A6D 32 7C 89         ld (current_scroll),a
-170+  8A70 CC 77 8A         call z,sr_scrollmax
-171+  8A73 ED 92 30         nextreg $30,a
-172+  8A76 C9               ret
-173+  8A77              sr_scrollmax:
-174+  8A77 21 81 42         ld hl,LEVEL_Y_START_ADDRESS+1
-175+  8A7A 11 80 42         ld de,LEVEL_Y_START_ADDRESS
-176+  8A7D 01 80 02         ld bc,640
-177+  8A80 ED B0            ldir
-178+  8A82 21 A8 86         ld hl,metalevel
-179+  8A85 3A 7E 89         ld a,(cam_edge_r)
-180+  8A88 ED 31            add hl,a
-181+  8A8A 11 A7 42         ld de,LEVEL_Y_START_ADDRESS+39 ;top right cell
-182+  8A8D 06 08            ld b,LEVEL_HEIGHT_META
-183+  8A8F 3A 50 8A         ld a,(meta_tile_offset)
-184+  8A92 FE 00            cp 0
-185+  8A94 CA 9A 8A         jp z,sr_putcolumn
-186+  8A97 C2 BB 8A         jp nz,sr_putcolumn_2nd
-187+  8A9A              sr_putcolumn:
-188+  8A9A 7E               ld a,(hl)
-189+  8A9B 12               ld (de),a
-190+  8A9C ED 35 28 00      add de,VIEW_WIDTH
-191+  8AA0 23               inc hl
-192+  8AA1 23               inc hl
-193+  8AA2 7E               ld a,(hl)
-194+  8AA3 12               ld (de),a
-195+  8AA4 ED 35 28 00      add de,VIEW_WIDTH
-196+  8AA8 ED 34 50 00      add hl,LEVEL_WIDTH_META
-197+  8AAC 10 EC            djnz sr_putcolumn
-198+  8AAE
-199+  8AAE 3A 50 8A         ld a,(meta_tile_offset)
-200+  8AB1 EE 01            xor 1
-201+  8AB3 32 50 8A         ld (meta_tile_offset),a
-202+  8AB6
-203+  8AB6 AF               xor a
-204+  8AB7 32 7C 89         ld (current_scroll),a
-205+  8ABA
-206+  8ABA C9               ret
-207+  8ABB              sr_putcolumn_2nd:
-208+  8ABB 23               inc hl
-209+  8ABC 7E               ld a,(hl)
-210+  8ABD 12               ld (de),a
-211+  8ABE ED 35 28 00      add de,VIEW_WIDTH
-212+  8AC2 23               inc hl
-213+  8AC3 23               inc hl
-214+  8AC4 7E               ld a,(hl)
-215+  8AC5 12               ld (de),a
-216+  8AC6 ED 34 50 00      add hl,LEVEL_WIDTH_META
-217+  8ACA 10 CE            djnz sr_putcolumn
-218+  8ACC
-219+  8ACC 3A 7E 89         ld a,(cam_edge_r)
-220+  8ACF 3C               inc a
-221+  8AD0 32 7E 89         ld (cam_edge_r),a
-222+  8AD3
-223+  8AD3 3A 50 8A         ld a,(meta_tile_offset)
-224+  8AD6 EE 01            xor 1
-225+  8AD8 32 50 8A         ld (meta_tile_offset),a
-226+  8ADB
-227+  8ADB AF               xor a
-228+  8ADC 32 7C 89         ld (current_scroll),a
-229+  8ADF
-230+  8ADF C9               ret
-231+  8AE0
-232+  8AE0
-233+  8AE0
-234+  8AE0
-235+  8AE0
-236+  8AE0
-237+  8AE0
-238+  8AE0              ; scroll_left:
-239+  8AE0              ;     ld a,LEFT
-240+  8AE0              ;     ld (scroll_direction),a
-241+  8AE0
-242+  8AE0              ;     ld a,(cam_edge_r)
-243+  8AE0              ;     cp LEVEL_START+VIEW_WIDTH+1
-244+  8AE0              ;     jp c, p_move_left
-245+  8AE0
-246+  8AE0              ;     ld a,(cam_edge_r)
-247+  8AE0              ;     sub VIEW_WIDTH
-248+  8AE0              ;     ld (cam_x),a
-249+  8AE0
-250+  8AE0              ;     ld a,(current_scroll)
-251+  8AE0              ;     inc a
-252+  8AE0              ;     cp 8
-253+  8AE0              ;     call z,drawcolumn_left
-254+  8AE0              ;     ld (current_scroll),a
-255+  8AE0              ;     ld b,a
-256+  8AE0              ;     ld a,8
-257+  8AE0              ;     sub b
-258+  8AE0              ;     nextreg $30,a
-259+  8AE0              ;     ret
-260+  8AE0              ; drawcolumn_left:
-261+  8AE0              ;     ; ld hl,$4000+1279
-262+  8AE0              ;     ; ld de,$4001+1279
-263+  8AE0              ;     ld hl,$44FF
-264+  8AE0              ;     ld de,$4500
-265+  8AE0              ;     ld bc,40*32
-266+  8AE0              ;     lddr  ; move whole screen to right 1 tile
-267+  8AE0              ;     ld hl,level1            ; start of tiles
-268+  8AE0              ;     ld a,(cam_x)           ; current cam_edge_r
-269+  8AE0              ;     dec a
-270+  8AE0              ;     add hl,a                ; add this to tile cam_edge_r
-271+  8AE0              ;     ; dec a                   ; dec the cam_edge_r
-272+  8AE0              ;     add a,VIEW_WIDTH
-273+  8AE0              ;     ld (cam_edge_r),a
-274+  8AE0              ;     ld de,$4000              ; top left cell
-275+  8AE0              ;     ld b,VIEW_HEIGHT
-276+  8AE0              ; columnloop_left:
-277+  8AE0              ;     ld a,(hl)                   ; get tile from (hl)
-278+  8AE0              ;     ld (de),a                   ; put in (de)
-279+  8AE0              ;     add de,VIEW_WIDTH                  ; move de to next line
-280+  8AE0              ;     add hl,WORLD_WIDTH          ; move hl to next map line
-281+  8AE0              ;     djnz columnloop_left             ; loop for 32 lines
-282+  8AE0              ;     xor a
-283+  8AE0              ;     ld (current_scroll),a
-284+  8AE0              ;     ret
-285+  8AE0
-286+  8AE0
-287+  8AE0
-288+  8AE0              ; scroll_right:
-289+  8AE0              ;     ld a,RIGHT
-290+  8AE0              ;     ld (scroll_direction),a
-291+  8AE0
-292+  8AE0              ;     ld a,(cam_edge_r)
-293+  8AE0              ;     cp WORLD_WIDTH
-294+  8AE0              ;     jp nc, p_move_right
-295+  8AE0              ;     ld a,(current_scroll)
-296+  8AE0              ;     inc a
-297+  8AE0              ;     cp 8
-298+  8AE0              ;     call z,nowdrawcolumn
-299+  8AE0              ;     ld (current_scroll),a
-300+  8AE0              ;     nextreg $30,a
-301+  8AE0              ;     ret
-302+  8AE0              ; nowdrawcolumn:
-303+  8AE0              ;     ld hl,$4001
-304+  8AE0              ;     ld de,$4000
-305+  8AE0              ;     ld bc,1280
-306+  8AE0              ;     ldir  ; move whole screen to left 1 tile
-307+  8AE0              ;     ld hl,level1            ; start of tiles
-308+  8AE0              ;     ld a,(cam_edge_r)           ; current cam_edge_r
-309+  8AE0              ;     add hl,a                ; add this to tile cam_edge_r
-310+  8AE0              ;     inc a                   ; inc the cam_edge_r
-311+  8AE0              ;     ld (cam_edge_r),a
-312+  8AE0              ;     ld de,$4027              ; top right cell
-313+  8AE0              ;     ld b,VIEW_HEIGHT
-314+  8AE0              ; columnloop:
-315+  8AE0              ;     ld a,(hl)                   ; get tile from (hl)
-316+  8AE0              ;     ld (de),a                   ; put in (de)
-317+  8AE0              ;     add de,VIEW_WIDTH                  ; move de to next line
-318+  8AE0              ;     add hl,WORLD_WIDTH          ; move hl to next map line
-319+  8AE0              ;     djnz columnloop             ; loop for 32 lines
-320+  8AE0              ;     xor a
-321+  8AE0              ;     ld (current_scroll),a
-322+  8AE0              ;     ret
-323+  8AE0
-324+  8AE0
-325+  8AE0
-326+  8AE0
-327+  8AE0
-328+  8AE0
-329+  8AE0
-330+  8AE0
-331+  8AE0
-332+  8AE0
-333+  8AE0
-334+  8AE0
+170+  8A70 CC 7A 8A         call z,sr_scrollmax
+171+  8A73 32 7C 89         ld (current_scroll),a
+172+  8A76 ED 92 30         nextreg $30,a
+173+  8A79 C9               ret
+174+  8A7A              sr_scrollmax:
+175+  8A7A 21 81 42         ld hl,LEVEL_Y_START_ADDRESS+1
+176+  8A7D 11 80 42         ld de,LEVEL_Y_START_ADDRESS
+177+  8A80 01 80 02         ld bc,20*32
+178+  8A83 ED B0            ldir
+179+  8A85 21 A8 86         ld hl,metalevel
+180+  8A88 3A 7E 89         ld a,(cam_edge_r)
+181+  8A8B ED 31            add hl,a
+182+  8A8D 11 A7 42         ld de,LEVEL_Y_START_ADDRESS+39 ;top right cell
+183+  8A90 06 08            ld b,LEVEL_HEIGHT_META
+184+  8A92
+185+  8A92 3A 50 8A         ld a,(meta_tile_offset)
+186+  8A95 FE 00            cp 0
+187+  8A97 CA 9D 8A         jp z,sr_putcolumn
+188+  8A9A C2 CF 8A         jp nz,sr_putcolumn_2nd
+189+  8A9D              sr_putcolumn:
+190+  8A9D 7E               ld a,(hl)
+191+  8A9E 87               add a,a
+192+  8A9F 87               add a,a
+193+  8AA0 E5               push hl
+194+  8AA1 21 28 89         ld hl,metatiles
+195+  8AA4 ED 31            add hl,a
+196+  8AA6 7E               ld a,(hl)
+197+  8AA7 E1               pop hl
+198+  8AA8 12               ld (de),a
+199+  8AA9 ED 35 28 00      add de,VIEW_WIDTH
+200+  8AAD 7E               ld a,(hl)
+201+  8AAE 87               add a,a
+202+  8AAF 87               add a,a
+203+  8AB0 E5               push hl
+204+  8AB1 21 28 89         ld hl,metatiles
+205+  8AB4 C6 02            add a,2
+206+  8AB6 ED 31            add hl,a
+207+  8AB8 7E               ld a,(hl)
+208+  8AB9 E1               pop hl
+209+  8ABA 12               ld (de),a
+210+  8ABB ED 35 28 00      add de,VIEW_WIDTH
+211+  8ABF ED 34 50 00      add hl,LEVEL_WIDTH_META
+212+  8AC3 10 D8            djnz sr_putcolumn
+213+  8AC5
+214+  8AC5 3E 01            ld a,1
+215+  8AC7 32 50 8A         ld (meta_tile_offset),a
+216+  8ACA
+217+  8ACA AF               xor a
+218+  8ACB 32 7C 89         ld (current_scroll),a
+219+  8ACE
+220+  8ACE C9               ret
+221+  8ACF              sr_putcolumn_2nd:
+222+  8ACF 7E               ld a,(hl)
+223+  8AD0 87               add a,a
+224+  8AD1 87               add a,a
+225+  8AD2 E5               push hl
+226+  8AD3 21 28 89         ld hl,metatiles
+227+  8AD6 C6 01            add a,1
+228+  8AD8 ED 31            add hl,a
+229+  8ADA 7E               ld a,(hl)
+230+  8ADB E1               pop hl
+231+  8ADC 12               ld (de),a
+232+  8ADD ED 35 28 00      add de,VIEW_WIDTH
+233+  8AE1 7E               ld a,(hl)
+234+  8AE2 87               add a,a
+235+  8AE3 87               add a,a
+236+  8AE4 E5               push hl
+237+  8AE5 21 28 89         ld hl,metatiles
+238+  8AE8 C6 03            add a,3
+239+  8AEA ED 31            add hl,a
+240+  8AEC 7E               ld a,(hl)
+241+  8AED E1               pop hl
+242+  8AEE 12               ld (de),a
+243+  8AEF ED 35 28 00      add de,VIEW_WIDTH
+244+  8AF3 ED 34 50 00      add hl,LEVEL_WIDTH_META
+245+  8AF7 10 D6            djnz sr_putcolumn_2nd
+246+  8AF9
+247+  8AF9
+248+  8AF9 3A 7E 89         ld a,(cam_edge_r)
+249+  8AFC 3C               inc a
+250+  8AFD 32 7E 89         ld (cam_edge_r),a
+251+  8B00
+252+  8B00 3E 00            ld a,0
+253+  8B02 32 50 8A         ld (meta_tile_offset),a
+254+  8B05
+255+  8B05 AF               xor a
+256+  8B06 32 7C 89         ld (current_scroll),a
+257+  8B09
+258+  8B09 C9               ret
+259+  8B0A
+260+  8B0A
+261+  8B0A
+262+  8B0A
+263+  8B0A
+264+  8B0A
+265+  8B0A
+266+  8B0A              ; scroll_left:
+267+  8B0A              ;     ld a,LEFT
+268+  8B0A              ;     ld (scroll_direction),a
+269+  8B0A
+270+  8B0A              ;     ld a,(cam_edge_r)
+271+  8B0A              ;     cp LEVEL_START+VIEW_WIDTH+1
+272+  8B0A              ;     jp c, p_move_left
+273+  8B0A
+274+  8B0A              ;     ld a,(cam_edge_r)
+275+  8B0A              ;     sub VIEW_WIDTH
+276+  8B0A              ;     ld (cam_x),a
+277+  8B0A
+278+  8B0A              ;     ld a,(current_scroll)
+279+  8B0A              ;     inc a
+280+  8B0A              ;     cp 8
+281+  8B0A              ;     call z,drawcolumn_left
+282+  8B0A              ;     ld (current_scroll),a
+283+  8B0A              ;     ld b,a
+284+  8B0A              ;     ld a,8
+285+  8B0A              ;     sub b
+286+  8B0A              ;     nextreg $30,a
+287+  8B0A              ;     ret
+288+  8B0A              ; drawcolumn_left:
+289+  8B0A              ;     ; ld hl,$4000+1279
+290+  8B0A              ;     ; ld de,$4001+1279
+291+  8B0A              ;     ld hl,$44FF
+292+  8B0A              ;     ld de,$4500
+293+  8B0A              ;     ld bc,40*32
+294+  8B0A              ;     lddr  ; move whole screen to right 1 tile
+295+  8B0A              ;     ld hl,level1            ; start of tiles
+296+  8B0A              ;     ld a,(cam_x)           ; current cam_edge_r
+297+  8B0A              ;     dec a
+298+  8B0A              ;     add hl,a                ; add this to tile cam_edge_r
+299+  8B0A              ;     ; dec a                   ; dec the cam_edge_r
+300+  8B0A              ;     add a,VIEW_WIDTH
+301+  8B0A              ;     ld (cam_edge_r),a
+302+  8B0A              ;     ld de,$4000              ; top left cell
+303+  8B0A              ;     ld b,VIEW_HEIGHT
+304+  8B0A              ; columnloop_left:
+305+  8B0A              ;     ld a,(hl)                   ; get tile from (hl)
+306+  8B0A              ;     ld (de),a                   ; put in (de)
+307+  8B0A              ;     add de,VIEW_WIDTH                  ; move de to next line
+308+  8B0A              ;     add hl,WORLD_WIDTH          ; move hl to next map line
+309+  8B0A              ;     djnz columnloop_left             ; loop for 32 lines
+310+  8B0A              ;     xor a
+311+  8B0A              ;     ld (current_scroll),a
+312+  8B0A              ;     ret
+313+  8B0A
+314+  8B0A
+315+  8B0A
+316+  8B0A              ; scroll_right:
+317+  8B0A              ;     ld a,RIGHT
+318+  8B0A              ;     ld (scroll_direction),a
+319+  8B0A
+320+  8B0A              ;     ld a,(cam_edge_r)
+321+  8B0A              ;     cp WORLD_WIDTH
+322+  8B0A              ;     jp nc, p_move_right
+323+  8B0A              ;     ld a,(current_scroll)
+324+  8B0A              ;     inc a
+325+  8B0A              ;     cp 8
+326+  8B0A              ;     call z,nowdrawcolumn
+327+  8B0A              ;     ld (current_scroll),a
+328+  8B0A              ;     nextreg $30,a
+329+  8B0A              ;     ret
+330+  8B0A              ; nowdrawcolumn:
+331+  8B0A              ;     ld hl,$4001
+332+  8B0A              ;     ld de,$4000
+333+  8B0A              ;     ld bc,1280
+334+  8B0A              ;     ldir  ; move whole screen to left 1 tile
+335+  8B0A              ;     ld hl,level1            ; start of tiles
+336+  8B0A              ;     ld a,(cam_edge_r)           ; current cam_edge_r
+337+  8B0A              ;     add hl,a                ; add this to tile cam_edge_r
+338+  8B0A              ;     inc a                   ; inc the cam_edge_r
+339+  8B0A              ;     ld (cam_edge_r),a
+340+  8B0A              ;     ld de,$4027              ; top right cell
+341+  8B0A              ;     ld b,VIEW_HEIGHT
+342+  8B0A              ; columnloop:
+343+  8B0A              ;     ld a,(hl)                   ; get tile from (hl)
+344+  8B0A              ;     ld (de),a                   ; put in (de)
+345+  8B0A              ;     add de,VIEW_WIDTH                  ; move de to next line
+346+  8B0A              ;     add hl,WORLD_WIDTH          ; move hl to next map line
+347+  8B0A              ;     djnz columnloop             ; loop for 32 lines
+348+  8B0A              ;     xor a
+349+  8B0A              ;     ld (current_scroll),a
+350+  8B0A              ;     ret
+351+  8B0A
+352+  8B0A
+353+  8B0A
+354+  8B0A
+355+  8B0A
+356+  8B0A
+357+  8B0A
+358+  8B0A
+359+  8B0A
+360+  8B0A
+361+  8B0A
+362+  8B0A
 # file closed: src/levels/levelmanager.asm
- 37   8AE0              	include 'assets\sprites.asm'
+ 37   8B0A              	include 'assets\sprites.asm'
 # file opened: src/assets/sprites.asm
-  1+  8AE0              ; Sprite Attribute 0
-  2+  8AE0              ;     X X X X X X X X
-  3+  8AE0
-  4+  8AE0              ; Sprite Attribute 1
-  5+  8AE0              ;     Y Y Y Y Y Y Y Y
-  6+  8AE0
-  7+  8AE0              ; Sprite Attribute 2
-  8+  8AE0              ;     P P P P XM YM R X8/PR
-  9+  8AE0
- 10+  8AE0              ; Sprite Attribute 3
- 11+  8AE0              ;     V E N5 N4 N3 N2 N1 N0 (NNNNN=Pattern ID)
- 12+  8AE0
- 13+  8AE0              ; Sprite Attribute 4
- 14+  8AE0              ; A. Extended Anchor Sprite
- 15+  8AE0              ;     H N6 T X X Y Y Y8
- 16+  8AE0              ; B. Relative Sprite, Composite Type
- 17+  8AE0              ;     0 1 N6 X X Y Y PO
- 18+  8AE0              ; C. Relative Sprite, Unified Type
- 19+  8AE0              ;     0 1 N6 0 0 0 0 PO
- 20+  8AE0
- 21+  8AE0
- 22+  8AE0
+  1+  8B0A              ; Sprite Attribute 0
+  2+  8B0A              ;     X X X X X X X X
+  3+  8B0A
+  4+  8B0A              ; Sprite Attribute 1
+  5+  8B0A              ;     Y Y Y Y Y Y Y Y
+  6+  8B0A
+  7+  8B0A              ; Sprite Attribute 2
+  8+  8B0A              ;     P P P P XM YM R X8/PR
+  9+  8B0A
+ 10+  8B0A              ; Sprite Attribute 3
+ 11+  8B0A              ;     V E N5 N4 N3 N2 N1 N0 (NNNNN=Pattern ID)
+ 12+  8B0A
+ 13+  8B0A              ; Sprite Attribute 4
+ 14+  8B0A              ; A. Extended Anchor Sprite
+ 15+  8B0A              ;     H N6 T X X Y Y Y8
+ 16+  8B0A              ; B. Relative Sprite, Composite Type
+ 17+  8B0A              ;     0 1 N6 X X Y Y PO
+ 18+  8B0A              ; C. Relative Sprite, Unified Type
+ 19+  8B0A              ;     0 1 N6 0 0 0 0 PO
+ 20+  8B0A
+ 21+  8B0A
+ 22+  8B0A
 # file closed: src/assets/sprites.asm
- 38   8AE0
- 39   8AE0
- 40   8AE0              	include 'loadbins.asm'
+ 38   8B0A
+ 39   8B0A
+ 40   8B0A              	include 'loadbins.asm'
 # file opened: src/loadbins.asm
-  1+  8AE0
-  2+  8AE0
-  3+  8AE0              ;;;;;Tiles
-  4+  8AE0
-  5+  8AE0
-  6+  8AE0
-  7+  8AE0
-  8+  8AE0
-  9+  8AE0              caveman_palette:
- 10+  8AE0                  incbin 'assets/cavemantiles.nxp',0
- 11+  8AFA
- 12+  8AFA                  MMU 6,16
- 13+  8AFA                  org $c000
+  1+  8B0A
+  2+  8B0A
+  3+  8B0A              ;;;;;Tiles
+  4+  8B0A
+  5+  8B0A
+  6+  8B0A
+  7+  8B0A
+  8+  8B0A
+  9+  8B0A              caveman_palette:
+ 10+  8B0A                  incbin 'assets/cavemantiles.nxp',0
+ 11+  8B24
+ 12+  8B24                  MMU 6,16
+ 13+  8B24                  org $c000
  14+  C000
  15+  C000                  incbin 'assets/cavemantiles.til',0,TILE_DEFINITIONS_SIZE
  16+  D000

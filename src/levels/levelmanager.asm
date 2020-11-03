@@ -168,36 +168,50 @@ scroll_right:
     cp 8
     ld (current_scroll),a
     call z,sr_scrollmax
+    ld (current_scroll),a
     nextreg $30,a
     ret
 sr_scrollmax:
     ld hl,LEVEL_Y_START_ADDRESS+1
     ld de,LEVEL_Y_START_ADDRESS
-    ld bc,640
+    ld bc,20*32
     ldir
     ld hl,metalevel
     ld a,(cam_edge_r)
     add hl,a
     ld de,LEVEL_Y_START_ADDRESS+39 ;top right cell
     ld b,LEVEL_HEIGHT_META
+    
     ld a,(meta_tile_offset)
     cp 0
     jp z,sr_putcolumn
     jp nz,sr_putcolumn_2nd
 sr_putcolumn:
     ld a,(hl)
+    add a,a
+    add a,a
+    push hl
+    ld hl,metatiles
+    add hl,a
+    ld a,(hl)
+    pop hl
     ld (de),a
     add de,VIEW_WIDTH
-    inc hl
-    inc hl
     ld a,(hl)
+    add a,a
+    add a,a
+    push hl
+    ld hl,metatiles
+    add a,2
+    add hl,a
+    ld a,(hl)
+    pop hl
     ld (de),a
     add de,VIEW_WIDTH
     add hl,LEVEL_WIDTH_META
     djnz sr_putcolumn
     
-    ld a,(meta_tile_offset)
-    xor 1
+    ld a,1
     ld (meta_tile_offset),a
 
     xor a
@@ -205,23 +219,37 @@ sr_putcolumn:
 
     ret
 sr_putcolumn_2nd:
-    inc hl
     ld a,(hl)
+    add a,a
+    add a,a
+    push hl
+    ld hl,metatiles
+    add a,1
+    add hl,a
+    ld a,(hl)
+    pop hl
     ld (de),a
     add de,VIEW_WIDTH
-    inc hl
-    inc hl
     ld a,(hl)
+    add a,a
+    add a,a
+    push hl
+    ld hl,metatiles
+    add a,3
+    add hl,a
+    ld a,(hl)
+    pop hl
     ld (de),a
+    add de,VIEW_WIDTH
     add hl,LEVEL_WIDTH_META
-    djnz sr_putcolumn
+    djnz sr_putcolumn_2nd
 
+    
     ld a,(cam_edge_r)
     inc a
     ld (cam_edge_r),a
     
-    ld a,(meta_tile_offset)
-    xor 1
+    ld a,0
     ld (meta_tile_offset),a
 
     xor a
