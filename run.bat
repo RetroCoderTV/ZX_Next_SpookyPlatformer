@@ -6,5 +6,5 @@ if not errorlevel 1 (
 	C:\Dev\ZXNext\bin\CSpect.exe -r -brk -zxnext -nextrom -tv -basickeys -vsync -sound -map=main.map -mmc=C:\Dev\ZXNext\sdcard\somename.img
 )
 else(
-PAUSE
+@REM PAUSE
 )

@@ -39,14 +39,15 @@ tiles_init:
     ld bc,TILE_DEFINITIONS_SIZE
     ldir
 
-    nextreg $6b, %10100000
+    nextreg $6b, %10000000
     nextreg $6c, 0
     nextreg $6e, $40
     nextreg $6f, $60
     nextreg $68, %10000000
     nextreg $43, %00110000
 
- 
+    ; ld a,3
+    
     xor a ;black
     nextreg $4c,a ;tilemap transparency colour 
     nextreg $14,a; global transparency colour
@@ -65,8 +66,19 @@ layer2_update:
     ld a,h
     nextreg $71, a
     inc hl
+    inc hl
+
     ld (test_layer2_scroll),hl
-    ret
+    cp 0
+    ret z
+
+    ld a,l
+    cp low 320
+    ret nz
+
+    ld hl,0
+    ld (test_layer2_scroll),hl
+    ret 
 
 
 
@@ -90,9 +102,8 @@ uploadpal:
 
 ;does 2 passes per 'map' line, due to 2 rows within each supertile
 view_init:
-    ld ix,metalevel
-    ; ld de,$4000
-    ld de,LEVEL_Y_START_ADDRESS
+    ld ix,metalevel ;point at level 'map' (in meta tiles)
+    ld de,$4500 ;
     ld c,0
 view_init_screen:
     ld b,VIEW_WIDTH_META
@@ -102,6 +113,15 @@ view_init_line_pass1:
     add a,a
     add a,a ;A*4 (metatile size)
     add hl,a
+    add hl,a ;add twice to hl because metatile elements are 2 bytes each
+    ld a,(hl)
+    ld (de),a
+    inc hl
+    inc de
+    ld a,(hl)
+    ld (de),a
+    inc hl
+    inc de
     ld a,(hl)
     ld (de),a
     inc hl
@@ -122,8 +142,17 @@ view_init_line_pass2:
     add a,a
     add a,a ;A*4 (metatile size)
     add hl,a
+    add hl,a
+    ld a,4
+    add hl,a
+    ld a,(hl)
+    ld (de),a
     inc hl
+    inc de
+    ld a,(hl)
+    ld (de),a
     inc hl
+    inc de
     ld a,(hl)
     ld (de),a
     inc hl
@@ -133,6 +162,7 @@ view_init_line_pass2:
     inc de
     inc ix
     djnz view_init_line_pass2
+
     push de
     ld de,LEVEL_WIDTH_META-VIEW_WIDTH_META
     add ix,de
@@ -150,6 +180,14 @@ meta_tile_offset db 0
 scroll_left:
     ret
 
+; AB  (meta tile "a")
+; CD
+; EF (meta tile "b")
+; GH
+
+; .. you draw only:
+; A
+; E
 scroll_right:
     ld a,RIGHT
     ld (scroll_direction),a
@@ -167,48 +205,59 @@ scroll_right:
     cp 8
     ld (current_scroll),a
     call z,sr_scrollmax
-    ld (current_scroll),a
+    ld a,(current_scroll)
     nextreg $30,a
     ret
 sr_scrollmax:
-    ld hl,LEVEL_Y_START_ADDRESS+1
+    ld hl,LEVEL_Y_START_ADDRESS+2
     ld de,LEVEL_Y_START_ADDRESS
-    ld bc,20*32
+    ld bc,20*32*2
     ldir
+
     ld hl,metalevel
     ld a,(cam_edge_r)
     add hl,a
-    ld de,LEVEL_Y_START_ADDRESS+39 ;top right cell
+    ld de,LEVEL_Y_START_ADDRESS+78
     ld b,LEVEL_HEIGHT_META
-    
+
     ld a,(meta_tile_offset)
-    cp 0
-    jp z,sr_putcolumn
-    jp nz,sr_putcolumn_2nd
-sr_putcolumn:
+    cp 0 
+    jp z,sr_putcolumn1
+    jp nz,sr_putcolumn2
+sr_putcolumn1:
     ld a,(hl)
     add a,a
     add a,a
     push hl
     ld hl,metatiles
     add hl,a
+    add hl,a
+    ld a,(hl) 
+    ld (de),a ;Aa
+    inc hl
+    inc de
     ld a,(hl)
+    ld (de),a ;Ab   
     pop hl
-    ld (de),a
-    add de,VIEW_WIDTH
+    add de,(VIEW_WIDTH*2)-1 ;WIDTH-1
     ld a,(hl)
     add a,a
     add a,a
     push hl
     ld hl,metatiles
-    add a,2
+    add hl,a
+    add a,4
     add hl,a
     ld a,(hl)
+    ld (de),a ;Ca
+    inc hl
+    inc de
+    ld a,(hl)
+    ld (de),a ;Ca   
     pop hl
-    ld (de),a
-    add de,VIEW_WIDTH
+    add de,(VIEW_WIDTH*2)-1
     add hl,LEVEL_WIDTH_META
-    djnz sr_putcolumn
+    djnz sr_putcolumn1
     
     ld a,1
     ld (meta_tile_offset),a
@@ -217,44 +266,193 @@ sr_putcolumn:
     ld (current_scroll),a
 
     ret
-sr_putcolumn_2nd:
+sr_putcolumn2:
     ld a,(hl)
     add a,a
     add a,a
     push hl
     ld hl,metatiles
-    add a,1
+    add hl,a
+    add a,2
     add hl,a
     ld a,(hl)
+    ld (de),a ;Ba
+    inc hl
+    inc de
+    ld a,(hl)
+    ld (de),a ;Bb   
     pop hl
-    ld (de),a
-    add de,VIEW_WIDTH
+    add de,(VIEW_WIDTH*2)-1 ;WIDTH-1
     ld a,(hl)
     add a,a
     add a,a
     push hl
     ld hl,metatiles
-    add a,3
+    add hl,a
+    add a,6
     add hl,a
     ld a,(hl)
+    ld (de),a ;Da
+    inc hl
+    inc de
+    ld a,(hl)
+    ld (de),a ;Db   
     pop hl
-    ld (de),a
-    add de,VIEW_WIDTH
+    add de,(VIEW_WIDTH*2)-1
     add hl,LEVEL_WIDTH_META
-    djnz sr_putcolumn_2nd
-
+    djnz sr_putcolumn2
     
+   
+    ld a,0
+    ld (meta_tile_offset),a
+
+
     ld a,(cam_edge_r)
     inc a
     ld (cam_edge_r),a
-    
-    ld a,0
-    ld (meta_tile_offset),a
 
     xor a
     ld (current_scroll),a
 
     ret
+
+
+
+
+
+
+
+
+
+
+
+
+
+; scroll_right_old:
+;     ld a,RIGHT
+;     ld (scroll_direction),a
+
+;     ld a,(cam_edge_r)
+;     sub VIEW_WIDTH_META
+;     ld (cam_x),a
+
+;     ld a,(cam_edge_r)
+;     cp LEVEL_WIDTH_META
+;     jp nc, p_move_right
+
+;     ld a,(current_scroll)
+;     inc a
+;     cp 8
+;     ld (current_scroll),a
+;     call z,sr_scrollmax
+;     ld (current_scroll),a
+;     nextreg $30,a
+;     ret
+; sr_scrollmax:
+;     ld hl,LEVEL_Y_START_ADDRESS+1
+;     ld de,LEVEL_Y_START_ADDRESS
+;     ld bc,20*32
+;     ldir
+;     ld hl,metalevel
+;     ld a,(cam_edge_r)
+;     add hl,a
+;     ld de,LEVEL_Y_START_ADDRESS+39 ;top right cell
+;     ld b,LEVEL_HEIGHT_META
+    
+;     ld a,(meta_tile_offset)
+;     cp 0
+;     jp z,sr_putcolumn
+;     jp nz,sr_putcolumn_2nd
+; sr_putcolumn:
+;     ld a,(hl)
+;     add a,a
+;     add a,a ;A*4
+;     push hl
+;     ld hl,metatiles
+;     add hl,a
+;     add hl,a
+;     ld a,(hl)
+;     ld (de),a
+;     inc hl
+;     inc de
+;     ld a,(hl)
+;     pop hl
+;     ld (de),a
+;     add de,VIEW_WIDTH-1
+;     ld a,(hl)
+;     add a,a
+;     add a,a ;A*4
+;     push hl
+;     ld hl,metatiles
+;     add hl,a
+;     add a,4 ; halfway thru the metatile
+;     add hl,a
+;     ld a,(hl)
+;     ld (de),a
+;     inc hl
+;     inc de
+;     ld a,(hl)
+;     pop hl
+;     ld (de),a
+;     add de,VIEW_WIDTH-1
+;     add hl,LEVEL_WIDTH_META
+;     djnz sr_putcolumn
+    
+;     ld a,1
+;     ld (meta_tile_offset),a
+
+;     xor a
+;     ld (current_scroll),a
+
+;     ret
+; sr_putcolumn_2nd:
+;    ld a,(hl)
+;     add a,a
+;     add a,a ;A*4
+;     push hl
+;     ld hl,metatiles
+;     add hl,a
+;     add a,2
+;     add hl,a
+;     ld a,(hl)
+;     ld (de),a
+;     inc hl
+;     inc de
+;     ld a,(hl)
+;     pop hl
+;     ld (de),a
+;     add de,VIEW_WIDTH-1
+;     ld a,(hl)
+;     add a,a
+;     add a,a ;A*4
+;     push hl
+;     ld hl,metatiles
+;     add hl,a
+;     add a,6 ; halfway thru the metatile
+;     add hl,a
+;     ld a,(hl)
+;     ld (de),a
+;     inc hl
+;     inc de
+;     ld a,(hl)
+;     pop hl
+;     ld (de),a
+;     add de,VIEW_WIDTH-1
+;     add hl,LEVEL_WIDTH_META
+;     djnz sr_putcolumn_2nd
+
+    
+;     ld a,(cam_edge_r)
+;     inc a
+;     ld (cam_edge_r),a
+    
+;     ld a,0
+;     ld (meta_tile_offset),a
+
+;     xor a
+;     ld (current_scroll),a
+
+;     ret
 
 
 

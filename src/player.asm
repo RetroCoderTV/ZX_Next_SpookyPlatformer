@@ -507,12 +507,13 @@ check_collision_jumping:
 
 collided_jumping:
     
-    ; ld a,(player_world_y)
-    ; add a,a
-    ; add a,a
-    ; add a,a
-    ; add a,a
-    ; ld (py),a
+    ;snap to nearest cell
+    ld a,(player_world_y)
+    add a,a
+    add a,a
+    add a,a
+    add a,a
+    ld (py),a
    
     ld a,(player_jump_direction)
     cp UP
