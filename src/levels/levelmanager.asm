@@ -41,8 +41,8 @@ tiles_init:
 
     nextreg $6b, %10000000
     nextreg $6c, 0
-    nextreg $6e, $40
-    nextreg $6f, $60
+    nextreg $6e, high $4000
+    nextreg $6f, high $6000
     nextreg $68, %10000000
     nextreg $43, %00110000
 
@@ -103,8 +103,15 @@ uploadpal:
 
 ;does 2 passes per 'map' line, due to 2 rows within each supertile
 view_init:
+    ; clear top half of tilemap with zeroes (that's [0 tile + 0 attribute], 40*16 block)
+    ld hl,$4000
+    ld de,$4001
+    ld bc,$500-1
+    ld (hl),l
+    ldir
+    ; end with DE == $4500 for rest of the view_init
+
     ld ix,metalevel ;point at level 'map' (in meta tiles)
-    ld de,$4500 ;
     ld c,0
 view_init_screen:
     ld b,VIEW_WIDTH_META
@@ -203,12 +210,10 @@ scroll_right:
 
     ld a,(current_scroll)
     inc a
-    cp 8
+    and 7
     ld (current_scroll),a
-    call z,sr_scrollmax
-    ld a,(current_scroll)
     nextreg $30,a
-    ret
+    ret nz
 sr_scrollmax:
     ld hl,LEVEL_Y_START_ADDRESS+2
     ld de,LEVEL_Y_START_ADDRESS
@@ -219,102 +224,59 @@ sr_scrollmax:
     ld a,(cam_edge_r)
     add hl,a
     ld de,LEVEL_Y_START_ADDRESS+78
-    ld b,LEVEL_HEIGHT_META
+    ld b,LEVEL_HEIGHT_META+1    ; +1 for `ldi` turning C=0 -> C=$FF and --B at first byte
+    ; then less than 255 bytes is copied further, so B works as LEVEL_HEIGHT_META counter
 
     ld a,(meta_tile_offset)
-    cp 0 
-    jp z,sr_putcolumn1
-    jp nz,sr_putcolumn2
-sr_putcolumn1:
-    ld a,(hl)
-    add a,a
-    add a,a
-    push hl
-    ld hl,metatiles
-    add hl,a
-    add hl,a
-    ld a,(hl) 
-    ld (de),a ;Aa
-    inc hl
-    inc de
-    ld a,(hl)
-    ld (de),a ;Ab   
-    pop hl
-    add de,(VIEW_WIDTH*2)-1 ;WIDTH-1
-    ld a,(hl)
-    add a,a
-    add a,a
-    push hl
-    ld hl,metatiles
-    add hl,a
-    add a,4
-    add hl,a
-    ld a,(hl)
-    ld (de),a ;Ca
-    inc hl
-    inc de
-    ld a,(hl)
-    ld (de),a ;Ca   
-    pop hl
-    add de,(VIEW_WIDTH*2)-1
-    add hl,LEVEL_WIDTH_META
-    djnz sr_putcolumn1
-    
-    ld a,1
+    xor 1
     ld (meta_tile_offset),a
+    jp z,sr_putcolumn2      ; was 1, so do second column
 
-    xor a
-    ld (current_scroll),a
-
+sr_putcolumn1_loop:
+    ld a,(hl)
+    push hl
+    ld hl,metatiles
+    add a,a
+    add a,a
+    add hl,a
+    add hl,a        ; HL = metatile data, top-left tile
+    ldi             ; 2B copy from HL to DE, 2x inc hl/de, 2x dec bc (B adjusted for it)
+    ldi             ; top tile written
+    add de,(VIEW_WIDTH*2)-2
+    inc hl
+    inc hl          ; skip to correct bottom tile
+    ldi             ; 2B copy from HL to DE, 2x inc hl/de, 2x dec bc (B adjusted for it)
+    ldi             ; bottom tile written
+    add de,(VIEW_WIDTH*2)-2
+    pop hl
+    add hl,LEVEL_WIDTH_META
+    djnz sr_putcolumn1_loop
     ret
+
 sr_putcolumn2:
-    ld a,(hl)
-    add a,a
-    add a,a
-    push hl
-    ld hl,metatiles
-    add hl,a
-    add a,2
-    add hl,a
-    ld a,(hl)
-    ld (de),a ;Ba
-    inc hl
-    inc de
-    ld a,(hl)
-    ld (de),a ;Bb   
-    pop hl
-    add de,(VIEW_WIDTH*2)-1 ;WIDTH-1
-    ld a,(hl)
-    add a,a
-    add a,a
-    push hl
-    ld hl,metatiles
-    add hl,a
-    add a,6
-    add hl,a
-    ld a,(hl)
-    ld (de),a ;Da
-    inc hl
-    inc de
-    ld a,(hl)
-    ld (de),a ;Db   
-    pop hl
-    add de,(VIEW_WIDTH*2)-1
-    add hl,LEVEL_WIDTH_META
-    djnz sr_putcolumn2
-    
-   
-    ld a,0
-    ld (meta_tile_offset),a
-
-
     ld a,(cam_edge_r)
     inc a
     ld (cam_edge_r),a
 
-    xor a
-    ld (current_scroll),a
-
+sr_putcolumn2_loop:
+    ld a,(hl)
+    push hl
+    ld hl,metatiles+2
+    add a,a
+    add a,a
+    add hl,a
+    add hl,a        ; HL = metatile data, top-right tile
+    ldi             ; 2B copy from HL to DE, 2x inc hl/de, 2x dec bc (B adjusted for it)
+    ldi             ; top tile written
+    add de,(VIEW_WIDTH*2)-2
+    inc hl
+    inc hl          ; skip to correct bottom tile
+    ldi             ; 2B copy from HL to DE, 2x inc hl/de, 2x dec bc (B adjusted for it)
+    ldi             ; bottom tile written
+    add de,(VIEW_WIDTH*2)-2
+    pop hl
+    add hl,LEVEL_WIDTH_META
+    djnz sr_putcolumn2_loop
     ret
 
 
