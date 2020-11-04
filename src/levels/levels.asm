@@ -1,7 +1,8 @@
 ; another way to check solids (if not in order)
 meta_solids:
     db 17,19
-SOLIDS_LENGTH equ 2
+    db 17+32,19+32
+SOLIDS_LENGTH equ 4
 check_solid:
     ld hl,meta_solids
     ld bc,SOLIDS_LENGTH

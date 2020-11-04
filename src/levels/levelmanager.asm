@@ -73,11 +73,12 @@ layer2_update:
     ret z
 
     ld a,l
-    cp low 320
+    cp low 320 ;sjasm - gives the low byte needed for value 320
     ret nz
 
     ld hl,0
     ld (test_layer2_scroll),hl
+
     ret 
 
 

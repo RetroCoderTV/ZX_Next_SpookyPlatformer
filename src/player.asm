@@ -211,7 +211,7 @@ player_update_walking:
 
     
 
-    ; ; ; ; ; ; ; ; ; call check_grounded
+    call check_grounded
 
     ret
 
@@ -246,7 +246,7 @@ player_update_jumping:
     call z,plyr_move_right_start
 
     call player_calculate_world_position
-    ; ; ; ; ; ; ; call check_collision_feet
+
     call check_collision_jumping
     
     ld a,(player_jump_point)
@@ -519,6 +519,7 @@ collided_jumping:
     cp UP
     ret z
 
+    ;collided
     ld a,WALKING
     ld (player_animation_state),a
     ld hl,0
@@ -527,86 +528,46 @@ collided_jumping:
     
     ret
 
-; check_collision_feet:
-;     ld a,(player_animation_state)
-;     cp JUMPING
-;     ret nz
-
-;     ld a,(player_jump_direction)
-;     cp DOWN
-;     ret nz
-
-;     ; ld hl,level1
-;     ; ld a,(player_world_y)
-;     ; add a,4
-;     ; ld d,a
-;     ; ld e,WORLD_WIDTH
-;     ; mul d,e
-;     ; add hl,de
-;     ; ld a,(player_world_x)
-;     ; ld e,a
-;     ; ld d,0
-;     ; add hl,de
-;     ; ld a,(hl)
-;     ; cp 12
-;     ; jp c,collided_solid_feet
-
-;     ld hl,level1
-;     ld a,(player_world_y)
-;     add a,4
-;     ld d,a
-;     ld e,WORLD_WIDTH
-;     mul d,e
-;     add hl,de
-;     ld a,(player_world_x)
-;     add a,1
-;     ld e,a
-;     ld d,0
-;     add hl,de
-;     ld a,(hl)
-;     cp 12
-;     jp c,collided_solid_feet
-
-;     ld hl,level1
-;     ld a,(player_world_y)
-;     add a,4
-;     ld d,a
-;     ld e,WORLD_WIDTH
-;     mul d,e
-;     add hl,de
-;     ld a,(player_world_x)
-;     add a,2
-;     ld e,a
-;     ld d,0
-;     add hl,de
-;     ld a,(hl)
-;     cp 12
-;     jp c,collided_solid_feet
-
-;     ; ld hl,level1
-;     ; ld a,(player_world_y)
-;     ; add a,4
-;     ; ld d,a
-;     ; ld e,WORLD_WIDTH
-;     ; mul d,e
-;     ; add hl,de
-;     ; ld a,(player_world_x)
-;     ; add a,3
-;     ; ld e,a
-;     ; ld d,0
-;     ; add hl,de
-;     ; ld a,(hl)
-;     ; cp 12
-;     ; jp c,collided_solid_feet
-
-;     ret
 
 
+check_grounded:
+    ld a,(player_jump_direction)
+    cp DOWN
+    ret nz
 
 
+    ld hl,metalevel
+    ld a,(player_world_y)
+    cp 7
+    ret c
+    sub 7
+    ld d,a
+    ld e,LEVEL_WIDTH_META
+    mul d,e
+    add hl,de
+    ld a,(player_world_x)
+    ld e,a
+    ld d,0
+    add hl,de
+    ld a,(hl)
+    call check_solid
+    jp z,collided_true
 
+    jp collided_false
+collided_true:
+    ld a,TRUE
+    ld (player_grounded),a 
+    ret
 
-
+collided_false:
+    ld a,FALSE
+    ld (player_grounded),a
+    ;set mode to jumping>down
+    ld a,JUMPING
+    ld (player_animation_state),a
+    ld a,DOWN
+    ld (player_jump_direction),a
+    ret
 
 
 ; check_grounded:
@@ -629,53 +590,7 @@ collided_jumping:
 ;     cp 12
 ;     jp c,player_set_grounded ;if under 12, the tile is solid
 
-;     ld hl,level1
-;     ld a,(player_world_y)
-;     add a,5
-;     ld d,a
-;     ld e,WORLD_WIDTH
-;     mul d,e
-;     add hl,de
-;     ld a,(player_world_x)
-;     add a,1
-;     ld e,a
-;     ld d,0
-;     add hl,de
-;     ld a,(hl)
-;     cp 12
-;     jp c,player_set_grounded ;if under 12, the tile is solid
 
-;     ld hl,level1
-;     ld a,(player_world_y)
-;     add a,5
-;     ld d,a
-;     ld e,WORLD_WIDTH
-;     mul d,e
-;     add hl,de
-;     ld a,(player_world_x)
-;     add a,2
-;     ld e,a
-;     ld d,0
-;     add hl,de
-;     ld a,(hl)
-;     cp 12
-;     jp c,player_set_grounded ;if under 12, the tile is solid
-
-;     ld hl,level1
-;     ld a,(player_world_y)
-;     add a,5
-;     ld d,a
-;     ld e,WORLD_WIDTH
-;     mul d,e
-;     add hl,de
-;     ld a,(player_world_x)
-;     add a,3
-;     ld e,a
-;     ld d,0
-;     add hl,de
-;     ld a,(hl)
-;     cp 12
-;     jp c,player_set_grounded ;if under 12, the tile is solid
 
 ;     ;else not grounded:
 ;     ld a,FALSE
