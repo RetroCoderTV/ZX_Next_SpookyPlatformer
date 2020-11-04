@@ -570,68 +570,6 @@ collided_false:
     ret
 
 
-; check_grounded:
-;     ld a,(player_jump_direction)
-;     cp UP
-;     ret z
-
-;     ld hl,level1
-;     ld a,(player_world_y)
-;     add a,5
-;     ld d,a
-;     ld e,WORLD_WIDTH
-;     mul d,e
-;     add hl,de
-;     ld a,(player_world_x)
-;     ld e,a
-;     ld d,0
-;     add hl,de
-;     ld a,(hl)
-;     cp 12
-;     jp c,player_set_grounded ;if under 12, the tile is solid
-
-
-
-;     ;else not grounded:
-;     ld a,FALSE
-;     ld (player_grounded),a
-;     ;set mode to jumping>down
-;     ld a,JUMPING
-;     ld (player_animation_state),a
-;     ld a,DOWN
-;     ld (player_jump_direction),a
-
-;     ret
-
-
-
-; player_set_grounded:
-;     ld a,TRUE
-;     ld (player_grounded),a
-;     ret
-
-
-; collided_solid_feet:
-;     ld a,(player_world_y)
-;     add a,a
-;     add a,a
-;     add a,a
-;     ld (py),a
-   
-;     ld a,(player_jump_direction)
-;     cp UP
-;     ret z
-
-;     ld a,WALKING
-;     ld (player_animation_state),a
-;     ld hl,0
-;     ld (vy),hl
-
-    
-;     ret
-
-
-
 ; check_collision_left:
 ;     ld hl,level1
 ;     ld a,(player_world_y)
