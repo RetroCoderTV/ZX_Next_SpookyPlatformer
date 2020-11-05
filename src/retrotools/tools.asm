@@ -85,7 +85,7 @@ PlotTile8:
 
 		ld d,64
 		ld e,a					; 11
-		mul					
+		mul de
 
 		ld a,%11000000 			; this points to $c000 
 		or d		 			; 8

@@ -1,3 +1,16 @@
+
+    OPT --syntax=abfw     ; recommended sub-syntax of current sjasmplus
+    ; "a" - multi-arguments for instructions require double-comma, i.e. `push hl,,de,,bc`
+    ;     - this helps to avoid common pitfalls like `sub a,a` becoming 2x `sub a` in default syntax
+    ;     - making it single "sub a from a" and enabling non-Zilog syntax `sub a,...`
+    ; "b" - whole expression parentheses are legal for memory access only
+    ;     - things like "ld b,(variable)" will become errors, as there's only ld b,immediate
+    ;     - for regular expression parentheses you can disambiguate `ld b,+(1+2+3)` by unary +
+    ; "f" - warn about fake instructions of sjasmplus (if used by accident)
+    ;     - to use them intentionally, use comment to suppress warning: `ld hl,de ; fake`
+    ;     - one extra warning from this class is Z80N extension `mul`, requiring explicit argument `mul de` or `mul d,e`
+    ; "w" - report warnings as errors
+
     org 0x8000
 
     DEVICE ZXSPECTRUMNEXT
