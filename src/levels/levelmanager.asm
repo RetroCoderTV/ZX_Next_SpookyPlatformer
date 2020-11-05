@@ -188,14 +188,7 @@ meta_tile_offset db 0
 scroll_left:
     ret
 
-; AB  (meta tile "a")
-; CD
-; EF (meta tile "b")
-; GH
 
-; .. you draw only:
-; A
-; E
 scroll_right:
     ld a,RIGHT
     ld (scroll_direction),a
