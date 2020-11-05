@@ -3,7 +3,7 @@
 
 
 
-PLAYER_SLOT equ 58
+PLAYER_SLOT equ 20
 
 PLAYER_DEFAULT_ATTR3 equ %11000000
 
@@ -20,7 +20,7 @@ player_world_y db 0
 
 px dw 48
 py db 0
-player_attr_2 db %00001000
+player_attr_2 db %00000000
 player_attr_3 db PLAYER_DEFAULT_ATTR3
 player_attr_4 db %00100000
 
@@ -65,44 +65,16 @@ player_init:
 
 
 draw_debug_sprite:
-    ; ld a,33
-    ; nextreg $34,a
 
-    ; ;attr 0
-    ; ld a,(player_world_x)
-    ; add a,a
-    ; add a,a
-    ; add a,a
-    ; add a,a
-    ; nextreg $35,a
-
-    ; ;attr 1
-    ; ld a,(player_world_y)
-    ; add a,a
-    ; add a,a
-    ; add a,a
-    ; add a,a
-    ; nextreg $36,a
-
-    ; ;attr 2
-    ; ld a,0
-    ; nextreg $37,a
-
-    ; ;attr 3
-    ; ld a,%10000000
-    ; nextreg $38,a
     ret
 
 player_init_sprites:
     ld a,PLAYER_SLOT
     nextreg $34,a
 
-    ;Ox
-    ;xx
-
+    ;Axx
     ;xxx
     ;xxx
-    ;xOx
 
     ;attr 0
     ld a,(px)
@@ -131,9 +103,9 @@ player_init_sprites:
     ;relative sprites...
 
     ;r1:
-    ; x0
-    ; xx
-    ;
+    ;ARx
+    ;xxx
+    ;xxx
 
     ld a,PLAYER_SLOT+1
     nextreg $34,a
@@ -159,17 +131,19 @@ player_init_sprites:
     nextreg $39,a
 
     ;r2:
-    ;xx
-    ;0x
+    ;AxR
+    ;xxx
+    ;xxx
+
     ld a,PLAYER_SLOT+2
     nextreg $34,a
     
     ;a0
-    ld a,0
+    ld a,32
     nextreg $35,a
 
     ;a1
-    ld a,16
+    ld a,0
     nextreg $36,a
 
     ;a2
@@ -185,9 +159,37 @@ player_init_sprites:
     nextreg $39,a
 
     ;r3:
-    ;xx
-    ;x0
+    ;Axx
+    ;Rxx
+    ;xxx
     ld a,PLAYER_SLOT+3
+    nextreg $34,a
+    
+    ;a0
+    ld a,0
+    nextreg $35,a
+
+    ;a1
+    ld a,16
+    nextreg $36,a
+
+    ;a2
+    ld a,%00000001
+    nextreg $37,a
+
+    ;a3
+    ld a,%11000011
+    nextreg $38,a
+
+    ;a4
+    ld a,%01000001
+    nextreg $39,a
+
+    ;r4:
+    ;Axx
+    ;xRx
+    ;xxx
+    ld a,PLAYER_SLOT+4
     nextreg $34,a
     
     ;a0
@@ -203,7 +205,115 @@ player_init_sprites:
     nextreg $37,a
 
     ;a3
-    ld a,%11000011
+    ld a,%11000100
+    nextreg $38,a
+
+    ;a4
+    ld a,%01000001
+    nextreg $39,a
+
+    ;r5:
+    ;Axx
+    ;xxR
+    ;xxx
+    ld a,PLAYER_SLOT+5
+    nextreg $34,a
+    
+    ;a0
+    ld a,32
+    nextreg $35,a
+
+    ;a1
+    ld a,16
+    nextreg $36,a
+
+    ;a2
+    ld a,%00000001
+    nextreg $37,a
+
+    ;a3
+    ld a,%11000101
+    nextreg $38,a
+
+    ;a4
+    ld a,%01000001
+    nextreg $39,a
+
+    ;r6:
+    ;Axx
+    ;xxx
+    ;Rxx
+    ld a,PLAYER_SLOT+6
+    nextreg $34,a
+    
+    ;a0
+    ld a,0
+    nextreg $35,a
+
+    ;a1
+    ld a,32
+    nextreg $36,a
+
+    ;a2
+    ld a,%00000001
+    nextreg $37,a
+
+    ;a3
+    ld a,%11000110
+    nextreg $38,a
+
+    ;a4
+    ld a,%01000001
+    nextreg $39,a
+
+    ;r7:
+    ;Axx
+    ;xxx
+    ;xRx
+    ld a,PLAYER_SLOT+7
+    nextreg $34,a
+    
+    ;a0
+    ld a,16
+    nextreg $35,a
+
+    ;a1
+    ld a,32
+    nextreg $36,a
+
+    ;a2
+    ld a,%00000001
+    nextreg $37,a
+
+    ;a3
+    ld a,%11000111
+    nextreg $38,a
+
+    ;a4
+    ld a,%01000001
+    nextreg $39,a
+
+    ;r8:
+    ;Axx
+    ;xxx
+    ;xxR
+    ld a,PLAYER_SLOT+8
+    nextreg $34,a
+    
+    ;a0
+    ld a,32
+    nextreg $35,a
+
+    ;a1
+    ld a,32
+    nextreg $36,a
+
+    ;a2
+    ld a,%00000001
+    nextreg $37,a
+
+    ;a3
+    ld a,%11001000
     nextreg $38,a
 
     ;a4
@@ -357,10 +467,10 @@ plyr_move_left_start:
 
     ld a,(player_attr_2)
     bit 3,a
-    jp z,plyr_move_left
+    jp nz,plyr_move_left
 
     ld a,(player_attr_2)
-    res 3,a
+    set 3,a
     ld (player_attr_2),a
 
     ld hl,(px)
@@ -400,10 +510,10 @@ plyr_move_right_start:
 
     ld a,(player_attr_2)
     bit 3,a
-    jp nz,plyr_move_right
+    jp z,plyr_move_right
 
     ld a,(player_attr_2)
-    set 3,a
+    res 3,a
     ld (player_attr_2),a
 
     ld hl,(px)
@@ -550,9 +660,9 @@ check_collision_jumping:
 
     ld hl,metalevel
     ld a,(player_world_y)
-    cp 6
+    cp 5
     ret c
-    sub 6
+    sub 5
     ld d,a
     ld e,LEVEL_WIDTH_META
     mul d,e
