@@ -272,7 +272,7 @@
    3+ 8092
    4+ 8092
    5+ 8092
-   6+ 8092              PLAYER_SLOT equ 20
+   6+ 8092              PLAYER_SLOT equ 50
    7+ 8092
    8+ 8092              PLAYER_DEFAULT_ATTR3 equ %11000000
    9+ 8092
@@ -338,7 +338,7 @@
   69+ 80A7 C9               ret
   70+ 80A8
   71+ 80A8              player_init_sprites:
-  72+ 80A8 3E 14            ld a,PLAYER_SLOT
+  72+ 80A8 3E 32            ld a,PLAYER_SLOT
   73+ 80AA ED 92 34         nextreg $34,a
   74+ 80AD
   75+ 80AD                  ;Axx
@@ -376,7 +376,7 @@
  107+ 80D1                  ;xxx
  108+ 80D1                  ;xxx
  109+ 80D1
- 110+ 80D1 3E 15            ld a,PLAYER_SLOT+1
+ 110+ 80D1 3E 33            ld a,PLAYER_SLOT+1
  111+ 80D3 ED 92 34         nextreg $34,a
  112+ 80D6
  113+ 80D6                  ;a0
@@ -404,7 +404,7 @@
  135+ 80EF                  ;xxx
  136+ 80EF                  ;xxx
  137+ 80EF
- 138+ 80EF 3E 16            ld a,PLAYER_SLOT+2
+ 138+ 80EF 3E 34            ld a,PLAYER_SLOT+2
  139+ 80F1 ED 92 34         nextreg $34,a
  140+ 80F4
  141+ 80F4                  ;a0
@@ -431,7 +431,7 @@
  162+ 810D                  ;Axx
  163+ 810D                  ;Rxx
  164+ 810D                  ;xxx
- 165+ 810D 3E 17            ld a,PLAYER_SLOT+3
+ 165+ 810D 3E 35            ld a,PLAYER_SLOT+3
  166+ 810F ED 92 34         nextreg $34,a
  167+ 8112
  168+ 8112                  ;a0
@@ -458,7 +458,7 @@
  189+ 812B                  ;Axx
  190+ 812B                  ;xRx
  191+ 812B                  ;xxx
- 192+ 812B 3E 18            ld a,PLAYER_SLOT+4
+ 192+ 812B 3E 36            ld a,PLAYER_SLOT+4
  193+ 812D ED 92 34         nextreg $34,a
  194+ 8130
  195+ 8130                  ;a0
@@ -485,7 +485,7 @@
  216+ 8149                  ;Axx
  217+ 8149                  ;xxR
  218+ 8149                  ;xxx
- 219+ 8149 3E 19            ld a,PLAYER_SLOT+5
+ 219+ 8149 3E 37            ld a,PLAYER_SLOT+5
  220+ 814B ED 92 34         nextreg $34,a
  221+ 814E
  222+ 814E                  ;a0
@@ -512,7 +512,7 @@
  243+ 8167                  ;Axx
  244+ 8167                  ;xxx
  245+ 8167                  ;Rxx
- 246+ 8167 3E 1A            ld a,PLAYER_SLOT+6
+ 246+ 8167 3E 38            ld a,PLAYER_SLOT+6
  247+ 8169 ED 92 34         nextreg $34,a
  248+ 816C
  249+ 816C                  ;a0
@@ -539,7 +539,7 @@
  270+ 8185                  ;Axx
  271+ 8185                  ;xxx
  272+ 8185                  ;xRx
- 273+ 8185 3E 1B            ld a,PLAYER_SLOT+7
+ 273+ 8185 3E 39            ld a,PLAYER_SLOT+7
  274+ 8187 ED 92 34         nextreg $34,a
  275+ 818A
  276+ 818A                  ;a0
@@ -566,7 +566,7 @@
  297+ 81A3                  ;Axx
  298+ 81A3                  ;xxx
  299+ 81A3                  ;xxR
- 300+ 81A3 3E 1C            ld a,PLAYER_SLOT+8
+ 300+ 81A3 3E 3A            ld a,PLAYER_SLOT+8
  301+ 81A5 ED 92 34         nextreg $34,a
  302+ 81A8
  303+ 81A8                  ;a0
@@ -743,7 +743,7 @@
  474+ 8287 32 97 80         ld (player_attr_2),a
  475+ 828A
  476+ 828A 2A 94 80         ld hl,(px)
- 477+ 828D ED 34 F0 FF      add hl,-16
+ 477+ 828D ED 34 20 00      add hl,32 ;2 relatives width (plus anchor)
  478+ 8291 22 94 80         ld (px),hl
  479+ 8294              plyr_move_left:
  480+ 8294
@@ -786,7 +786,7 @@
  517+ 82D1 32 97 80         ld (player_attr_2),a
  518+ 82D4
  519+ 82D4 2A 94 80         ld hl,(px)
- 520+ 82D7 ED 34 10 00      add hl,16
+ 520+ 82D7 ED 34 E0 FF      add hl,-32
  521+ 82DB 22 94 80         ld (px),hl
  522+ 82DE              plyr_move_right:
  523+ 82DE CD 49 83         call player_calculate_world_position
@@ -817,7 +817,7 @@
  548+ 8303
  549+ 8303
  550+ 8303              player_draw:
- 551+ 8303 3E 14            ld a,PLAYER_SLOT
+ 551+ 8303 3E 32            ld a,PLAYER_SLOT
  552+ 8305 ED 92 34         nextreg $34,a
  553+ 8308
  554+ 8308                  ;attr 0
@@ -879,318 +879,319 @@
  610+ 8355
  611+ 8355 3A 9F 80         ld a,(player_walk_direction)
  612+ 8358 FE 01            cp RIGHT
- 613+ 835A CA 78 83         jp z, p_wp_r
+ 613+ 835A CA 74 83         jp z, p_wp_r
  614+ 835D
  615+ 835D              p_wp_l:
  616+ 835D 2A 94 80         ld hl,(px)
- 617+ 8360 ED 34 20 00      add hl,32
- 618+ 8364 7D               ld a,l
- 619+ 8365 E6 F0            and %11110000
- 620+ 8367 0F               rrca
- 621+ 8368 0F               rrca
- 622+ 8369 0F               rrca
- 623+ 836A 0F               rrca
- 624+ 836B 47               ld b,a
- 625+ 836C 3A E0 8B         ld a,(cam_edge_r)
- 626+ 836F D6 14            sub VIEW_WIDTH_META
- 627+ 8371 4F               ld c,a
- 628+ 8372 78               ld a,b
- 629+ 8373 81               add a,c
- 630+ 8374 32 92 80         ld (player_world_x),a
- 631+ 8377 C9               ret
- 632+ 8378              p_wp_r:
- 633+ 8378 2A 94 80         ld hl,(px)
- 634+ 837B 7D               ld a,l
- 635+ 837C E6 F0            and %11110000
- 636+ 837E 0F               rrca
- 637+ 837F 0F               rrca
- 638+ 8380 0F               rrca
- 639+ 8381 0F               rrca
- 640+ 8382 47               ld b,a
- 641+ 8383 3A E0 8B         ld a,(cam_edge_r)
- 642+ 8386 D6 14            sub VIEW_WIDTH_META
- 643+ 8388 4F               ld c,a
- 644+ 8389 78               ld a,b
- 645+ 838A 81               add a,c
- 646+ 838B 32 92 80         ld (player_world_x),a
- 647+ 838E C9               ret
- 648+ 838F
+ 617+ 8360                  ; add hl,32
+ 618+ 8360 7D               ld a,l
+ 619+ 8361 E6 F0            and %11110000
+ 620+ 8363 0F               rrca
+ 621+ 8364 0F               rrca
+ 622+ 8365 0F               rrca
+ 623+ 8366 0F               rrca
+ 624+ 8367 47               ld b,a
+ 625+ 8368 3A E0 8B         ld a,(cam_edge_r)
+ 626+ 836B D6 14            sub VIEW_WIDTH_META
+ 627+ 836D 4F               ld c,a
+ 628+ 836E 78               ld a,b
+ 629+ 836F 81               add a,c
+ 630+ 8370 32 92 80         ld (player_world_x),a
+ 631+ 8373 C9               ret
+ 632+ 8374              p_wp_r:
+ 633+ 8374 2A 94 80         ld hl,(px)
+ 634+ 8377 ED 34 18 00      add hl,24
+ 635+ 837B 7D               ld a,l
+ 636+ 837C E6 F0            and %11110000
+ 637+ 837E 0F               rrca
+ 638+ 837F 0F               rrca
+ 639+ 8380 0F               rrca
+ 640+ 8381 0F               rrca
+ 641+ 8382 47               ld b,a
+ 642+ 8383 3A E0 8B         ld a,(cam_edge_r)
+ 643+ 8386 D6 14            sub VIEW_WIDTH_META
+ 644+ 8388 4F               ld c,a
+ 645+ 8389 78               ld a,b
+ 646+ 838A 81               add a,c
+ 647+ 838B 32 92 80         ld (player_world_x),a
+ 648+ 838E C9               ret
  649+ 838F
  650+ 838F
- 651+ 838F              check_collision_jumping:
- 652+ 838F 3A 9B 80         ld a,(player_animation_state)
- 653+ 8392 FE 0B            cp JUMPING
- 654+ 8394 C0               ret nz
- 655+ 8395
- 656+ 8395 3A A0 80         ld a,(player_jump_direction)
- 657+ 8398 FE 03            cp DOWN
- 658+ 839A C0               ret nz
- 659+ 839B
+ 651+ 838F
+ 652+ 838F              check_collision_jumping:
+ 653+ 838F 3A 9B 80         ld a,(player_animation_state)
+ 654+ 8392 FE 0B            cp JUMPING
+ 655+ 8394 C0               ret nz
+ 656+ 8395
+ 657+ 8395 3A A0 80         ld a,(player_jump_direction)
+ 658+ 8398 FE 03            cp DOWN
+ 659+ 839A C0               ret nz
  660+ 839B
- 661+ 839B 21 5E 87         ld hl,metalevel
- 662+ 839E 3A 93 80         ld a,(player_world_y)
- 663+ 83A1 FE 05            cp 5
- 664+ 83A3 D8               ret c
- 665+ 83A4 D6 05            sub 5
- 666+ 83A6 57               ld d,a
- 667+ 83A7 1E 50            ld e,LEVEL_WIDTH_META
- 668+ 83A9 ED 30            mul d,e
- 669+ 83AB 19               add hl,de
- 670+ 83AC 3A 92 80         ld a,(player_world_x)
- 671+ 83AF 5F               ld e,a
- 672+ 83B0 16 00            ld d,0
- 673+ 83B2 19               add hl,de
- 674+ 83B3 7E               ld a,(hl)
- 675+ 83B4 CD 55 87         call check_solid
- 676+ 83B7 CA BB 83         jp z,collided_jumping
- 677+ 83BA
+ 661+ 839B
+ 662+ 839B 21 5E 87         ld hl,metalevel
+ 663+ 839E 3A 93 80         ld a,(player_world_y)
+ 664+ 83A1 FE 05            cp 5
+ 665+ 83A3 D8               ret c
+ 666+ 83A4 D6 05            sub 5
+ 667+ 83A6 57               ld d,a
+ 668+ 83A7 1E 50            ld e,LEVEL_WIDTH_META
+ 669+ 83A9 ED 30            mul d,e
+ 670+ 83AB 19               add hl,de
+ 671+ 83AC 3A 92 80         ld a,(player_world_x)
+ 672+ 83AF 5F               ld e,a
+ 673+ 83B0 16 00            ld d,0
+ 674+ 83B2 19               add hl,de
+ 675+ 83B3 7E               ld a,(hl)
+ 676+ 83B4 CD 55 87         call check_solid
+ 677+ 83B7 CA BB 83         jp z,collided_jumping
  678+ 83BA
  679+ 83BA
- 680+ 83BA C9               ret
- 681+ 83BB
+ 680+ 83BA
+ 681+ 83BA C9               ret
  682+ 83BB
- 683+ 83BB              collided_jumping:
- 684+ 83BB
- 685+ 83BB                  ;snap to nearest cell
- 686+ 83BB 3A 93 80         ld a,(player_world_y)
- 687+ 83BE 87               add a,a
- 688+ 83BF 87               add a,a
- 689+ 83C0 87               add a,a
- 690+ 83C1 87               add a,a
- 691+ 83C2 32 96 80         ld (py),a
- 692+ 83C5
- 693+ 83C5 3A A0 80         ld a,(player_jump_direction)
- 694+ 83C8 FE 02            cp UP
- 695+ 83CA C8               ret z
- 696+ 83CB
- 697+ 83CB                  ;collided
- 698+ 83CB 3E 0A            ld a,WALKING
- 699+ 83CD 32 9B 80         ld (player_animation_state),a
- 700+ 83D0 21 00 00         ld hl,0
- 701+ 83D3 22 9C 80         ld (vy),hl
- 702+ 83D6
+ 683+ 83BB
+ 684+ 83BB              collided_jumping:
+ 685+ 83BB
+ 686+ 83BB                  ;snap to nearest cell
+ 687+ 83BB 3A 93 80         ld a,(player_world_y)
+ 688+ 83BE 87               add a,a
+ 689+ 83BF 87               add a,a
+ 690+ 83C0 87               add a,a
+ 691+ 83C1 87               add a,a
+ 692+ 83C2 32 96 80         ld (py),a
+ 693+ 83C5
+ 694+ 83C5 3A A0 80         ld a,(player_jump_direction)
+ 695+ 83C8 FE 02            cp UP
+ 696+ 83CA C8               ret z
+ 697+ 83CB
+ 698+ 83CB                  ;collided
+ 699+ 83CB 3E 0A            ld a,WALKING
+ 700+ 83CD 32 9B 80         ld (player_animation_state),a
+ 701+ 83D0 21 00 00         ld hl,0
+ 702+ 83D3 22 9C 80         ld (vy),hl
  703+ 83D6
- 704+ 83D6 C9               ret
- 705+ 83D7
+ 704+ 83D6
+ 705+ 83D6 C9               ret
  706+ 83D7
- 707+ 83D7              check_grounded:
- 708+ 83D7 3A A0 80         ld a,(player_jump_direction)
- 709+ 83DA FE 03            cp DOWN
- 710+ 83DC C0               ret nz
- 711+ 83DD
- 712+ 83DD 21 5E 87         ld hl,metalevel
- 713+ 83E0 3A 93 80         ld a,(player_world_y)
- 714+ 83E3 FE 07            cp 7
- 715+ 83E5 D8               ret c
- 716+ 83E6 D6 07            sub 7
- 717+ 83E8 57               ld d,a
- 718+ 83E9 1E 50            ld e,LEVEL_WIDTH_META
- 719+ 83EB ED 30            mul d,e
- 720+ 83ED 19               add hl,de
- 721+ 83EE 3A 92 80         ld a,(player_world_x)
- 722+ 83F1 5F               ld e,a
- 723+ 83F2 16 00            ld d,0
- 724+ 83F4 19               add hl,de
- 725+ 83F5 7E               ld a,(hl)
- 726+ 83F6 CD 55 87         call check_solid
- 727+ 83F9 CA FF 83         jp z,grounded_true
- 728+ 83FC
+ 707+ 83D7
+ 708+ 83D7              check_grounded:
+ 709+ 83D7 3A A0 80         ld a,(player_jump_direction)
+ 710+ 83DA FE 03            cp DOWN
+ 711+ 83DC C0               ret nz
+ 712+ 83DD
+ 713+ 83DD 21 5E 87         ld hl,metalevel
+ 714+ 83E0 3A 93 80         ld a,(player_world_y)
+ 715+ 83E3 FE 06            cp 6
+ 716+ 83E5 D8               ret c
+ 717+ 83E6 D6 06            sub 6
+ 718+ 83E8 57               ld d,a
+ 719+ 83E9 1E 50            ld e,LEVEL_WIDTH_META
+ 720+ 83EB ED 30            mul d,e
+ 721+ 83ED 19               add hl,de
+ 722+ 83EE 3A 92 80         ld a,(player_world_x)
+ 723+ 83F1 5F               ld e,a
+ 724+ 83F2 16 00            ld d,0
+ 725+ 83F4 19               add hl,de
+ 726+ 83F5 7E               ld a,(hl)
+ 727+ 83F6 CD 55 87         call check_solid
+ 728+ 83F9 CA FF 83         jp z,grounded_true
  729+ 83FC
- 730+ 83FC C3 05 84         jp grounded_false
- 731+ 83FF              grounded_true:
- 732+ 83FF 3E 01            ld a,TRUE
- 733+ 8401 32 A2 80         ld (player_grounded),a
- 734+ 8404 C9               ret
- 735+ 8405
- 736+ 8405              grounded_false:
- 737+ 8405 3E 00            ld a,FALSE
- 738+ 8407 32 A2 80         ld (player_grounded),a
- 739+ 840A
- 740+ 840A 3E 0B            ld a,JUMPING
- 741+ 840C 32 9B 80         ld (player_animation_state),a
- 742+ 840F
- 743+ 840F C9               ret
- 744+ 8410
+ 730+ 83FC
+ 731+ 83FC C3 05 84         jp grounded_false
+ 732+ 83FF              grounded_true:
+ 733+ 83FF 3E 01            ld a,TRUE
+ 734+ 8401 32 A2 80         ld (player_grounded),a
+ 735+ 8404 C9               ret
+ 736+ 8405
+ 737+ 8405              grounded_false:
+ 738+ 8405 3E 00            ld a,FALSE
+ 739+ 8407 32 A2 80         ld (player_grounded),a
+ 740+ 840A
+ 741+ 840A 3E 0B            ld a,JUMPING
+ 742+ 840C 32 9B 80         ld (player_animation_state),a
+ 743+ 840F
+ 744+ 840F C9               ret
  745+ 8410
- 746+ 8410              ; check_collision_left:
- 747+ 8410              ;     ld hl,level1
- 748+ 8410              ;     ld a,(player_world_y)
- 749+ 8410              ;     add a,2
- 750+ 8410              ;     ld d,a
- 751+ 8410              ;     ld e,WORLD_WIDTH
- 752+ 8410              ;     mul d,e
- 753+ 8410              ;     add hl,de
- 754+ 8410              ;     ld a,(player_world_x)
- 755+ 8410              ;     ld e,a
- 756+ 8410              ;     ld d,0
- 757+ 8410              ;     add hl,de
- 758+ 8410              ;     ld a,(hl)
- 759+ 8410              ;     cp 12
- 760+ 8410              ;     jp c,collided_solid_sideways
- 761+ 8410
- 762+ 8410              ;     ld a,FALSE
- 763+ 8410              ;     ld (player_collided_solid),a
- 764+ 8410
- 765+ 8410              ;     ret
- 766+ 8410
+ 746+ 8410
+ 747+ 8410              ; check_collision_left:
+ 748+ 8410              ;     ld hl,level1
+ 749+ 8410              ;     ld a,(player_world_y)
+ 750+ 8410              ;     add a,2
+ 751+ 8410              ;     ld d,a
+ 752+ 8410              ;     ld e,WORLD_WIDTH
+ 753+ 8410              ;     mul d,e
+ 754+ 8410              ;     add hl,de
+ 755+ 8410              ;     ld a,(player_world_x)
+ 756+ 8410              ;     ld e,a
+ 757+ 8410              ;     ld d,0
+ 758+ 8410              ;     add hl,de
+ 759+ 8410              ;     ld a,(hl)
+ 760+ 8410              ;     cp 12
+ 761+ 8410              ;     jp c,collided_solid_sideways
+ 762+ 8410
+ 763+ 8410              ;     ld a,FALSE
+ 764+ 8410              ;     ld (player_collided_solid),a
+ 765+ 8410
+ 766+ 8410              ;     ret
  767+ 8410
  768+ 8410
- 769+ 8410              ; check_collision_right:
- 770+ 8410              ;     ld hl,(px)
- 771+ 8410              ;     ld a,h
- 772+ 8410              ;     cp 0
- 773+ 8410              ;     jp nz, check_collision_right_x8
- 774+ 8410
- 775+ 8410              ;     ld hl,level1
- 776+ 8410              ;     ld a,(player_world_y)
- 777+ 8410              ;     ld d,a
- 778+ 8410              ;     ld e,WORLD_WIDTH
- 779+ 8410              ;     mul d,e
- 780+ 8410              ;     add hl,de
- 781+ 8410              ;     ld a,(player_world_x)
- 782+ 8410              ;     add a,1
- 783+ 8410              ;     ld e,a
- 784+ 8410              ;     ld d,0
- 785+ 8410              ;     add hl,de
- 786+ 8410              ;     ld a,(hl)
- 787+ 8410              ;     cp 12
- 788+ 8410              ;     jp c,collided_solid_sideways
- 789+ 8410
- 790+ 8410              ;     ld hl,level1
- 791+ 8410              ;     ld a,(player_world_y)
- 792+ 8410              ;     add a,1
- 793+ 8410              ;     ld d,a
- 794+ 8410              ;     ld e,WORLD_WIDTH
- 795+ 8410              ;     mul d,e
- 796+ 8410              ;     add hl,de
- 797+ 8410              ;     ld a,(player_world_x)
- 798+ 8410              ;     add a,1
- 799+ 8410              ;     ld e,a
- 800+ 8410              ;     ld d,0
- 801+ 8410              ;     add hl,de
- 802+ 8410              ;     ld a,(hl)
- 803+ 8410              ;     cp 12
- 804+ 8410              ;     jp c,collided_solid_sideways
- 805+ 8410
- 806+ 8410              ;     ld hl,level1
- 807+ 8410              ;     ld a,(player_world_y)
- 808+ 8410              ;     add a,2
- 809+ 8410              ;     ld d,a
- 810+ 8410              ;     ld e,WORLD_WIDTH
- 811+ 8410              ;     mul d,e
- 812+ 8410              ;     add hl,de
- 813+ 8410              ;     ld a,(player_world_x)
- 814+ 8410              ;     add a,1
- 815+ 8410              ;     ld e,a
- 816+ 8410              ;     ld d,0
- 817+ 8410              ;     add hl,de
- 818+ 8410              ;     ld a,(hl)
- 819+ 8410              ;     cp 12
- 820+ 8410              ;     jp c,collided_solid_sideways
- 821+ 8410
- 822+ 8410              ;     ld hl,level1
- 823+ 8410              ;     ld a,(player_world_y)
- 824+ 8410              ;     add a,3
- 825+ 8410              ;     ld d,a
- 826+ 8410              ;     ld e,WORLD_WIDTH
- 827+ 8410              ;     mul d,e
- 828+ 8410              ;     add hl,de
- 829+ 8410              ;     ld a,(player_world_x)
- 830+ 8410              ;     add a,1
- 831+ 8410              ;     ld e,a
- 832+ 8410              ;     ld d,0
- 833+ 8410              ;     add hl,de
- 834+ 8410              ;     ld a,(hl)
- 835+ 8410              ;     cp 12
- 836+ 8410              ;     jp c,collided_solid_sideways
- 837+ 8410
+ 769+ 8410
+ 770+ 8410              ; check_collision_right:
+ 771+ 8410              ;     ld hl,(px)
+ 772+ 8410              ;     ld a,h
+ 773+ 8410              ;     cp 0
+ 774+ 8410              ;     jp nz, check_collision_right_x8
+ 775+ 8410
+ 776+ 8410              ;     ld hl,level1
+ 777+ 8410              ;     ld a,(player_world_y)
+ 778+ 8410              ;     ld d,a
+ 779+ 8410              ;     ld e,WORLD_WIDTH
+ 780+ 8410              ;     mul d,e
+ 781+ 8410              ;     add hl,de
+ 782+ 8410              ;     ld a,(player_world_x)
+ 783+ 8410              ;     add a,1
+ 784+ 8410              ;     ld e,a
+ 785+ 8410              ;     ld d,0
+ 786+ 8410              ;     add hl,de
+ 787+ 8410              ;     ld a,(hl)
+ 788+ 8410              ;     cp 12
+ 789+ 8410              ;     jp c,collided_solid_sideways
+ 790+ 8410
+ 791+ 8410              ;     ld hl,level1
+ 792+ 8410              ;     ld a,(player_world_y)
+ 793+ 8410              ;     add a,1
+ 794+ 8410              ;     ld d,a
+ 795+ 8410              ;     ld e,WORLD_WIDTH
+ 796+ 8410              ;     mul d,e
+ 797+ 8410              ;     add hl,de
+ 798+ 8410              ;     ld a,(player_world_x)
+ 799+ 8410              ;     add a,1
+ 800+ 8410              ;     ld e,a
+ 801+ 8410              ;     ld d,0
+ 802+ 8410              ;     add hl,de
+ 803+ 8410              ;     ld a,(hl)
+ 804+ 8410              ;     cp 12
+ 805+ 8410              ;     jp c,collided_solid_sideways
+ 806+ 8410
+ 807+ 8410              ;     ld hl,level1
+ 808+ 8410              ;     ld a,(player_world_y)
+ 809+ 8410              ;     add a,2
+ 810+ 8410              ;     ld d,a
+ 811+ 8410              ;     ld e,WORLD_WIDTH
+ 812+ 8410              ;     mul d,e
+ 813+ 8410              ;     add hl,de
+ 814+ 8410              ;     ld a,(player_world_x)
+ 815+ 8410              ;     add a,1
+ 816+ 8410              ;     ld e,a
+ 817+ 8410              ;     ld d,0
+ 818+ 8410              ;     add hl,de
+ 819+ 8410              ;     ld a,(hl)
+ 820+ 8410              ;     cp 12
+ 821+ 8410              ;     jp c,collided_solid_sideways
+ 822+ 8410
+ 823+ 8410              ;     ld hl,level1
+ 824+ 8410              ;     ld a,(player_world_y)
+ 825+ 8410              ;     add a,3
+ 826+ 8410              ;     ld d,a
+ 827+ 8410              ;     ld e,WORLD_WIDTH
+ 828+ 8410              ;     mul d,e
+ 829+ 8410              ;     add hl,de
+ 830+ 8410              ;     ld a,(player_world_x)
+ 831+ 8410              ;     add a,1
+ 832+ 8410              ;     ld e,a
+ 833+ 8410              ;     ld d,0
+ 834+ 8410              ;     add hl,de
+ 835+ 8410              ;     ld a,(hl)
+ 836+ 8410              ;     cp 12
+ 837+ 8410              ;     jp c,collided_solid_sideways
  838+ 8410
  839+ 8410
- 840+ 8410              ;     ld a,FALSE
- 841+ 8410              ;     ld (player_collided_solid),a
- 842+ 8410
- 843+ 8410              ;     ret
- 844+ 8410
- 845+ 8410              ; check_collision_right_x8:
- 846+ 8410              ;     ld hl,level1
- 847+ 8410              ;     ld a,(player_world_y)
- 848+ 8410              ;     ld d,a
- 849+ 8410              ;     ld e,WORLD_WIDTH
- 850+ 8410              ;     mul d,e
- 851+ 8410              ;     add hl,de
- 852+ 8410              ;     ld a,(player_world_x)
- 853+ 8410              ;     add a,33
- 854+ 8410              ;     ld e,a
- 855+ 8410              ;     ld d,0
- 856+ 8410              ;     add hl,de
- 857+ 8410              ;     ld a,(hl)
- 858+ 8410              ;     cp 12
- 859+ 8410              ;     jp c,collided_solid_sideways
- 860+ 8410
- 861+ 8410              ;     ld hl,level1
- 862+ 8410              ;     ld a,(player_world_y)
- 863+ 8410              ;     add a,1
- 864+ 8410              ;     ld d,a
- 865+ 8410              ;     ld e,WORLD_WIDTH
- 866+ 8410              ;     mul d,e
- 867+ 8410              ;     add hl,de
- 868+ 8410              ;     ld a,(player_world_x)
- 869+ 8410              ;     add a,33
- 870+ 8410              ;     ld e,a
- 871+ 8410              ;     ld d,0
- 872+ 8410              ;     add hl,de
- 873+ 8410              ;     ld a,(hl)
- 874+ 8410              ;     cp 12
- 875+ 8410              ;     jp c,collided_solid_sideways
- 876+ 8410
- 877+ 8410              ;     ld hl,level1
- 878+ 8410              ;     ld a,(player_world_y)
- 879+ 8410              ;     add a,2
- 880+ 8410              ;     ld d,a
- 881+ 8410              ;     ld e,WORLD_WIDTH
- 882+ 8410              ;     mul d,e
- 883+ 8410              ;     add hl,de
- 884+ 8410              ;     ld a,(player_world_x)
- 885+ 8410              ;     add a,33
- 886+ 8410              ;     ld e,a
- 887+ 8410              ;     ld d,0
- 888+ 8410              ;     add hl,de
- 889+ 8410              ;     ld a,(hl)
- 890+ 8410              ;     cp 12
- 891+ 8410              ;     jp c,collided_solid_sideways
- 892+ 8410
- 893+ 8410              ;     ld hl,level1
- 894+ 8410              ;     ld a,(player_world_y)
- 895+ 8410              ;     add a,3
- 896+ 8410              ;     ld d,a
- 897+ 8410              ;     ld e,WORLD_WIDTH
- 898+ 8410              ;     mul d,e
- 899+ 8410              ;     add hl,de
- 900+ 8410              ;     ld a,(player_world_x)
- 901+ 8410              ;     add a,33
- 902+ 8410              ;     ld e,a
- 903+ 8410              ;     ld d,0
- 904+ 8410              ;     add hl,de
- 905+ 8410              ;     ld a,(hl)
- 906+ 8410              ;     cp 12
- 907+ 8410              ;     jp c,collided_solid_sideways
- 908+ 8410
+ 840+ 8410
+ 841+ 8410              ;     ld a,FALSE
+ 842+ 8410              ;     ld (player_collided_solid),a
+ 843+ 8410
+ 844+ 8410              ;     ret
+ 845+ 8410
+ 846+ 8410              ; check_collision_right_x8:
+ 847+ 8410              ;     ld hl,level1
+ 848+ 8410              ;     ld a,(player_world_y)
+ 849+ 8410              ;     ld d,a
+ 850+ 8410              ;     ld e,WORLD_WIDTH
+ 851+ 8410              ;     mul d,e
+ 852+ 8410              ;     add hl,de
+ 853+ 8410              ;     ld a,(player_world_x)
+ 854+ 8410              ;     add a,33
+ 855+ 8410              ;     ld e,a
+ 856+ 8410              ;     ld d,0
+ 857+ 8410              ;     add hl,de
+ 858+ 8410              ;     ld a,(hl)
+ 859+ 8410              ;     cp 12
+ 860+ 8410              ;     jp c,collided_solid_sideways
+ 861+ 8410
+ 862+ 8410              ;     ld hl,level1
+ 863+ 8410              ;     ld a,(player_world_y)
+ 864+ 8410              ;     add a,1
+ 865+ 8410              ;     ld d,a
+ 866+ 8410              ;     ld e,WORLD_WIDTH
+ 867+ 8410              ;     mul d,e
+ 868+ 8410              ;     add hl,de
+ 869+ 8410              ;     ld a,(player_world_x)
+ 870+ 8410              ;     add a,33
+ 871+ 8410              ;     ld e,a
+ 872+ 8410              ;     ld d,0
+ 873+ 8410              ;     add hl,de
+ 874+ 8410              ;     ld a,(hl)
+ 875+ 8410              ;     cp 12
+ 876+ 8410              ;     jp c,collided_solid_sideways
+ 877+ 8410
+ 878+ 8410              ;     ld hl,level1
+ 879+ 8410              ;     ld a,(player_world_y)
+ 880+ 8410              ;     add a,2
+ 881+ 8410              ;     ld d,a
+ 882+ 8410              ;     ld e,WORLD_WIDTH
+ 883+ 8410              ;     mul d,e
+ 884+ 8410              ;     add hl,de
+ 885+ 8410              ;     ld a,(player_world_x)
+ 886+ 8410              ;     add a,33
+ 887+ 8410              ;     ld e,a
+ 888+ 8410              ;     ld d,0
+ 889+ 8410              ;     add hl,de
+ 890+ 8410              ;     ld a,(hl)
+ 891+ 8410              ;     cp 12
+ 892+ 8410              ;     jp c,collided_solid_sideways
+ 893+ 8410
+ 894+ 8410              ;     ld hl,level1
+ 895+ 8410              ;     ld a,(player_world_y)
+ 896+ 8410              ;     add a,3
+ 897+ 8410              ;     ld d,a
+ 898+ 8410              ;     ld e,WORLD_WIDTH
+ 899+ 8410              ;     mul d,e
+ 900+ 8410              ;     add hl,de
+ 901+ 8410              ;     ld a,(player_world_x)
+ 902+ 8410              ;     add a,33
+ 903+ 8410              ;     ld e,a
+ 904+ 8410              ;     ld d,0
+ 905+ 8410              ;     add hl,de
+ 906+ 8410              ;     ld a,(hl)
+ 907+ 8410              ;     cp 12
+ 908+ 8410              ;     jp c,collided_solid_sideways
  909+ 8410
  910+ 8410
- 911+ 8410              ;     ld a,FALSE
- 912+ 8410              ;     ld (player_collided_solid),a
- 913+ 8410
- 914+ 8410              ;     ret
- 915+ 8410
+ 911+ 8410
+ 912+ 8410              ;     ld a,FALSE
+ 913+ 8410              ;     ld (player_collided_solid),a
+ 914+ 8410
+ 915+ 8410              ;     ret
  916+ 8410
  917+ 8410
  918+ 8410
  919+ 8410
  920+ 8410
- 921+ 8410              ; collided_solid_sideways:
- 922+ 8410              ;     ld a,TRUE
- 923+ 8410              ;     ld (player_collided_solid),a
- 924+ 8410              ;     ret
+ 921+ 8410
+ 922+ 8410              ; collided_solid_sideways:
+ 923+ 8410              ;     ld a,TRUE
+ 924+ 8410              ;     ld (player_collided_solid),a
+ 925+ 8410              ;     ret
 # file closed: src/player.asm
   31  8410              	include 'objects.asm'
 # file opened: src/objects.asm
@@ -2843,1535 +2844,23 @@
   15+ C000                  incbin 'assets/cavetiles2.til',0,TILE_DEFINITIONS_SIZE
   16+ D000
   17+ D000
-  18+ D000              	;courtesy of ped7g:
-  19+ D000                  ; patch tile gfx with grid gfx
-  20+ D000              tileN=1
-  21+ D000                  DUP 128-tileN
-  22+ D000             >        ORG $C000 + tileN*32
-  23+ C020 FF          >        DB $FF
-  24+ C021 F0          >        DB {b $ } | $F0
-  25+ C022             >        ORG $C000 + tileN*32 + 1*4
-  26+ C024 F0          >        DB {b $ } | $F0
-  27+ C025             >        ORG $C000 + tileN*32 + 2*4
-  28+ C028 F0          >        DB {b $ } | $F0
-  29+ C029             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ C03B 0F          >        DB {b $ } | $0F
-  31+ C03C             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ C03F FF          >        DB $FF
-  33+ C040             >tileN=tileN+1
-  22+ C040             >        ORG $C000 + tileN*32
-  23+ C040 FF          >        DB $FF
-  24+ C041 F0          >        DB {b $ } | $F0
-  25+ C042             >        ORG $C000 + tileN*32 + 1*4
-  26+ C044 F0          >        DB {b $ } | $F0
-  27+ C045             >        ORG $C000 + tileN*32 + 2*4
-  28+ C048 F0          >        DB {b $ } | $F0
-  29+ C049             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ C05B 0F          >        DB {b $ } | $0F
-  31+ C05C             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ C05F FF          >        DB $FF
-  33+ C060             >tileN=tileN+1
-  22+ C060             >        ORG $C000 + tileN*32
-  23+ C060 FF          >        DB $FF
-  24+ C061 F0          >        DB {b $ } | $F0
-  25+ C062             >        ORG $C000 + tileN*32 + 1*4
-  26+ C064 F0          >        DB {b $ } | $F0
-  27+ C065             >        ORG $C000 + tileN*32 + 2*4
-  28+ C068 F0          >        DB {b $ } | $F0
-  29+ C069             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ C07B 4F          >        DB {b $ } | $0F
-  31+ C07C             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ C07F FF          >        DB $FF
-  33+ C080             >tileN=tileN+1
-  22+ C080             >        ORG $C000 + tileN*32
-  23+ C080 FF          >        DB $FF
-  24+ C081 FA          >        DB {b $ } | $F0
-  25+ C082             >        ORG $C000 + tileN*32 + 1*4
-  26+ C084 FA          >        DB {b $ } | $F0
-  27+ C085             >        ORG $C000 + tileN*32 + 2*4
-  28+ C088 FA          >        DB {b $ } | $F0
-  29+ C089             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ C09B DF          >        DB {b $ } | $0F
-  31+ C09C             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ C09F FF          >        DB $FF
-  33+ C0A0             >tileN=tileN+1
-  22+ C0A0             >        ORG $C000 + tileN*32
-  23+ C0A0 FF          >        DB $FF
-  24+ C0A1 FA          >        DB {b $ } | $F0
-  25+ C0A2             >        ORG $C000 + tileN*32 + 1*4
-  26+ C0A4 FD          >        DB {b $ } | $F0
-  27+ C0A5             >        ORG $C000 + tileN*32 + 2*4
-  28+ C0A8 FD          >        DB {b $ } | $F0
-  29+ C0A9             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ C0BB 6F          >        DB {b $ } | $0F
-  31+ C0BC             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ C0BF FF          >        DB $FF
-  33+ C0C0             >tileN=tileN+1
-  22+ C0C0             >        ORG $C000 + tileN*32
-  23+ C0C0 FF          >        DB $FF
-  24+ C0C1 F0          >        DB {b $ } | $F0
-  25+ C0C2             >        ORG $C000 + tileN*32 + 1*4
-  26+ C0C4 F0          >        DB {b $ } | $F0
-  27+ C0C5             >        ORG $C000 + tileN*32 + 2*4
-  28+ C0C8 F0          >        DB {b $ } | $F0
-  29+ C0C9             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ C0DB 1F          >        DB {b $ } | $0F
-  31+ C0DC             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ C0DF FF          >        DB $FF
-  33+ C0E0             >tileN=tileN+1
-  22+ C0E0             >        ORG $C000 + tileN*32
-  23+ C0E0 FF          >        DB $FF
-  24+ C0E1 F0          >        DB {b $ } | $F0
-  25+ C0E2             >        ORG $C000 + tileN*32 + 1*4
-  26+ C0E4 F0          >        DB {b $ } | $F0
-  27+ C0E5             >        ORG $C000 + tileN*32 + 2*4
-  28+ C0E8 F7          >        DB {b $ } | $F0
-  29+ C0E9             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ C0FB 7F          >        DB {b $ } | $0F
-  31+ C0FC             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ C0FF FF          >        DB $FF
-  33+ C100             >tileN=tileN+1
-  22+ C100             >        ORG $C000 + tileN*32
-  23+ C100 FF          >        DB $FF
-  24+ C101 FA          >        DB {b $ } | $F0
-  25+ C102             >        ORG $C000 + tileN*32 + 1*4
-  26+ C104 F3          >        DB {b $ } | $F0
-  27+ C105             >        ORG $C000 + tileN*32 + 2*4
-  28+ C108 F2          >        DB {b $ } | $F0
-  29+ C109             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ C11B AF          >        DB {b $ } | $0F
-  31+ C11C             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ C11F FF          >        DB $FF
-  33+ C120             >tileN=tileN+1
-  22+ C120             >        ORG $C000 + tileN*32
-  23+ C120 FF          >        DB $FF
-  24+ C121 F3          >        DB {b $ } | $F0
-  25+ C122             >        ORG $C000 + tileN*32 + 1*4
-  26+ C124 FA          >        DB {b $ } | $F0
-  27+ C125             >        ORG $C000 + tileN*32 + 2*4
-  28+ C128 F6          >        DB {b $ } | $F0
-  29+ C129             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ C13B 6F          >        DB {b $ } | $0F
-  31+ C13C             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ C13F FF          >        DB $FF
-  33+ C140             >tileN=tileN+1
-  22+ C140             >        ORG $C000 + tileN*32
-  23+ C140 FF          >        DB $FF
-  24+ C141 FA          >        DB {b $ } | $F0
-  25+ C142             >        ORG $C000 + tileN*32 + 1*4
-  26+ C144 F3          >        DB {b $ } | $F0
-  27+ C145             >        ORG $C000 + tileN*32 + 2*4
-  28+ C148 F2          >        DB {b $ } | $F0
-  29+ C149             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ C15B 6F          >        DB {b $ } | $0F
-  31+ C15C             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ C15F FF          >        DB $FF
-  33+ C160             >tileN=tileN+1
-  22+ C160             >        ORG $C000 + tileN*32
-  23+ C160 FF          >        DB $FF
-  24+ C161 FA          >        DB {b $ } | $F0
-  25+ C162             >        ORG $C000 + tileN*32 + 1*4
-  26+ C164 F6          >        DB {b $ } | $F0
-  27+ C165             >        ORG $C000 + tileN*32 + 2*4
-  28+ C168 FD          >        DB {b $ } | $F0
-  29+ C169             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ C17B 2F          >        DB {b $ } | $0F
-  31+ C17C             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ C17F FF          >        DB $FF
-  33+ C180             >tileN=tileN+1
-  22+ C180             >        ORG $C000 + tileN*32
-  23+ C180 FF          >        DB $FF
-  24+ C181 F6          >        DB {b $ } | $F0
-  25+ C182             >        ORG $C000 + tileN*32 + 1*4
-  26+ C184 F6          >        DB {b $ } | $F0
-  27+ C185             >        ORG $C000 + tileN*32 + 2*4
-  28+ C188 F2          >        DB {b $ } | $F0
-  29+ C189             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ C19B 3F          >        DB {b $ } | $0F
-  31+ C19C             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ C19F FF          >        DB $FF
-  33+ C1A0             >tileN=tileN+1
-  22+ C1A0             >        ORG $C000 + tileN*32
-  23+ C1A0 FF          >        DB $FF
-  24+ C1A1 F2          >        DB {b $ } | $F0
-  25+ C1A2             >        ORG $C000 + tileN*32 + 1*4
-  26+ C1A4 F3          >        DB {b $ } | $F0
-  27+ C1A5             >        ORG $C000 + tileN*32 + 2*4
-  28+ C1A8 F2          >        DB {b $ } | $F0
-  29+ C1A9             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ C1BB 6F          >        DB {b $ } | $0F
-  31+ C1BC             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ C1BF FF          >        DB $FF
-  33+ C1C0             >tileN=tileN+1
-  22+ C1C0             >        ORG $C000 + tileN*32
-  23+ C1C0 FF          >        DB $FF
-  24+ C1C1 F7          >        DB {b $ } | $F0
-  25+ C1C2             >        ORG $C000 + tileN*32 + 1*4
-  26+ C1C4 F1          >        DB {b $ } | $F0
-  27+ C1C5             >        ORG $C000 + tileN*32 + 2*4
-  28+ C1C8 F1          >        DB {b $ } | $F0
-  29+ C1C9             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ C1DB 4F          >        DB {b $ } | $0F
-  31+ C1DC             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ C1DF FF          >        DB $FF
-  33+ C1E0             >tileN=tileN+1
-  22+ C1E0             >        ORG $C000 + tileN*32
-  23+ C1E0 FF          >        DB $FF
-  24+ C1E1 F1          >        DB {b $ } | $F0
-  25+ C1E2             >        ORG $C000 + tileN*32 + 1*4
-  26+ C1E4 F4          >        DB {b $ } | $F0
-  27+ C1E5             >        ORG $C000 + tileN*32 + 2*4
-  28+ C1E8 F1          >        DB {b $ } | $F0
-  29+ C1E9             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ C1FB 4F          >        DB {b $ } | $0F
-  31+ C1FC             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ C1FF FF          >        DB $FF
-  33+ C200             >tileN=tileN+1
-  22+ C200             >        ORG $C000 + tileN*32
-  23+ C200 FF          >        DB $FF
-  24+ C201 F7          >        DB {b $ } | $F0
-  25+ C202             >        ORG $C000 + tileN*32 + 1*4
-  26+ C204 F1          >        DB {b $ } | $F0
-  27+ C205             >        ORG $C000 + tileN*32 + 2*4
-  28+ C208 F1          >        DB {b $ } | $F0
-  29+ C209             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ C21B 4F          >        DB {b $ } | $0F
-  31+ C21C             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ C21F FF          >        DB $FF
-  33+ C220             >tileN=tileN+1
-  22+ C220             >        ORG $C000 + tileN*32
-  23+ C220 FF          >        DB $FF
-  24+ C221 F1          >        DB {b $ } | $F0
-  25+ C222             >        ORG $C000 + tileN*32 + 1*4
-  26+ C224 F4          >        DB {b $ } | $F0
-  27+ C225             >        ORG $C000 + tileN*32 + 2*4
-  28+ C228 F1          >        DB {b $ } | $F0
-  29+ C229             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ C23B 4F          >        DB {b $ } | $0F
-  31+ C23C             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ C23F FF          >        DB $FF
-  33+ C240             >tileN=tileN+1
-  22+ C240             >        ORG $C000 + tileN*32
-  23+ C240 FF          >        DB $FF
-  24+ C241 F0          >        DB {b $ } | $F0
-  25+ C242             >        ORG $C000 + tileN*32 + 1*4
-  26+ C244 F0          >        DB {b $ } | $F0
-  27+ C245             >        ORG $C000 + tileN*32 + 2*4
-  28+ C248 F0          >        DB {b $ } | $F0
-  29+ C249             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ C25B 9F          >        DB {b $ } | $0F
-  31+ C25C             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ C25F FF          >        DB $FF
-  33+ C260             >tileN=tileN+1
-  22+ C260             >        ORG $C000 + tileN*32
-  23+ C260 FF          >        DB $FF
-  24+ C261 F9          >        DB {b $ } | $F0
-  25+ C262             >        ORG $C000 + tileN*32 + 1*4
-  26+ C264 F0          >        DB {b $ } | $F0
-  27+ C265             >        ORG $C000 + tileN*32 + 2*4
-  28+ C268 F0          >        DB {b $ } | $F0
-  29+ C269             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ C27B 7F          >        DB {b $ } | $0F
-  31+ C27C             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ C27F FF          >        DB $FF
-  33+ C280             >tileN=tileN+1
-  22+ C280             >        ORG $C000 + tileN*32
-  23+ C280 FF          >        DB $FF
-  24+ C281 F0          >        DB {b $ } | $F0
-  25+ C282             >        ORG $C000 + tileN*32 + 1*4
-  26+ C284 F0          >        DB {b $ } | $F0
-  27+ C285             >        ORG $C000 + tileN*32 + 2*4
-  28+ C288 F0          >        DB {b $ } | $F0
-  29+ C289             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ C29B 0F          >        DB {b $ } | $0F
-  31+ C29C             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ C29F FF          >        DB $FF
-  33+ C2A0             >tileN=tileN+1
-  22+ C2A0             >        ORG $C000 + tileN*32
-  23+ C2A0 FF          >        DB $FF
-  24+ C2A1 F0          >        DB {b $ } | $F0
-  25+ C2A2             >        ORG $C000 + tileN*32 + 1*4
-  26+ C2A4 F0          >        DB {b $ } | $F0
-  27+ C2A5             >        ORG $C000 + tileN*32 + 2*4
-  28+ C2A8 F0          >        DB {b $ } | $F0
-  29+ C2A9             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ C2BB 7F          >        DB {b $ } | $0F
-  31+ C2BC             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ C2BF FF          >        DB $FF
-  33+ C2C0             >tileN=tileN+1
-  22+ C2C0             >        ORG $C000 + tileN*32
-  23+ C2C0 FF          >        DB $FF
-  24+ C2C1 F0          >        DB {b $ } | $F0
-  25+ C2C2             >        ORG $C000 + tileN*32 + 1*4
-  26+ C2C4 F0          >        DB {b $ } | $F0
-  27+ C2C5             >        ORG $C000 + tileN*32 + 2*4
-  28+ C2C8 F0          >        DB {b $ } | $F0
-  29+ C2C9             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ C2DB 0F          >        DB {b $ } | $0F
-  31+ C2DC             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ C2DF FF          >        DB $FF
-  33+ C2E0             >tileN=tileN+1
-  22+ C2E0             >        ORG $C000 + tileN*32
-  23+ C2E0 FF          >        DB $FF
-  24+ C2E1 F0          >        DB {b $ } | $F0
-  25+ C2E2             >        ORG $C000 + tileN*32 + 1*4
-  26+ C2E4 F0          >        DB {b $ } | $F0
-  27+ C2E5             >        ORG $C000 + tileN*32 + 2*4
-  28+ C2E8 F0          >        DB {b $ } | $F0
-  29+ C2E9             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ C2FB 0F          >        DB {b $ } | $0F
-  31+ C2FC             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ C2FF FF          >        DB $FF
-  33+ C300             >tileN=tileN+1
-  22+ C300             >        ORG $C000 + tileN*32
-  23+ C300 FF          >        DB $FF
-  24+ C301 F0          >        DB {b $ } | $F0
-  25+ C302             >        ORG $C000 + tileN*32 + 1*4
-  26+ C304 F0          >        DB {b $ } | $F0
-  27+ C305             >        ORG $C000 + tileN*32 + 2*4
-  28+ C308 F0          >        DB {b $ } | $F0
-  29+ C309             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ C31B 0F          >        DB {b $ } | $0F
-  31+ C31C             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ C31F FF          >        DB $FF
-  33+ C320             >tileN=tileN+1
-  22+ C320             >        ORG $C000 + tileN*32
-  23+ C320 FF          >        DB $FF
-  24+ C321 F0          >        DB {b $ } | $F0
-  25+ C322             >        ORG $C000 + tileN*32 + 1*4
-  26+ C324 F0          >        DB {b $ } | $F0
-  27+ C325             >        ORG $C000 + tileN*32 + 2*4
-  28+ C328 F0          >        DB {b $ } | $F0
-  29+ C329             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ C33B 0F          >        DB {b $ } | $0F
-  31+ C33C             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ C33F FF          >        DB $FF
-  33+ C340             >tileN=tileN+1
-  22+ C340             >        ORG $C000 + tileN*32
-  23+ C340 FF          >        DB $FF
-  24+ C341 F0          >        DB {b $ } | $F0
-  25+ C342             >        ORG $C000 + tileN*32 + 1*4
-  26+ C344 F0          >        DB {b $ } | $F0
-  27+ C345             >        ORG $C000 + tileN*32 + 2*4
-  28+ C348 F0          >        DB {b $ } | $F0
-  29+ C349             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ C35B 0F          >        DB {b $ } | $0F
-  31+ C35C             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ C35F FF          >        DB $FF
-  33+ C360             >tileN=tileN+1
-  22+ C360             >        ORG $C000 + tileN*32
-  23+ C360 FF          >        DB $FF
-  24+ C361 F0          >        DB {b $ } | $F0
-  25+ C362             >        ORG $C000 + tileN*32 + 1*4
-  26+ C364 F0          >        DB {b $ } | $F0
-  27+ C365             >        ORG $C000 + tileN*32 + 2*4
-  28+ C368 F0          >        DB {b $ } | $F0
-  29+ C369             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ C37B 0F          >        DB {b $ } | $0F
-  31+ C37C             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ C37F FF          >        DB $FF
-  33+ C380             >tileN=tileN+1
-  22+ C380             >        ORG $C000 + tileN*32
-  23+ C380 FF          >        DB $FF
-  24+ C381 F0          >        DB {b $ } | $F0
-  25+ C382             >        ORG $C000 + tileN*32 + 1*4
-  26+ C384 F0          >        DB {b $ } | $F0
-  27+ C385             >        ORG $C000 + tileN*32 + 2*4
-  28+ C388 F0          >        DB {b $ } | $F0
-  29+ C389             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ C39B 0F          >        DB {b $ } | $0F
-  31+ C39C             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ C39F FF          >        DB $FF
-  33+ C3A0             >tileN=tileN+1
-  22+ C3A0             >        ORG $C000 + tileN*32
-  23+ C3A0 FF          >        DB $FF
-  24+ C3A1 F0          >        DB {b $ } | $F0
-  25+ C3A2             >        ORG $C000 + tileN*32 + 1*4
-  26+ C3A4 F0          >        DB {b $ } | $F0
-  27+ C3A5             >        ORG $C000 + tileN*32 + 2*4
-  28+ C3A8 F0          >        DB {b $ } | $F0
-  29+ C3A9             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ C3BB 0F          >        DB {b $ } | $0F
-  31+ C3BC             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ C3BF FF          >        DB $FF
-  33+ C3C0             >tileN=tileN+1
-  22+ C3C0             >        ORG $C000 + tileN*32
-  23+ C3C0 FF          >        DB $FF
-  24+ C3C1 F0          >        DB {b $ } | $F0
-  25+ C3C2             >        ORG $C000 + tileN*32 + 1*4
-  26+ C3C4 F0          >        DB {b $ } | $F0
-  27+ C3C5             >        ORG $C000 + tileN*32 + 2*4
-  28+ C3C8 F0          >        DB {b $ } | $F0
-  29+ C3C9             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ C3DB 0F          >        DB {b $ } | $0F
-  31+ C3DC             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ C3DF FF          >        DB $FF
-  33+ C3E0             >tileN=tileN+1
-  22+ C3E0             >        ORG $C000 + tileN*32
-  23+ C3E0 FF          >        DB $FF
-  24+ C3E1 F0          >        DB {b $ } | $F0
-  25+ C3E2             >        ORG $C000 + tileN*32 + 1*4
-  26+ C3E4 F0          >        DB {b $ } | $F0
-  27+ C3E5             >        ORG $C000 + tileN*32 + 2*4
-  28+ C3E8 F0          >        DB {b $ } | $F0
-  29+ C3E9             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ C3FB 0F          >        DB {b $ } | $0F
-  31+ C3FC             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ C3FF FF          >        DB $FF
-  33+ C400             >tileN=tileN+1
-  22+ C400             >        ORG $C000 + tileN*32
-  23+ C400 FF          >        DB $FF
-  24+ C401 F0          >        DB {b $ } | $F0
-  25+ C402             >        ORG $C000 + tileN*32 + 1*4
-  26+ C404 F0          >        DB {b $ } | $F0
-  27+ C405             >        ORG $C000 + tileN*32 + 2*4
-  28+ C408 F0          >        DB {b $ } | $F0
-  29+ C409             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ C41B 0F          >        DB {b $ } | $0F
-  31+ C41C             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ C41F FF          >        DB $FF
-  33+ C420             >tileN=tileN+1
-  22+ C420             >        ORG $C000 + tileN*32
-  23+ C420 FF          >        DB $FF
-  24+ C421 F0          >        DB {b $ } | $F0
-  25+ C422             >        ORG $C000 + tileN*32 + 1*4
-  26+ C424 F0          >        DB {b $ } | $F0
-  27+ C425             >        ORG $C000 + tileN*32 + 2*4
-  28+ C428 F0          >        DB {b $ } | $F0
-  29+ C429             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ C43B 0F          >        DB {b $ } | $0F
-  31+ C43C             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ C43F FF          >        DB $FF
-  33+ C440             >tileN=tileN+1
-  22+ C440             >        ORG $C000 + tileN*32
-  23+ C440 FF          >        DB $FF
-  24+ C441 F7          >        DB {b $ } | $F0
-  25+ C442             >        ORG $C000 + tileN*32 + 1*4
-  26+ C444 F0          >        DB {b $ } | $F0
-  27+ C445             >        ORG $C000 + tileN*32 + 2*4
-  28+ C448 F0          >        DB {b $ } | $F0
-  29+ C449             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ C45B 4F          >        DB {b $ } | $0F
-  31+ C45C             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ C45F FF          >        DB $FF
-  33+ C460             >tileN=tileN+1
-  22+ C460             >        ORG $C000 + tileN*32
-  23+ C460 FF          >        DB $FF
-  24+ C461 F4          >        DB {b $ } | $F0
-  25+ C462             >        ORG $C000 + tileN*32 + 1*4
-  26+ C464 F7          >        DB {b $ } | $F0
-  27+ C465             >        ORG $C000 + tileN*32 + 2*4
-  28+ C468 F7          >        DB {b $ } | $F0
-  29+ C469             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ C47B 1F          >        DB {b $ } | $0F
-  31+ C47C             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ C47F FF          >        DB $FF
-  33+ C480             >tileN=tileN+1
-  22+ C480             >        ORG $C000 + tileN*32
-  23+ C480 FF          >        DB $FF
-  24+ C481 FA          >        DB {b $ } | $F0
-  25+ C482             >        ORG $C000 + tileN*32 + 1*4
-  26+ C484 F0          >        DB {b $ } | $F0
-  27+ C485             >        ORG $C000 + tileN*32 + 2*4
-  28+ C488 F0          >        DB {b $ } | $F0
-  29+ C489             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ C49B 3F          >        DB {b $ } | $0F
-  31+ C49C             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ C49F FF          >        DB $FF
-  33+ C4A0             >tileN=tileN+1
-  22+ C4A0             >        ORG $C000 + tileN*32
-  23+ C4A0 FF          >        DB $FF
-  24+ C4A1 F6          >        DB {b $ } | $F0
-  25+ C4A2             >        ORG $C000 + tileN*32 + 1*4
-  26+ C4A4 FA          >        DB {b $ } | $F0
-  27+ C4A5             >        ORG $C000 + tileN*32 + 2*4
-  28+ C4A8 F6          >        DB {b $ } | $F0
-  29+ C4A9             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ C4BB 3F          >        DB {b $ } | $0F
-  31+ C4BC             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ C4BF FF          >        DB $FF
-  33+ C4C0             >tileN=tileN+1
-  22+ C4C0             >        ORG $C000 + tileN*32
-  23+ C4C0 FF          >        DB $FF
-  24+ C4C1 F7          >        DB {b $ } | $F0
-  25+ C4C2             >        ORG $C000 + tileN*32 + 1*4
-  26+ C4C4 F1          >        DB {b $ } | $F0
-  27+ C4C5             >        ORG $C000 + tileN*32 + 2*4
-  28+ C4C8 F1          >        DB {b $ } | $F0
-  29+ C4C9             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ C4DB 1F          >        DB {b $ } | $0F
-  31+ C4DC             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ C4DF FF          >        DB $FF
-  33+ C4E0             >tileN=tileN+1
-  22+ C4E0             >        ORG $C000 + tileN*32
-  23+ C4E0 FF          >        DB $FF
-  24+ C4E1 F1          >        DB {b $ } | $F0
-  25+ C4E2             >        ORG $C000 + tileN*32 + 1*4
-  26+ C4E4 F1          >        DB {b $ } | $F0
-  27+ C4E5             >        ORG $C000 + tileN*32 + 2*4
-  28+ C4E8 F1          >        DB {b $ } | $F0
-  29+ C4E9             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ C4FB 7F          >        DB {b $ } | $0F
-  31+ C4FC             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ C4FF FF          >        DB $FF
-  33+ C500             >tileN=tileN+1
-  22+ C500             >        ORG $C000 + tileN*32
-  23+ C500 FF          >        DB $FF
-  24+ C501 F6          >        DB {b $ } | $F0
-  25+ C502             >        ORG $C000 + tileN*32 + 1*4
-  26+ C504 F6          >        DB {b $ } | $F0
-  27+ C505             >        ORG $C000 + tileN*32 + 2*4
-  28+ C508 F6          >        DB {b $ } | $F0
-  29+ C509             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ C51B AF          >        DB {b $ } | $0F
-  31+ C51C             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ C51F FF          >        DB $FF
-  33+ C520             >tileN=tileN+1
-  22+ C520             >        ORG $C000 + tileN*32
-  23+ C520 FF          >        DB $FF
-  24+ C521 F6          >        DB {b $ } | $F0
-  25+ C522             >        ORG $C000 + tileN*32 + 1*4
-  26+ C524 FA          >        DB {b $ } | $F0
-  27+ C525             >        ORG $C000 + tileN*32 + 2*4
-  28+ C528 FD          >        DB {b $ } | $F0
-  29+ C529             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ C53B AF          >        DB {b $ } | $0F
-  31+ C53C             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ C53F FF          >        DB $FF
-  33+ C540             >tileN=tileN+1
-  22+ C540             >        ORG $C000 + tileN*32
-  23+ C540 FF          >        DB $FF
-  24+ C541 FD          >        DB {b $ } | $F0
-  25+ C542             >        ORG $C000 + tileN*32 + 1*4
-  26+ C544 F3          >        DB {b $ } | $F0
-  27+ C545             >        ORG $C000 + tileN*32 + 2*4
-  28+ C548 F2          >        DB {b $ } | $F0
-  29+ C549             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ C55B 3F          >        DB {b $ } | $0F
-  31+ C55C             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ C55F FF          >        DB $FF
-  33+ C560             >tileN=tileN+1
-  22+ C560             >        ORG $C000 + tileN*32
-  23+ C560 FF          >        DB $FF
-  24+ C561 FA          >        DB {b $ } | $F0
-  25+ C562             >        ORG $C000 + tileN*32 + 1*4
-  26+ C564 FA          >        DB {b $ } | $F0
-  27+ C565             >        ORG $C000 + tileN*32 + 2*4
-  28+ C568 FA          >        DB {b $ } | $F0
-  29+ C569             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ C57B 2F          >        DB {b $ } | $0F
-  31+ C57C             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ C57F FF          >        DB $FF
-  33+ C580             >tileN=tileN+1
-  22+ C580             >        ORG $C000 + tileN*32
-  23+ C580 FF          >        DB $FF
-  24+ C581 F2          >        DB {b $ } | $F0
-  25+ C582             >        ORG $C000 + tileN*32 + 1*4
-  26+ C584 F2          >        DB {b $ } | $F0
-  27+ C585             >        ORG $C000 + tileN*32 + 2*4
-  28+ C588 F2          >        DB {b $ } | $F0
-  29+ C589             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ C59B AF          >        DB {b $ } | $0F
-  31+ C59C             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ C59F FF          >        DB $FF
-  33+ C5A0             >tileN=tileN+1
-  22+ C5A0             >        ORG $C000 + tileN*32
-  23+ C5A0 FF          >        DB $FF
-  24+ C5A1 F6          >        DB {b $ } | $F0
-  25+ C5A2             >        ORG $C000 + tileN*32 + 1*4
-  26+ C5A4 F3          >        DB {b $ } | $F0
-  27+ C5A5             >        ORG $C000 + tileN*32 + 2*4
-  28+ C5A8 F6          >        DB {b $ } | $F0
-  29+ C5A9             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ C5BB 6F          >        DB {b $ } | $0F
-  31+ C5BC             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ C5BF FF          >        DB $FF
-  33+ C5C0             >tileN=tileN+1
-  22+ C5C0             >        ORG $C000 + tileN*32
-  23+ C5C0 FF          >        DB $FF
-  24+ C5C1 F7          >        DB {b $ } | $F0
-  25+ C5C2             >        ORG $C000 + tileN*32 + 1*4
-  26+ C5C4 F1          >        DB {b $ } | $F0
-  27+ C5C5             >        ORG $C000 + tileN*32 + 2*4
-  28+ C5C8 F1          >        DB {b $ } | $F0
-  29+ C5C9             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ C5DB 1F          >        DB {b $ } | $0F
-  31+ C5DC             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ C5DF FF          >        DB $FF
-  33+ C5E0             >tileN=tileN+1
-  22+ C5E0             >        ORG $C000 + tileN*32
-  23+ C5E0 FF          >        DB $FF
-  24+ C5E1 F1          >        DB {b $ } | $F0
-  25+ C5E2             >        ORG $C000 + tileN*32 + 1*4
-  26+ C5E4 F1          >        DB {b $ } | $F0
-  27+ C5E5             >        ORG $C000 + tileN*32 + 2*4
-  28+ C5E8 F1          >        DB {b $ } | $F0
-  29+ C5E9             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ C5FB 7F          >        DB {b $ } | $0F
-  31+ C5FC             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ C5FF FF          >        DB $FF
-  33+ C600             >tileN=tileN+1
-  22+ C600             >        ORG $C000 + tileN*32
-  23+ C600 FF          >        DB $FF
-  24+ C601 F7          >        DB {b $ } | $F0
-  25+ C602             >        ORG $C000 + tileN*32 + 1*4
-  26+ C604 F1          >        DB {b $ } | $F0
-  27+ C605             >        ORG $C000 + tileN*32 + 2*4
-  28+ C608 F1          >        DB {b $ } | $F0
-  29+ C609             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ C61B 1F          >        DB {b $ } | $0F
-  31+ C61C             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ C61F FF          >        DB $FF
-  33+ C620             >tileN=tileN+1
-  22+ C620             >        ORG $C000 + tileN*32
-  23+ C620 FF          >        DB $FF
-  24+ C621 F1          >        DB {b $ } | $F0
-  25+ C622             >        ORG $C000 + tileN*32 + 1*4
-  26+ C624 F1          >        DB {b $ } | $F0
-  27+ C625             >        ORG $C000 + tileN*32 + 2*4
-  28+ C628 F1          >        DB {b $ } | $F0
-  29+ C629             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ C63B 7F          >        DB {b $ } | $0F
-  31+ C63C             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ C63F FF          >        DB $FF
-  33+ C640             >tileN=tileN+1
-  22+ C640             >        ORG $C000 + tileN*32
-  23+ C640 FF          >        DB $FF
-  24+ C641 F9          >        DB {b $ } | $F0
-  25+ C642             >        ORG $C000 + tileN*32 + 1*4
-  26+ C644 F7          >        DB {b $ } | $F0
-  27+ C645             >        ORG $C000 + tileN*32 + 2*4
-  28+ C648 F7          >        DB {b $ } | $F0
-  29+ C649             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ C65B 1F          >        DB {b $ } | $0F
-  31+ C65C             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ C65F FF          >        DB $FF
-  33+ C660             >tileN=tileN+1
-  22+ C660             >        ORG $C000 + tileN*32
-  23+ C660 FF          >        DB $FF
-  24+ C661 F1          >        DB {b $ } | $F0
-  25+ C662             >        ORG $C000 + tileN*32 + 1*4
-  26+ C664 F4          >        DB {b $ } | $F0
-  27+ C665             >        ORG $C000 + tileN*32 + 2*4
-  28+ C668 F4          >        DB {b $ } | $F0
-  29+ C669             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ C67B 7F          >        DB {b $ } | $0F
-  31+ C67C             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ C67F FF          >        DB $FF
-  33+ C680             >tileN=tileN+1
-  22+ C680             >        ORG $C000 + tileN*32
-  23+ C680 FF          >        DB $FF
-  24+ C681 F7          >        DB {b $ } | $F0
-  25+ C682             >        ORG $C000 + tileN*32 + 1*4
-  26+ C684 FB          >        DB {b $ } | $F0
-  27+ C685             >        ORG $C000 + tileN*32 + 2*4
-  28+ C688 F7          >        DB {b $ } | $F0
-  29+ C689             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ C69B 7F          >        DB {b $ } | $0F
-  31+ C69C             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ C69F FF          >        DB $FF
-  33+ C6A0             >tileN=tileN+1
-  22+ C6A0             >        ORG $C000 + tileN*32
-  23+ C6A0 FF          >        DB $FF
-  24+ C6A1 FB          >        DB {b $ } | $F0
-  25+ C6A2             >        ORG $C000 + tileN*32 + 1*4
-  26+ C6A4 F9          >        DB {b $ } | $F0
-  27+ C6A5             >        ORG $C000 + tileN*32 + 2*4
-  28+ C6A8 F9          >        DB {b $ } | $F0
-  29+ C6A9             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ C6BB 1F          >        DB {b $ } | $0F
-  31+ C6BC             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ C6BF FF          >        DB $FF
-  33+ C6C0             >tileN=tileN+1
-  22+ C6C0             >        ORG $C000 + tileN*32
-  23+ C6C0 FF          >        DB $FF
-  24+ C6C1 F0          >        DB {b $ } | $F0
-  25+ C6C2             >        ORG $C000 + tileN*32 + 1*4
-  26+ C6C4 F0          >        DB {b $ } | $F0
-  27+ C6C5             >        ORG $C000 + tileN*32 + 2*4
-  28+ C6C8 F0          >        DB {b $ } | $F0
-  29+ C6C9             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ C6DB 0F          >        DB {b $ } | $0F
-  31+ C6DC             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ C6DF FF          >        DB $FF
-  33+ C6E0             >tileN=tileN+1
-  22+ C6E0             >        ORG $C000 + tileN*32
-  23+ C6E0 FF          >        DB $FF
-  24+ C6E1 F0          >        DB {b $ } | $F0
-  25+ C6E2             >        ORG $C000 + tileN*32 + 1*4
-  26+ C6E4 F0          >        DB {b $ } | $F0
-  27+ C6E5             >        ORG $C000 + tileN*32 + 2*4
-  28+ C6E8 F0          >        DB {b $ } | $F0
-  29+ C6E9             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ C6FB 0F          >        DB {b $ } | $0F
-  31+ C6FC             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ C6FF FF          >        DB $FF
-  33+ C700             >tileN=tileN+1
-  22+ C700             >        ORG $C000 + tileN*32
-  23+ C700 FF          >        DB $FF
-  24+ C701 F0          >        DB {b $ } | $F0
-  25+ C702             >        ORG $C000 + tileN*32 + 1*4
-  26+ C704 F0          >        DB {b $ } | $F0
-  27+ C705             >        ORG $C000 + tileN*32 + 2*4
-  28+ C708 F0          >        DB {b $ } | $F0
-  29+ C709             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ C71B 0F          >        DB {b $ } | $0F
-  31+ C71C             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ C71F FF          >        DB $FF
-  33+ C720             >tileN=tileN+1
-  22+ C720             >        ORG $C000 + tileN*32
-  23+ C720 FF          >        DB $FF
-  24+ C721 F0          >        DB {b $ } | $F0
-  25+ C722             >        ORG $C000 + tileN*32 + 1*4
-  26+ C724 F0          >        DB {b $ } | $F0
-  27+ C725             >        ORG $C000 + tileN*32 + 2*4
-  28+ C728 F0          >        DB {b $ } | $F0
-  29+ C729             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ C73B 0F          >        DB {b $ } | $0F
-  31+ C73C             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ C73F FF          >        DB $FF
-  33+ C740             >tileN=tileN+1
-  22+ C740             >        ORG $C000 + tileN*32
-  23+ C740 FF          >        DB $FF
-  24+ C741 F0          >        DB {b $ } | $F0
-  25+ C742             >        ORG $C000 + tileN*32 + 1*4
-  26+ C744 F0          >        DB {b $ } | $F0
-  27+ C745             >        ORG $C000 + tileN*32 + 2*4
-  28+ C748 F0          >        DB {b $ } | $F0
-  29+ C749             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ C75B 0F          >        DB {b $ } | $0F
-  31+ C75C             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ C75F FF          >        DB $FF
-  33+ C760             >tileN=tileN+1
-  22+ C760             >        ORG $C000 + tileN*32
-  23+ C760 FF          >        DB $FF
-  24+ C761 F0          >        DB {b $ } | $F0
-  25+ C762             >        ORG $C000 + tileN*32 + 1*4
-  26+ C764 F0          >        DB {b $ } | $F0
-  27+ C765             >        ORG $C000 + tileN*32 + 2*4
-  28+ C768 F0          >        DB {b $ } | $F0
-  29+ C769             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ C77B 0F          >        DB {b $ } | $0F
-  31+ C77C             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ C77F FF          >        DB $FF
-  33+ C780             >tileN=tileN+1
-  22+ C780             >        ORG $C000 + tileN*32
-  23+ C780 FF          >        DB $FF
-  24+ C781 F0          >        DB {b $ } | $F0
-  25+ C782             >        ORG $C000 + tileN*32 + 1*4
-  26+ C784 F0          >        DB {b $ } | $F0
-  27+ C785             >        ORG $C000 + tileN*32 + 2*4
-  28+ C788 F0          >        DB {b $ } | $F0
-  29+ C789             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ C79B 0F          >        DB {b $ } | $0F
-  31+ C79C             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ C79F FF          >        DB $FF
-  33+ C7A0             >tileN=tileN+1
-  22+ C7A0             >        ORG $C000 + tileN*32
-  23+ C7A0 FF          >        DB $FF
-  24+ C7A1 F0          >        DB {b $ } | $F0
-  25+ C7A2             >        ORG $C000 + tileN*32 + 1*4
-  26+ C7A4 F0          >        DB {b $ } | $F0
-  27+ C7A5             >        ORG $C000 + tileN*32 + 2*4
-  28+ C7A8 F0          >        DB {b $ } | $F0
-  29+ C7A9             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ C7BB 0F          >        DB {b $ } | $0F
-  31+ C7BC             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ C7BF FF          >        DB $FF
-  33+ C7C0             >tileN=tileN+1
-  22+ C7C0             >        ORG $C000 + tileN*32
-  23+ C7C0 FF          >        DB $FF
-  24+ C7C1 F0          >        DB {b $ } | $F0
-  25+ C7C2             >        ORG $C000 + tileN*32 + 1*4
-  26+ C7C4 F0          >        DB {b $ } | $F0
-  27+ C7C5             >        ORG $C000 + tileN*32 + 2*4
-  28+ C7C8 F0          >        DB {b $ } | $F0
-  29+ C7C9             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ C7DB 0F          >        DB {b $ } | $0F
-  31+ C7DC             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ C7DF FF          >        DB $FF
-  33+ C7E0             >tileN=tileN+1
-  22+ C7E0             >        ORG $C000 + tileN*32
-  23+ C7E0 FF          >        DB $FF
-  24+ C7E1 F0          >        DB {b $ } | $F0
-  25+ C7E2             >        ORG $C000 + tileN*32 + 1*4
-  26+ C7E4 F0          >        DB {b $ } | $F0
-  27+ C7E5             >        ORG $C000 + tileN*32 + 2*4
-  28+ C7E8 F0          >        DB {b $ } | $F0
-  29+ C7E9             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ C7FB 0F          >        DB {b $ } | $0F
-  31+ C7FC             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ C7FF FF          >        DB $FF
-  33+ C800             >tileN=tileN+1
-  22+ C800             >        ORG $C000 + tileN*32
-  23+ C800 FF          >        DB $FF
-  24+ C801 FC          >        DB {b $ } | $F0
-  25+ C802             >        ORG $C000 + tileN*32 + 1*4
-  26+ C804 F0          >        DB {b $ } | $F0
-  27+ C805             >        ORG $C000 + tileN*32 + 2*4
-  28+ C808 F0          >        DB {b $ } | $F0
-  29+ C809             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ C81B 0F          >        DB {b $ } | $0F
-  31+ C81C             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ C81F FF          >        DB $FF
-  33+ C820             >tileN=tileN+1
-  22+ C820             >        ORG $C000 + tileN*32
-  23+ C820 FF          >        DB $FF
-  24+ C821 FC          >        DB {b $ } | $F0
-  25+ C822             >        ORG $C000 + tileN*32 + 1*4
-  26+ C824 F0          >        DB {b $ } | $F0
-  27+ C825             >        ORG $C000 + tileN*32 + 2*4
-  28+ C828 F0          >        DB {b $ } | $F0
-  29+ C829             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ C83B 0F          >        DB {b $ } | $0F
-  31+ C83C             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ C83F FF          >        DB $FF
-  33+ C840             >tileN=tileN+1
-  22+ C840             >        ORG $C000 + tileN*32
-  23+ C840 FF          >        DB $FF
-  24+ C841 F7          >        DB {b $ } | $F0
-  25+ C842             >        ORG $C000 + tileN*32 + 1*4
-  26+ C844 F7          >        DB {b $ } | $F0
-  27+ C845             >        ORG $C000 + tileN*32 + 2*4
-  28+ C848 F7          >        DB {b $ } | $F0
-  29+ C849             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ C85B 1F          >        DB {b $ } | $0F
-  31+ C85C             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ C85F FF          >        DB $FF
-  33+ C860             >tileN=tileN+1
-  22+ C860             >        ORG $C000 + tileN*32
-  23+ C860 FF          >        DB $FF
-  24+ C861 F1          >        DB {b $ } | $F0
-  25+ C862             >        ORG $C000 + tileN*32 + 1*4
-  26+ C864 F4          >        DB {b $ } | $F0
-  27+ C865             >        ORG $C000 + tileN*32 + 2*4
-  28+ C868 F9          >        DB {b $ } | $F0
-  29+ C869             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ C87B BF          >        DB {b $ } | $0F
-  31+ C87C             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ C87F FF          >        DB $FF
-  33+ C880             >tileN=tileN+1
-  22+ C880             >        ORG $C000 + tileN*32
-  23+ C880 FF          >        DB $FF
-  24+ C881 F3          >        DB {b $ } | $F0
-  25+ C882             >        ORG $C000 + tileN*32 + 1*4
-  26+ C884 F0          >        DB {b $ } | $F0
-  27+ C885             >        ORG $C000 + tileN*32 + 2*4
-  28+ C888 F3          >        DB {b $ } | $F0
-  29+ C889             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ C89B 3F          >        DB {b $ } | $0F
-  31+ C89C             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ C89F FF          >        DB $FF
-  33+ C8A0             >tileN=tileN+1
-  22+ C8A0             >        ORG $C000 + tileN*32
-  23+ C8A0 FF          >        DB $FF
-  24+ C8A1 F6          >        DB {b $ } | $F0
-  25+ C8A2             >        ORG $C000 + tileN*32 + 1*4
-  26+ C8A4 F6          >        DB {b $ } | $F0
-  27+ C8A5             >        ORG $C000 + tileN*32 + 2*4
-  28+ C8A8 F6          >        DB {b $ } | $F0
-  29+ C8A9             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ C8BB 3F          >        DB {b $ } | $0F
-  31+ C8BC             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ C8BF FF          >        DB $FF
-  33+ C8C0             >tileN=tileN+1
-  22+ C8C0             >        ORG $C000 + tileN*32
-  23+ C8C0 FF          >        DB $FF
-  24+ C8C1 F4          >        DB {b $ } | $F0
-  25+ C8C2             >        ORG $C000 + tileN*32 + 1*4
-  26+ C8C4 F1          >        DB {b $ } | $F0
-  27+ C8C5             >        ORG $C000 + tileN*32 + 2*4
-  28+ C8C8 F4          >        DB {b $ } | $F0
-  29+ C8C9             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ C8DB 7F          >        DB {b $ } | $0F
-  31+ C8DC             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ C8DF FF          >        DB $FF
-  33+ C8E0             >tileN=tileN+1
-  22+ C8E0             >        ORG $C000 + tileN*32
-  23+ C8E0 FF          >        DB $FF
-  24+ C8E1 F4          >        DB {b $ } | $F0
-  25+ C8E2             >        ORG $C000 + tileN*32 + 1*4
-  26+ C8E4 F1          >        DB {b $ } | $F0
-  27+ C8E5             >        ORG $C000 + tileN*32 + 2*4
-  28+ C8E8 F4          >        DB {b $ } | $F0
-  29+ C8E9             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ C8FB 7F          >        DB {b $ } | $0F
-  31+ C8FC             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ C8FF FF          >        DB $FF
-  33+ C900             >tileN=tileN+1
-  22+ C900             >        ORG $C000 + tileN*32
-  23+ C900 FF          >        DB $FF
-  24+ C901 FD          >        DB {b $ } | $F0
-  25+ C902             >        ORG $C000 + tileN*32 + 1*4
-  26+ C904 F6          >        DB {b $ } | $F0
-  27+ C905             >        ORG $C000 + tileN*32 + 2*4
-  28+ C908 F3          >        DB {b $ } | $F0
-  29+ C909             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ C91B AF          >        DB {b $ } | $0F
-  31+ C91C             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ C91F FF          >        DB $FF
-  33+ C920             >tileN=tileN+1
-  22+ C920             >        ORG $C000 + tileN*32
-  23+ C920 FF          >        DB $FF
-  24+ C921 FD          >        DB {b $ } | $F0
-  25+ C922             >        ORG $C000 + tileN*32 + 1*4
-  26+ C924 FD          >        DB {b $ } | $F0
-  27+ C925             >        ORG $C000 + tileN*32 + 2*4
-  28+ C928 FA          >        DB {b $ } | $F0
-  29+ C929             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ C93B 6F          >        DB {b $ } | $0F
-  31+ C93C             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ C93F FF          >        DB $FF
-  33+ C940             >tileN=tileN+1
-  22+ C940             >        ORG $C000 + tileN*32
-  23+ C940 FF          >        DB $FF
-  24+ C941 F3          >        DB {b $ } | $F0
-  25+ C942             >        ORG $C000 + tileN*32 + 1*4
-  26+ C944 F0          >        DB {b $ } | $F0
-  27+ C945             >        ORG $C000 + tileN*32 + 2*4
-  28+ C948 F3          >        DB {b $ } | $F0
-  29+ C949             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ C95B 3F          >        DB {b $ } | $0F
-  31+ C95C             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ C95F FF          >        DB $FF
-  33+ C960             >tileN=tileN+1
-  22+ C960             >        ORG $C000 + tileN*32
-  23+ C960 FF          >        DB $FF
-  24+ C961 F6          >        DB {b $ } | $F0
-  25+ C962             >        ORG $C000 + tileN*32 + 1*4
-  26+ C964 F6          >        DB {b $ } | $F0
-  27+ C965             >        ORG $C000 + tileN*32 + 2*4
-  28+ C968 F6          >        DB {b $ } | $F0
-  29+ C969             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ C97B 3F          >        DB {b $ } | $0F
-  31+ C97C             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ C97F FF          >        DB $FF
-  33+ C980             >tileN=tileN+1
-  22+ C980             >        ORG $C000 + tileN*32
-  23+ C980 FF          >        DB $FF
-  24+ C981 F6          >        DB {b $ } | $F0
-  25+ C982             >        ORG $C000 + tileN*32 + 1*4
-  26+ C984 F6          >        DB {b $ } | $F0
-  27+ C985             >        ORG $C000 + tileN*32 + 2*4
-  28+ C988 F2          >        DB {b $ } | $F0
-  29+ C989             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ C99B DF          >        DB {b $ } | $0F
-  31+ C99C             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ C99F FF          >        DB $FF
-  33+ C9A0             >tileN=tileN+1
-  22+ C9A0             >        ORG $C000 + tileN*32
-  23+ C9A0 FF          >        DB $FF
-  24+ C9A1 F3          >        DB {b $ } | $F0
-  25+ C9A2             >        ORG $C000 + tileN*32 + 1*4
-  26+ C9A4 F3          >        DB {b $ } | $F0
-  27+ C9A5             >        ORG $C000 + tileN*32 + 2*4
-  28+ C9A8 FD          >        DB {b $ } | $F0
-  29+ C9A9             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ C9BB DF          >        DB {b $ } | $0F
-  31+ C9BC             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ C9BF FF          >        DB $FF
-  33+ C9C0             >tileN=tileN+1
-  22+ C9C0             >        ORG $C000 + tileN*32
-  23+ C9C0 FF          >        DB $FF
-  24+ C9C1 F4          >        DB {b $ } | $F0
-  25+ C9C2             >        ORG $C000 + tileN*32 + 1*4
-  26+ C9C4 F9          >        DB {b $ } | $F0
-  27+ C9C5             >        ORG $C000 + tileN*32 + 2*4
-  28+ C9C8 F1          >        DB {b $ } | $F0
-  29+ C9C9             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ C9DB 7F          >        DB {b $ } | $0F
-  31+ C9DC             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ C9DF FF          >        DB $FF
-  33+ C9E0             >tileN=tileN+1
-  22+ C9E0             >        ORG $C000 + tileN*32
-  23+ C9E0 FF          >        DB $FF
-  24+ C9E1 F1          >        DB {b $ } | $F0
-  25+ C9E2             >        ORG $C000 + tileN*32 + 1*4
-  26+ C9E4 F1          >        DB {b $ } | $F0
-  27+ C9E5             >        ORG $C000 + tileN*32 + 2*4
-  28+ C9E8 F1          >        DB {b $ } | $F0
-  29+ C9E9             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ C9FB 4F          >        DB {b $ } | $0F
-  31+ C9FC             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ C9FF FF          >        DB $FF
-  33+ CA00             >tileN=tileN+1
-  22+ CA00             >        ORG $C000 + tileN*32
-  23+ CA00 FF          >        DB $FF
-  24+ CA01 F4          >        DB {b $ } | $F0
-  25+ CA02             >        ORG $C000 + tileN*32 + 1*4
-  26+ CA04 F1          >        DB {b $ } | $F0
-  27+ CA05             >        ORG $C000 + tileN*32 + 2*4
-  28+ CA08 F4          >        DB {b $ } | $F0
-  29+ CA09             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ CA1B 7F          >        DB {b $ } | $0F
-  31+ CA1C             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ CA1F FF          >        DB $FF
-  33+ CA20             >tileN=tileN+1
-  22+ CA20             >        ORG $C000 + tileN*32
-  23+ CA20 FF          >        DB $FF
-  24+ CA21 F4          >        DB {b $ } | $F0
-  25+ CA22             >        ORG $C000 + tileN*32 + 1*4
-  26+ CA24 F1          >        DB {b $ } | $F0
-  27+ CA25             >        ORG $C000 + tileN*32 + 2*4
-  28+ CA28 F4          >        DB {b $ } | $F0
-  29+ CA29             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ CA3B 7F          >        DB {b $ } | $0F
-  31+ CA3C             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ CA3F FF          >        DB $FF
-  33+ CA40             >tileN=tileN+1
-  22+ CA40             >        ORG $C000 + tileN*32
-  23+ CA40 FF          >        DB $FF
-  24+ CA41 F0          >        DB {b $ } | $F0
-  25+ CA42             >        ORG $C000 + tileN*32 + 1*4
-  26+ CA44 F0          >        DB {b $ } | $F0
-  27+ CA45             >        ORG $C000 + tileN*32 + 2*4
-  28+ CA48 F0          >        DB {b $ } | $F0
-  29+ CA49             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ CA5B 0F          >        DB {b $ } | $0F
-  31+ CA5C             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ CA5F FF          >        DB $FF
-  33+ CA60             >tileN=tileN+1
-  22+ CA60             >        ORG $C000 + tileN*32
-  23+ CA60 FF          >        DB $FF
-  24+ CA61 F0          >        DB {b $ } | $F0
-  25+ CA62             >        ORG $C000 + tileN*32 + 1*4
-  26+ CA64 F0          >        DB {b $ } | $F0
-  27+ CA65             >        ORG $C000 + tileN*32 + 2*4
-  28+ CA68 F0          >        DB {b $ } | $F0
-  29+ CA69             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ CA7B 0F          >        DB {b $ } | $0F
-  31+ CA7C             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ CA7F FF          >        DB $FF
-  33+ CA80             >tileN=tileN+1
-  22+ CA80             >        ORG $C000 + tileN*32
-  23+ CA80 FF          >        DB $FF
-  24+ CA81 F0          >        DB {b $ } | $F0
-  25+ CA82             >        ORG $C000 + tileN*32 + 1*4
-  26+ CA84 F0          >        DB {b $ } | $F0
-  27+ CA85             >        ORG $C000 + tileN*32 + 2*4
-  28+ CA88 F0          >        DB {b $ } | $F0
-  29+ CA89             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ CA9B 0F          >        DB {b $ } | $0F
-  31+ CA9C             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ CA9F FF          >        DB $FF
-  33+ CAA0             >tileN=tileN+1
-  22+ CAA0             >        ORG $C000 + tileN*32
-  23+ CAA0 FF          >        DB $FF
-  24+ CAA1 F0          >        DB {b $ } | $F0
-  25+ CAA2             >        ORG $C000 + tileN*32 + 1*4
-  26+ CAA4 F0          >        DB {b $ } | $F0
-  27+ CAA5             >        ORG $C000 + tileN*32 + 2*4
-  28+ CAA8 F0          >        DB {b $ } | $F0
-  29+ CAA9             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ CABB 0F          >        DB {b $ } | $0F
-  31+ CABC             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ CABF FF          >        DB $FF
-  33+ CAC0             >tileN=tileN+1
-  22+ CAC0             >        ORG $C000 + tileN*32
-  23+ CAC0 FF          >        DB $FF
-  24+ CAC1 F0          >        DB {b $ } | $F0
-  25+ CAC2             >        ORG $C000 + tileN*32 + 1*4
-  26+ CAC4 F0          >        DB {b $ } | $F0
-  27+ CAC5             >        ORG $C000 + tileN*32 + 2*4
-  28+ CAC8 F0          >        DB {b $ } | $F0
-  29+ CAC9             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ CADB 0F          >        DB {b $ } | $0F
-  31+ CADC             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ CADF FF          >        DB $FF
-  33+ CAE0             >tileN=tileN+1
-  22+ CAE0             >        ORG $C000 + tileN*32
-  23+ CAE0 FF          >        DB $FF
-  24+ CAE1 F0          >        DB {b $ } | $F0
-  25+ CAE2             >        ORG $C000 + tileN*32 + 1*4
-  26+ CAE4 F0          >        DB {b $ } | $F0
-  27+ CAE5             >        ORG $C000 + tileN*32 + 2*4
-  28+ CAE8 F0          >        DB {b $ } | $F0
-  29+ CAE9             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ CAFB 0F          >        DB {b $ } | $0F
-  31+ CAFC             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ CAFF FF          >        DB $FF
-  33+ CB00             >tileN=tileN+1
-  22+ CB00             >        ORG $C000 + tileN*32
-  23+ CB00 FF          >        DB $FF
-  24+ CB01 F0          >        DB {b $ } | $F0
-  25+ CB02             >        ORG $C000 + tileN*32 + 1*4
-  26+ CB04 F0          >        DB {b $ } | $F0
-  27+ CB05             >        ORG $C000 + tileN*32 + 2*4
-  28+ CB08 F0          >        DB {b $ } | $F0
-  29+ CB09             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ CB1B 0F          >        DB {b $ } | $0F
-  31+ CB1C             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ CB1F FF          >        DB $FF
-  33+ CB20             >tileN=tileN+1
-  22+ CB20             >        ORG $C000 + tileN*32
-  23+ CB20 FF          >        DB $FF
-  24+ CB21 F0          >        DB {b $ } | $F0
-  25+ CB22             >        ORG $C000 + tileN*32 + 1*4
-  26+ CB24 F0          >        DB {b $ } | $F0
-  27+ CB25             >        ORG $C000 + tileN*32 + 2*4
-  28+ CB28 F0          >        DB {b $ } | $F0
-  29+ CB29             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ CB3B 0F          >        DB {b $ } | $0F
-  31+ CB3C             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ CB3F FF          >        DB $FF
-  33+ CB40             >tileN=tileN+1
-  22+ CB40             >        ORG $C000 + tileN*32
-  23+ CB40 FF          >        DB $FF
-  24+ CB41 F0          >        DB {b $ } | $F0
-  25+ CB42             >        ORG $C000 + tileN*32 + 1*4
-  26+ CB44 F0          >        DB {b $ } | $F0
-  27+ CB45             >        ORG $C000 + tileN*32 + 2*4
-  28+ CB48 F0          >        DB {b $ } | $F0
-  29+ CB49             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ CB5B 0F          >        DB {b $ } | $0F
-  31+ CB5C             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ CB5F FF          >        DB $FF
-  33+ CB60             >tileN=tileN+1
-  22+ CB60             >        ORG $C000 + tileN*32
-  23+ CB60 FF          >        DB $FF
-  24+ CB61 F0          >        DB {b $ } | $F0
-  25+ CB62             >        ORG $C000 + tileN*32 + 1*4
-  26+ CB64 F0          >        DB {b $ } | $F0
-  27+ CB65             >        ORG $C000 + tileN*32 + 2*4
-  28+ CB68 F0          >        DB {b $ } | $F0
-  29+ CB69             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ CB7B 0F          >        DB {b $ } | $0F
-  31+ CB7C             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ CB7F FF          >        DB $FF
-  33+ CB80             >tileN=tileN+1
-  22+ CB80             >        ORG $C000 + tileN*32
-  23+ CB80 FF          >        DB $FF
-  24+ CB81 F0          >        DB {b $ } | $F0
-  25+ CB82             >        ORG $C000 + tileN*32 + 1*4
-  26+ CB84 F0          >        DB {b $ } | $F0
-  27+ CB85             >        ORG $C000 + tileN*32 + 2*4
-  28+ CB88 F0          >        DB {b $ } | $F0
-  29+ CB89             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ CB9B 0F          >        DB {b $ } | $0F
-  31+ CB9C             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ CB9F FF          >        DB $FF
-  33+ CBA0             >tileN=tileN+1
-  22+ CBA0             >        ORG $C000 + tileN*32
-  23+ CBA0 FF          >        DB $FF
-  24+ CBA1 F0          >        DB {b $ } | $F0
-  25+ CBA2             >        ORG $C000 + tileN*32 + 1*4
-  26+ CBA4 F0          >        DB {b $ } | $F0
-  27+ CBA5             >        ORG $C000 + tileN*32 + 2*4
-  28+ CBA8 F0          >        DB {b $ } | $F0
-  29+ CBA9             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ CBBB 0F          >        DB {b $ } | $0F
-  31+ CBBC             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ CBBF FF          >        DB $FF
-  33+ CBC0             >tileN=tileN+1
-  22+ CBC0             >        ORG $C000 + tileN*32
-  23+ CBC0 FF          >        DB $FF
-  24+ CBC1 F0          >        DB {b $ } | $F0
-  25+ CBC2             >        ORG $C000 + tileN*32 + 1*4
-  26+ CBC4 F0          >        DB {b $ } | $F0
-  27+ CBC5             >        ORG $C000 + tileN*32 + 2*4
-  28+ CBC8 F0          >        DB {b $ } | $F0
-  29+ CBC9             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ CBDB 0F          >        DB {b $ } | $0F
-  31+ CBDC             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ CBDF FF          >        DB $FF
-  33+ CBE0             >tileN=tileN+1
-  22+ CBE0             >        ORG $C000 + tileN*32
-  23+ CBE0 FF          >        DB $FF
-  24+ CBE1 F0          >        DB {b $ } | $F0
-  25+ CBE2             >        ORG $C000 + tileN*32 + 1*4
-  26+ CBE4 F0          >        DB {b $ } | $F0
-  27+ CBE5             >        ORG $C000 + tileN*32 + 2*4
-  28+ CBE8 F0          >        DB {b $ } | $F0
-  29+ CBE9             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ CBFB 0F          >        DB {b $ } | $0F
-  31+ CBFC             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ CBFF FF          >        DB $FF
-  33+ CC00             >tileN=tileN+1
-  22+ CC00             >        ORG $C000 + tileN*32
-  23+ CC00 FF          >        DB $FF
-  24+ CC01 FC          >        DB {b $ } | $F0
-  25+ CC02             >        ORG $C000 + tileN*32 + 1*4
-  26+ CC04 F0          >        DB {b $ } | $F0
-  27+ CC05             >        ORG $C000 + tileN*32 + 2*4
-  28+ CC08 F0          >        DB {b $ } | $F0
-  29+ CC09             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ CC1B 0F          >        DB {b $ } | $0F
-  31+ CC1C             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ CC1F FF          >        DB $FF
-  33+ CC20             >tileN=tileN+1
-  22+ CC20             >        ORG $C000 + tileN*32
-  23+ CC20 FF          >        DB $FF
-  24+ CC21 FC          >        DB {b $ } | $F0
-  25+ CC22             >        ORG $C000 + tileN*32 + 1*4
-  26+ CC24 F0          >        DB {b $ } | $F0
-  27+ CC25             >        ORG $C000 + tileN*32 + 2*4
-  28+ CC28 F0          >        DB {b $ } | $F0
-  29+ CC29             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ CC3B 0F          >        DB {b $ } | $0F
-  31+ CC3C             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ CC3F FF          >        DB $FF
-  33+ CC40             >tileN=tileN+1
-  22+ CC40             >        ORG $C000 + tileN*32
-  23+ CC40 FF          >        DB $FF
-  24+ CC41 FB          >        DB {b $ } | $F0
-  25+ CC42             >        ORG $C000 + tileN*32 + 1*4
-  26+ CC44 F7          >        DB {b $ } | $F0
-  27+ CC45             >        ORG $C000 + tileN*32 + 2*4
-  28+ CC48 F4          >        DB {b $ } | $F0
-  29+ CC49             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ CC5B 6F          >        DB {b $ } | $0F
-  31+ CC5C             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ CC5F FF          >        DB $FF
-  33+ CC60             >tileN=tileN+1
-  22+ CC60             >        ORG $C000 + tileN*32
-  23+ CC60 FF          >        DB $FF
-  24+ CC61 F9          >        DB {b $ } | $F0
-  25+ CC62             >        ORG $C000 + tileN*32 + 1*4
-  26+ CC64 F9          >        DB {b $ } | $F0
-  27+ CC65             >        ORG $C000 + tileN*32 + 2*4
-  28+ CC68 F2          >        DB {b $ } | $F0
-  29+ CC69             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ CC7B 2F          >        DB {b $ } | $0F
-  31+ CC7C             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ CC7F FF          >        DB $FF
-  33+ CC80             >tileN=tileN+1
-  22+ CC80             >        ORG $C000 + tileN*32
-  23+ CC80 FF          >        DB $FF
-  24+ CC81 F3          >        DB {b $ } | $F0
-  25+ CC82             >        ORG $C000 + tileN*32 + 1*4
-  26+ CC84 F2          >        DB {b $ } | $F0
-  27+ CC85             >        ORG $C000 + tileN*32 + 2*4
-  28+ CC88 F0          >        DB {b $ } | $F0
-  29+ CC89             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ CC9B DF          >        DB {b $ } | $0F
-  31+ CC9C             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ CC9F FF          >        DB $FF
-  33+ CCA0             >tileN=tileN+1
-  22+ CCA0             >        ORG $C000 + tileN*32
-  23+ CCA0 FF          >        DB $FF
-  24+ CCA1 F2          >        DB {b $ } | $F0
-  25+ CCA2             >        ORG $C000 + tileN*32 + 1*4
-  26+ CCA4 F3          >        DB {b $ } | $F0
-  27+ CCA5             >        ORG $C000 + tileN*32 + 2*4
-  28+ CCA8 F6          >        DB {b $ } | $F0
-  29+ CCA9             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ CCBB AF          >        DB {b $ } | $0F
-  31+ CCBC             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ CCBF FF          >        DB $FF
-  33+ CCC0             >tileN=tileN+1
-  22+ CCC0             >        ORG $C000 + tileN*32
-  23+ CCC0 FF          >        DB $FF
-  24+ CCC1 F4          >        DB {b $ } | $F0
-  25+ CCC2             >        ORG $C000 + tileN*32 + 1*4
-  26+ CCC4 F7          >        DB {b $ } | $F0
-  27+ CCC5             >        ORG $C000 + tileN*32 + 2*4
-  28+ CCC8 F7          >        DB {b $ } | $F0
-  29+ CCC9             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ CCDB AF          >        DB {b $ } | $0F
-  31+ CCDC             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ CCDF FF          >        DB $FF
-  33+ CCE0             >tileN=tileN+1
-  22+ CCE0             >        ORG $C000 + tileN*32
-  23+ CCE0 FF          >        DB $FF
-  24+ CCE1 F7          >        DB {b $ } | $F0
-  25+ CCE2             >        ORG $C000 + tileN*32 + 1*4
-  26+ CCE4 FB          >        DB {b $ } | $F0
-  27+ CCE5             >        ORG $C000 + tileN*32 + 2*4
-  28+ CCE8 F7          >        DB {b $ } | $F0
-  29+ CCE9             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ CCFB 3F          >        DB {b $ } | $0F
-  31+ CCFC             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ CCFF FF          >        DB $FF
-  33+ CD00             >tileN=tileN+1
-  22+ CD00             >        ORG $C000 + tileN*32
-  23+ CD00 FF          >        DB $FF
-  24+ CD01 F6          >        DB {b $ } | $F0
-  25+ CD02             >        ORG $C000 + tileN*32 + 1*4
-  26+ CD04 F3          >        DB {b $ } | $F0
-  27+ CD05             >        ORG $C000 + tileN*32 + 2*4
-  28+ CD08 F2          >        DB {b $ } | $F0
-  29+ CD09             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ CD1B 1F          >        DB {b $ } | $0F
-  31+ CD1C             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ CD1F FF          >        DB $FF
-  33+ CD20             >tileN=tileN+1
-  22+ CD20             >        ORG $C000 + tileN*32
-  23+ CD20 FF          >        DB $FF
-  24+ CD21 F6          >        DB {b $ } | $F0
-  25+ CD22             >        ORG $C000 + tileN*32 + 1*4
-  26+ CD24 F6          >        DB {b $ } | $F0
-  27+ CD25             >        ORG $C000 + tileN*32 + 2*4
-  28+ CD28 F3          >        DB {b $ } | $F0
-  29+ CD29             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ CD3B 7F          >        DB {b $ } | $0F
-  31+ CD3C             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ CD3F FF          >        DB $FF
-  33+ CD40             >tileN=tileN+1
-  22+ CD40             >        ORG $C000 + tileN*32
-  23+ CD40 FF          >        DB $FF
-  24+ CD41 F3          >        DB {b $ } | $F0
-  25+ CD42             >        ORG $C000 + tileN*32 + 1*4
-  26+ CD44 F2          >        DB {b $ } | $F0
-  27+ CD45             >        ORG $C000 + tileN*32 + 2*4
-  28+ CD48 F0          >        DB {b $ } | $F0
-  29+ CD49             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ CD5B DF          >        DB {b $ } | $0F
-  31+ CD5C             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ CD5F FF          >        DB $FF
-  33+ CD60             >tileN=tileN+1
-  22+ CD60             >        ORG $C000 + tileN*32
-  23+ CD60 FF          >        DB $FF
-  24+ CD61 F2          >        DB {b $ } | $F0
-  25+ CD62             >        ORG $C000 + tileN*32 + 1*4
-  26+ CD64 F3          >        DB {b $ } | $F0
-  27+ CD65             >        ORG $C000 + tileN*32 + 2*4
-  28+ CD68 F6          >        DB {b $ } | $F0
-  29+ CD69             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ CD7B AF          >        DB {b $ } | $0F
-  31+ CD7C             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ CD7F FF          >        DB $FF
-  33+ CD80             >tileN=tileN+1
-  22+ CD80             >        ORG $C000 + tileN*32
-  23+ CD80 FF          >        DB $FF
-  24+ CD81 FD          >        DB {b $ } | $F0
-  25+ CD82             >        ORG $C000 + tileN*32 + 1*4
-  26+ CD84 F6          >        DB {b $ } | $F0
-  27+ CD85             >        ORG $C000 + tileN*32 + 2*4
-  28+ CD88 F6          >        DB {b $ } | $F0
-  29+ CD89             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ CD9B 6F          >        DB {b $ } | $0F
-  31+ CD9C             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ CD9F FF          >        DB $FF
-  33+ CDA0             >tileN=tileN+1
-  22+ CDA0             >        ORG $C000 + tileN*32
-  23+ CDA0 FF          >        DB $FF
-  24+ CDA1 FD          >        DB {b $ } | $F0
-  25+ CDA2             >        ORG $C000 + tileN*32 + 1*4
-  26+ CDA4 FA          >        DB {b $ } | $F0
-  27+ CDA5             >        ORG $C000 + tileN*32 + 2*4
-  28+ CDA8 FA          >        DB {b $ } | $F0
-  29+ CDA9             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ CDBB 0F          >        DB {b $ } | $0F
-  31+ CDBC             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ CDBF FF          >        DB $FF
-  33+ CDC0             >tileN=tileN+1
-  22+ CDC0             >        ORG $C000 + tileN*32
-  23+ CDC0 FF          >        DB $FF
-  24+ CDC1 F1          >        DB {b $ } | $F0
-  25+ CDC2             >        ORG $C000 + tileN*32 + 1*4
-  26+ CDC4 F4          >        DB {b $ } | $F0
-  27+ CDC5             >        ORG $C000 + tileN*32 + 2*4
-  28+ CDC8 F9          >        DB {b $ } | $F0
-  29+ CDC9             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ CDDB 6F          >        DB {b $ } | $0F
-  31+ CDDC             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ CDDF FF          >        DB $FF
-  33+ CDE0             >tileN=tileN+1
-  22+ CDE0             >        ORG $C000 + tileN*32
-  23+ CDE0 FF          >        DB $FF
-  24+ CDE1 F9          >        DB {b $ } | $F0
-  25+ CDE2             >        ORG $C000 + tileN*32 + 1*4
-  26+ CDE4 F4          >        DB {b $ } | $F0
-  27+ CDE5             >        ORG $C000 + tileN*32 + 2*4
-  28+ CDE8 F4          >        DB {b $ } | $F0
-  29+ CDE9             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ CDFB 3F          >        DB {b $ } | $0F
-  31+ CDFC             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ CDFF FF          >        DB $FF
-  33+ CE00             >tileN=tileN+1
-  22+ CE00             >        ORG $C000 + tileN*32
-  23+ CE00 FF          >        DB $FF
-  24+ CE01 F4          >        DB {b $ } | $F0
-  25+ CE02             >        ORG $C000 + tileN*32 + 1*4
-  26+ CE04 F7          >        DB {b $ } | $F0
-  27+ CE05             >        ORG $C000 + tileN*32 + 2*4
-  28+ CE08 F7          >        DB {b $ } | $F0
-  29+ CE09             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ CE1B AF          >        DB {b $ } | $0F
-  31+ CE1C             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ CE1F FF          >        DB $FF
-  33+ CE20             >tileN=tileN+1
-  22+ CE20             >        ORG $C000 + tileN*32
-  23+ CE20 FF          >        DB $FF
-  24+ CE21 F7          >        DB {b $ } | $F0
-  25+ CE22             >        ORG $C000 + tileN*32 + 1*4
-  26+ CE24 FB          >        DB {b $ } | $F0
-  27+ CE25             >        ORG $C000 + tileN*32 + 2*4
-  28+ CE28 F7          >        DB {b $ } | $F0
-  29+ CE29             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ CE3B 3F          >        DB {b $ } | $0F
-  31+ CE3C             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ CE3F FF          >        DB $FF
-  33+ CE40             >tileN=tileN+1
-  22+ CE40             >        ORG $C000 + tileN*32
-  23+ CE40 FF          >        DB $FF
-  24+ CE41 F7          >        DB {b $ } | $F0
-  25+ CE42             >        ORG $C000 + tileN*32 + 1*4
-  26+ CE44 F0          >        DB {b $ } | $F0
-  27+ CE45             >        ORG $C000 + tileN*32 + 2*4
-  28+ CE48 FB          >        DB {b $ } | $F0
-  29+ CE49             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ CE5B 9F          >        DB {b $ } | $0F
-  31+ CE5C             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ CE5F FF          >        DB $FF
-  33+ CE60             >tileN=tileN+1
-  22+ CE60             >        ORG $C000 + tileN*32
-  23+ CE60 FF          >        DB $FF
-  24+ CE61 F9          >        DB {b $ } | $F0
-  25+ CE62             >        ORG $C000 + tileN*32 + 1*4
-  26+ CE64 F9          >        DB {b $ } | $F0
-  27+ CE65             >        ORG $C000 + tileN*32 + 2*4
-  28+ CE68 F9          >        DB {b $ } | $F0
-  29+ CE69             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ CE7B 4F          >        DB {b $ } | $0F
-  31+ CE7C             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ CE7F FF          >        DB $FF
-  33+ CE80             >tileN=tileN+1
-  22+ CE80             >        ORG $C000 + tileN*32
-  23+ CE80 FF          >        DB $FF
-  24+ CE81 F7          >        DB {b $ } | $F0
-  25+ CE82             >        ORG $C000 + tileN*32 + 1*4
-  26+ CE84 F5          >        DB {b $ } | $F0
-  27+ CE85             >        ORG $C000 + tileN*32 + 2*4
-  28+ CE88 FB          >        DB {b $ } | $F0
-  29+ CE89             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ CE9B 9F          >        DB {b $ } | $0F
-  31+ CE9C             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ CE9F FF          >        DB $FF
-  33+ CEA0             >tileN=tileN+1
-  22+ CEA0             >        ORG $C000 + tileN*32
-  23+ CEA0 FF          >        DB $FF
-  24+ CEA1 F9          >        DB {b $ } | $F0
-  25+ CEA2             >        ORG $C000 + tileN*32 + 1*4
-  26+ CEA4 F9          >        DB {b $ } | $F0
-  27+ CEA5             >        ORG $C000 + tileN*32 + 2*4
-  28+ CEA8 F9          >        DB {b $ } | $F0
-  29+ CEA9             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ CEBB 4F          >        DB {b $ } | $0F
-  31+ CEBC             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ CEBF FF          >        DB $FF
-  33+ CEC0             >tileN=tileN+1
-  22+ CEC0             >        ORG $C000 + tileN*32
-  23+ CEC0 FF          >        DB $FF
-  24+ CEC1 F0          >        DB {b $ } | $F0
-  25+ CEC2             >        ORG $C000 + tileN*32 + 1*4
-  26+ CEC4 F0          >        DB {b $ } | $F0
-  27+ CEC5             >        ORG $C000 + tileN*32 + 2*4
-  28+ CEC8 F0          >        DB {b $ } | $F0
-  29+ CEC9             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ CEDB 0F          >        DB {b $ } | $0F
-  31+ CEDC             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ CEDF FF          >        DB $FF
-  33+ CEE0             >tileN=tileN+1
-  22+ CEE0             >        ORG $C000 + tileN*32
-  23+ CEE0 FF          >        DB $FF
-  24+ CEE1 F0          >        DB {b $ } | $F0
-  25+ CEE2             >        ORG $C000 + tileN*32 + 1*4
-  26+ CEE4 F0          >        DB {b $ } | $F0
-  27+ CEE5             >        ORG $C000 + tileN*32 + 2*4
-  28+ CEE8 F0          >        DB {b $ } | $F0
-  29+ CEE9             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ CEFB 0F          >        DB {b $ } | $0F
-  31+ CEFC             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ CEFF FF          >        DB $FF
-  33+ CF00             >tileN=tileN+1
-  22+ CF00             >        ORG $C000 + tileN*32
-  23+ CF00 FF          >        DB $FF
-  24+ CF01 F0          >        DB {b $ } | $F0
-  25+ CF02             >        ORG $C000 + tileN*32 + 1*4
-  26+ CF04 F0          >        DB {b $ } | $F0
-  27+ CF05             >        ORG $C000 + tileN*32 + 2*4
-  28+ CF08 F0          >        DB {b $ } | $F0
-  29+ CF09             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ CF1B 0F          >        DB {b $ } | $0F
-  31+ CF1C             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ CF1F FF          >        DB $FF
-  33+ CF20             >tileN=tileN+1
-  22+ CF20             >        ORG $C000 + tileN*32
-  23+ CF20 FF          >        DB $FF
-  24+ CF21 F0          >        DB {b $ } | $F0
-  25+ CF22             >        ORG $C000 + tileN*32 + 1*4
-  26+ CF24 F0          >        DB {b $ } | $F0
-  27+ CF25             >        ORG $C000 + tileN*32 + 2*4
-  28+ CF28 F0          >        DB {b $ } | $F0
-  29+ CF29             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ CF3B 0F          >        DB {b $ } | $0F
-  31+ CF3C             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ CF3F FF          >        DB $FF
-  33+ CF40             >tileN=tileN+1
-  22+ CF40             >        ORG $C000 + tileN*32
-  23+ CF40 FF          >        DB $FF
-  24+ CF41 F0          >        DB {b $ } | $F0
-  25+ CF42             >        ORG $C000 + tileN*32 + 1*4
-  26+ CF44 F0          >        DB {b $ } | $F0
-  27+ CF45             >        ORG $C000 + tileN*32 + 2*4
-  28+ CF48 F0          >        DB {b $ } | $F0
-  29+ CF49             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ CF5B 0F          >        DB {b $ } | $0F
-  31+ CF5C             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ CF5F FF          >        DB $FF
-  33+ CF60             >tileN=tileN+1
-  22+ CF60             >        ORG $C000 + tileN*32
-  23+ CF60 FF          >        DB $FF
-  24+ CF61 F0          >        DB {b $ } | $F0
-  25+ CF62             >        ORG $C000 + tileN*32 + 1*4
-  26+ CF64 F0          >        DB {b $ } | $F0
-  27+ CF65             >        ORG $C000 + tileN*32 + 2*4
-  28+ CF68 F0          >        DB {b $ } | $F0
-  29+ CF69             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ CF7B 0F          >        DB {b $ } | $0F
-  31+ CF7C             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ CF7F FF          >        DB $FF
-  33+ CF80             >tileN=tileN+1
-  22+ CF80             >        ORG $C000 + tileN*32
-  23+ CF80 FF          >        DB $FF
-  24+ CF81 F0          >        DB {b $ } | $F0
-  25+ CF82             >        ORG $C000 + tileN*32 + 1*4
-  26+ CF84 F0          >        DB {b $ } | $F0
-  27+ CF85             >        ORG $C000 + tileN*32 + 2*4
-  28+ CF88 F0          >        DB {b $ } | $F0
-  29+ CF89             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ CF9B 0F          >        DB {b $ } | $0F
-  31+ CF9C             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ CF9F FF          >        DB $FF
-  33+ CFA0             >tileN=tileN+1
-  22+ CFA0             >        ORG $C000 + tileN*32
-  23+ CFA0 FF          >        DB $FF
-  24+ CFA1 F0          >        DB {b $ } | $F0
-  25+ CFA2             >        ORG $C000 + tileN*32 + 1*4
-  26+ CFA4 F0          >        DB {b $ } | $F0
-  27+ CFA5             >        ORG $C000 + tileN*32 + 2*4
-  28+ CFA8 F0          >        DB {b $ } | $F0
-  29+ CFA9             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ CFBB 0F          >        DB {b $ } | $0F
-  31+ CFBC             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ CFBF FF          >        DB $FF
-  33+ CFC0             >tileN=tileN+1
-  22+ CFC0             >        ORG $C000 + tileN*32
-  23+ CFC0 FF          >        DB $FF
-  24+ CFC1 F0          >        DB {b $ } | $F0
-  25+ CFC2             >        ORG $C000 + tileN*32 + 1*4
-  26+ CFC4 F0          >        DB {b $ } | $F0
-  27+ CFC5             >        ORG $C000 + tileN*32 + 2*4
-  28+ CFC8 F0          >        DB {b $ } | $F0
-  29+ CFC9             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ CFDB 0F          >        DB {b $ } | $0F
-  31+ CFDC             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ CFDF FF          >        DB $FF
-  33+ CFE0             >tileN=tileN+1
-  22+ CFE0             >        ORG $C000 + tileN*32
-  23+ CFE0 FF          >        DB $FF
-  24+ CFE1 F0          >        DB {b $ } | $F0
-  25+ CFE2             >        ORG $C000 + tileN*32 + 1*4
-  26+ CFE4 F0          >        DB {b $ } | $F0
-  27+ CFE5             >        ORG $C000 + tileN*32 + 2*4
-  28+ CFE8 F0          >        DB {b $ } | $F0
-  29+ CFE9             >        ORG $C000 + tileN*32 + 6*4 + 3
-  30+ CFFB 0F          >        DB {b $ } | $0F
-  31+ CFFC             >        ORG $C000 + tileN*32 + 7*4 + 3
-  32+ CFFF FF          >        DB $FF
-  33+ D000             >tileN=tileN+1
-  34+ D000                  EDUP
+  18+ D000              ; 	;courtesy of ped7g:
+  19+ D000              ;     ; patch tile gfx with grid gfx
+  20+ D000              ; tileN=1
+  21+ D000              ;     DUP 128-tileN
+  22+ D000              ;         ORG $C000 + tileN*32
+  23+ D000              ;         DB $FF
+  24+ D000              ;         DB {b $ } | $F0
+  25+ D000              ;         ORG $C000 + tileN*32 + 1*4
+  26+ D000              ;         DB {b $ } | $F0
+  27+ D000              ;         ORG $C000 + tileN*32 + 2*4
+  28+ D000              ;         DB {b $ } | $F0
+  29+ D000              ;         ORG $C000 + tileN*32 + 6*4 + 3
+  30+ D000              ;         DB {b $ } | $0F
+  31+ D000              ;         ORG $C000 + tileN*32 + 7*4 + 3
+  32+ D000              ;         DB $FF
+  33+ D000              ; tileN=tileN+1
+  34+ D000              ;     EDUP
   35+ D000
   36+ D000
   37+ D000

@@ -3,7 +3,7 @@
 
 
 
-PLAYER_SLOT equ 20
+PLAYER_SLOT equ 50
 
 PLAYER_DEFAULT_ATTR3 equ %11000000
 
@@ -474,7 +474,7 @@ plyr_move_left_start:
     ld (player_attr_2),a
 
     ld hl,(px)
-    add hl,-16
+    add hl,32 ;2 relatives width (plus anchor)
     ld (px),hl
 plyr_move_left:
     
@@ -517,7 +517,7 @@ plyr_move_right_start:
     ld (player_attr_2),a
 
     ld hl,(px)
-    add hl,16
+    add hl,-32
     ld (px),hl
 plyr_move_right:
     call player_calculate_world_position
@@ -614,7 +614,7 @@ player_calculate_world_position:
  
 p_wp_l:
     ld hl,(px)
-    add hl,32
+    ; add hl,32
     ld a,l
     and %11110000
     rrca
@@ -631,6 +631,7 @@ p_wp_l:
     ret
 p_wp_r:
     ld hl,(px)
+    add hl,24
     ld a,l
     and %11110000
     rrca
@@ -711,9 +712,9 @@ check_grounded:
 
     ld hl,metalevel
     ld a,(player_world_y)
-    cp 7
+    cp 6
     ret c
-    sub 7
+    sub 6
     ld d,a
     ld e,LEVEL_WIDTH_META
     mul d,e
