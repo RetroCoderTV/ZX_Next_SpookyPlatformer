@@ -14,7 +14,24 @@ caveman_palette:
 
     incbin 'assets/cavemantiles.til',0,TILE_DEFINITIONS_SIZE
 
-
+    IF 0    ; use "1" to see tile corners with gfx patched
+    ; patch tile gfx with grid gfx
+tileN=1
+    DUP 128-tileN
+        ORG $C000 + tileN*32
+        DB $FF
+        DB {b $ } | $F0
+        ORG $C000 + tileN*32 + 1*4
+        DB {b $ } | $F0
+        ORG $C000 + tileN*32 + 2*4
+        DB {b $ } | $F0
+        ORG $C000 + tileN*32 + 6*4 + 3
+        DB {b $ } | $0F
+        ORG $C000 + tileN*32 + 7*4 + 3
+        DB $FF
+tileN=tileN+1
+    EDUP
+    ENDIF
 
 
 ;;;sprites
