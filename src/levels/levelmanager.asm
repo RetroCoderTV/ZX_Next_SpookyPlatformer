@@ -179,16 +179,10 @@ meta_tile_offset db 0
 
 
 scroll_left:
+    jp p_move_left
     ret
 
-; AB  (meta tile "a")
-; CD
-; EF (meta tile "b")
-; GH
 
-; .. you draw only:
-; A
-; E
 scroll_right:
     ld a,RIGHT
     ld (scroll_direction),a
@@ -234,11 +228,11 @@ sr_putcolumn1:
     add hl,a
     add hl,a
     ld a,(hl) 
-    ld (de),a ;Aa
+    ld (de),a 
     inc hl
     inc de
     ld a,(hl)
-    ld (de),a ;Ab   
+    ld (de),a   
     pop hl
     add de,(VIEW_WIDTH*2)-1 ;WIDTH-1
     ld a,(hl)
@@ -250,11 +244,11 @@ sr_putcolumn1:
     add a,4
     add hl,a
     ld a,(hl)
-    ld (de),a ;Ca
+    ld (de),a 
     inc hl
     inc de
     ld a,(hl)
-    ld (de),a ;Ca   
+    ld (de),a  
     pop hl
     add de,(VIEW_WIDTH*2)-1
     add hl,LEVEL_WIDTH_META

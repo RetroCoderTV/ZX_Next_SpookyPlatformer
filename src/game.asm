@@ -19,6 +19,7 @@ game_update:
     call layer2_update
     call check_keys
     call player_update
+    call draw_debug_sprite
     call objects_update
     
     ret

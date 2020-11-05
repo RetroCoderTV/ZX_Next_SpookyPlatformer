@@ -50,6 +50,8 @@ MAX_UP_SPEED equ 5
 player_collided_solid db FALSE
 
 
+
+player_walk_direction db RIGHT
 player_jump_direction db DOWN
 player_jump_point db 208
 PLAYER_JUMP_HEIGHT equ 15
@@ -61,9 +63,46 @@ player_init:
     
     ret
 
+
+draw_debug_sprite:
+    ; ld a,33
+    ; nextreg $34,a
+
+    ; ;attr 0
+    ; ld a,(player_world_x)
+    ; add a,a
+    ; add a,a
+    ; add a,a
+    ; add a,a
+    ; nextreg $35,a
+
+    ; ;attr 1
+    ; ld a,(player_world_y)
+    ; add a,a
+    ; add a,a
+    ; add a,a
+    ; add a,a
+    ; nextreg $36,a
+
+    ; ;attr 2
+    ; ld a,0
+    ; nextreg $37,a
+
+    ; ;attr 3
+    ; ld a,%10000000
+    ; nextreg $38,a
+    ret
+
 player_init_sprites:
     ld a,PLAYER_SLOT
     nextreg $34,a
+
+    ;Ox
+    ;xx
+
+    ;xxx
+    ;xxx
+    ;xOx
 
     ;attr 0
     ld a,(px)
@@ -92,8 +131,9 @@ player_init_sprites:
     ;relative sprites...
 
     ;r1:
-    ;x0
-    ;xx
+    ; x0
+    ; xx
+    ;
 
     ld a,PLAYER_SLOT+1
     nextreg $34,a
@@ -283,7 +323,6 @@ plyr_set_jump_down:
     ret
 
 apply_force_up:
-    ; call apply_velocity_up
     ld hl,(vy)
     ld a,h
     cp -MAX_UP_SPEED
@@ -293,7 +332,6 @@ apply_force_up:
     ld (vy),hl
     ret
 apply_force_down:
-    ; call apply_velocity_down
     ld hl,(vy)
     ld a,h
     cp MAX_DOWN_SPEED
@@ -314,6 +352,9 @@ apply_velocity:
 
 
 plyr_move_left_start:
+    ld a,LEFT
+    ld (player_walk_direction),a
+
     ld a,(player_attr_2)
     bit 3,a
     jp z,plyr_move_left
@@ -326,6 +367,7 @@ plyr_move_left_start:
     add hl,-16
     ld (px),hl
 plyr_move_left:
+    
     call player_calculate_world_position
     ; ; ; ; ; ; ; ; call check_collision_left
 
@@ -346,13 +388,16 @@ plyr_move_left:
     jp c,scroll_left
     jp nc,p_move_left
         
-p_move_left
+p_move_left:
     add hl,-PLAYER_WALK_SPEED
     ld (px),hl
     ret
 
 
 plyr_move_right_start:
+    ld a,RIGHT
+    ld (player_walk_direction),a
+
     ld a,(player_attr_2)
     bit 3,a
     jp nz,plyr_move_right
@@ -445,7 +490,6 @@ player_set_to_default_frame:
 
 
 player_calculate_world_position:
-
     ld a,(py)
     and %11110000
     rrca
@@ -453,7 +497,29 @@ player_calculate_world_position:
     rrca
     rrca
     ld (player_world_y),a
+
+    ld a,(player_walk_direction)
+    cp RIGHT
+    jp z, p_wp_r
  
+p_wp_l:
+    ld hl,(px)
+    add hl,32
+    ld a,l
+    and %11110000
+    rrca
+    rrca
+    rrca 
+    rrca
+    ld b,a
+    ld a,(cam_edge_r)
+    sub VIEW_WIDTH_META
+    ld c,a
+    ld a,b
+    add a,c    
+    ld (player_world_x),a
+    ret
+p_wp_r:
     ld hl,(px)
     ld a,l
     and %11110000
@@ -468,7 +534,6 @@ player_calculate_world_position:
     ld a,b
     add a,c    
     ld (player_world_x),a
-
     ret
 
 
@@ -528,13 +593,11 @@ collided_jumping:
     
     ret
 
-
-
+    
 check_grounded:
     ld a,(player_jump_direction)
     cp DOWN
     ret nz
-
 
     ld hl,metalevel
     ld a,(player_world_y)
@@ -551,22 +614,22 @@ check_grounded:
     add hl,de
     ld a,(hl)
     call check_solid
-    jp z,collided_true
+    jp z,grounded_true
 
-    jp collided_false
-collided_true:
+
+    jp grounded_false
+grounded_true:
     ld a,TRUE
     ld (player_grounded),a 
     ret
 
-collided_false:
+grounded_false:
     ld a,FALSE
     ld (player_grounded),a
-    ;set mode to jumping>down
+
     ld a,JUMPING
     ld (player_animation_state),a
-    ld a,DOWN
-    ld (player_jump_direction),a
+
     ret
 
 
