@@ -55,6 +55,7 @@ player_walk_direction db RIGHT
 player_jump_direction db DOWN
 player_jump_point db 208
 PLAYER_JUMP_HEIGHT equ 15
+PLAYER_JUMP_ATTR3 equ %11001001
 player_grounded db FALSE
 
 
@@ -326,9 +327,7 @@ player_init_sprites:
 
 
 player_update:
-    ld a,(player_animation_timer)
-    inc a
-    ld (player_animation_timer),a
+    
 
     
 
@@ -344,8 +343,26 @@ player_update:
     ret
 
 
+
+player_walking_start:
+    ld a,(player_animation_state)
+    cp WALKING
+    jp z,player_update_walking
+
+    ld hl,0
+    ld (vy),hl
+
+    ld a,WALKING
+    ld (player_animation_state),a
+
+    ld a,PLAYER_DEFAULT_ATTR3
+    ld (player_attr_3),a
+
+    ret
 player_update_walking:
-    
+    ld a,(player_animation_timer)
+    inc a
+    ld (player_animation_timer),a
 
     ld a,(keypressed_A)
     cp TRUE
@@ -369,6 +386,9 @@ player_jump_start:
     ; ld a,(keypressed_Space_Held)
     ; cp TRUE
     ; ret z
+
+    ld a,PLAYER_JUMP_ATTR3
+    ld (player_attr_3),a
 
     ld a,(player_animation_state)
     cp JUMPING
@@ -696,10 +716,8 @@ collided_jumping:
     ret z
 
     ;collided
-    ld a,WALKING
-    ld (player_animation_state),a
-    ld hl,0
-    ld (vy),hl
+    call player_walking_start
+    
 
     
     ret
@@ -712,9 +730,9 @@ check_grounded:
 
     ld hl,metalevel
     ld a,(player_world_y)
-    cp 6
+    cp 5
     ret c
-    sub 6
+    sub 5
     ld d,a
     ld e,LEVEL_WIDTH_META
     mul d,e
@@ -730,6 +748,7 @@ check_grounded:
 
     jp grounded_false
 grounded_true:
+    ; BREAKPOINT
     ld a,TRUE
     ld (player_grounded),a 
     ret
@@ -737,6 +756,7 @@ grounded_true:
 grounded_false:
     ld a,FALSE
     ld (player_grounded),a
+    
 
     ld a,JUMPING
     ld (player_animation_state),a

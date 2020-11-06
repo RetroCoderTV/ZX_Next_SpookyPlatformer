@@ -29,7 +29,7 @@ layer2_init:
     ret
 
 tiles_init:
-    CLIPTILES 4,155,0,255
+    ; CLIPTILES 4,155,0,255
     call tiles_set_palette
 
     ;load the tile defs
@@ -175,21 +175,162 @@ view_init_line_pass2:
     ret
 
 
-meta_tile_offset db 0      
+current_meta_column db 0      
 
 
 scroll_left:
-    jp p_move_left
-    ret
-
-
-scroll_right:
-    ld a,RIGHT
-    ld (scroll_direction),a
-
     ld a,(cam_edge_r)
     sub VIEW_WIDTH_META
     ld (cam_x),a
+
+    ld a,(scroll_direction)
+    cp LEFT
+    jp z,do_scroll_left
+    
+    ld a,LEFT
+    ld (scroll_direction),a
+do_scroll_left:
+    ld a,(cam_edge_r)
+    sub VIEW_WIDTH_META
+    jp z,p_move_left
+
+    ld a,(current_scroll)
+    inc a
+    cp 8          
+    call z,sl_scrollmax 
+    ld (current_scroll),a
+    ld b,a
+    ld a,8
+    sub b
+    nextreg $30,a
+    ret
+sl_scrollmax:
+    ld hl,$4a00-2
+    ld de,$4a00
+    ld bc,20*32*2
+    lddr  
+
+    ld hl,metalevel            
+    ld a,(cam_x)     
+    add hl,a                                  
+    ld de,LEVEL_Y_START_ADDRESS             ; top left cell 
+    ld b,LEVEL_HEIGHT_META
+
+    ld a,(current_meta_column)
+    cp 0
+    jp z,sl_putcolumn1
+    jp nz,sl_putcolumn2
+
+sl_putcolumn1:
+    ld a,(hl)
+    add a,a
+    add a,a
+    push hl
+    ld hl,metatiles
+    add hl,a
+    add hl,a
+    ld a,(hl) 
+    ld (de),a 
+    inc hl
+    inc de
+    ld a,(hl)
+    ld (de),a   
+    pop hl
+    add de,(VIEW_WIDTH*2)-1 ;WIDTH-1
+    ld a,(hl)
+    add a,a
+    add a,a
+    push hl
+    ld hl,metatiles
+    add hl,a
+    add a,4
+    add hl,a
+    ld a,(hl)
+    ld (de),a 
+    inc hl
+    inc de
+    ld a,(hl)
+    ld (de),a  
+    pop hl
+    add de,(VIEW_WIDTH*2)-1
+    add hl,LEVEL_WIDTH_META
+    djnz sl_putcolumn1
+    
+    ld a,1
+    ld (current_meta_column),a
+
+    xor a
+    ld (current_scroll),a
+
+    ret
+sl_putcolumn2:
+    ld a,(hl)
+    add a,a
+    add a,a
+    push hl
+    ld hl,metatiles
+    add hl,a
+    add a,2
+    add hl,a
+    ld a,(hl)
+    ld (de),a ;Ba
+    inc hl
+    inc de
+    ld a,(hl)
+    ld (de),a ;Bb   
+    pop hl
+    add de,(VIEW_WIDTH*2)-1 ;WIDTH-1
+    ld a,(hl)
+    add a,a
+    add a,a
+    push hl
+    ld hl,metatiles
+    add hl,a
+    add a,6
+    add hl,a
+    ld a,(hl)
+    ld (de),a ;Da
+    inc hl
+    inc de
+    ld a,(hl)
+    ld (de),a ;Db   
+    pop hl
+    add de,(VIEW_WIDTH*2)-1
+    add hl,LEVEL_WIDTH_META
+    djnz sl_putcolumn2
+    
+   
+    ld a,0
+    ld (current_meta_column),a
+
+
+    ld a,(cam_edge_r)
+    dec a
+    ld (cam_edge_r),a
+
+    xor a
+    ld (current_scroll),a
+
+    ret
+
+   
+
+
+scroll_right:
+    ld a,(cam_edge_r)
+    sub VIEW_WIDTH_META
+    ld (cam_x),a
+    
+    ld a,(scroll_direction)
+    cp RIGHT
+    jp z,do_scroll_right
+    
+    ld a,RIGHT
+    ld (scroll_direction),a
+
+do_scroll_right:
+
+    
 
     ld a,(cam_edge_r)
     cp LEVEL_WIDTH_META
@@ -215,7 +356,7 @@ sr_scrollmax:
     ld de,LEVEL_Y_START_ADDRESS+78
     ld b,LEVEL_HEIGHT_META
 
-    ld a,(meta_tile_offset)
+    ld a,(current_meta_column)
     cp 0 
     jp z,sr_putcolumn1
     jp nz,sr_putcolumn2
@@ -255,7 +396,7 @@ sr_putcolumn1:
     djnz sr_putcolumn1
     
     ld a,1
-    ld (meta_tile_offset),a
+    ld (current_meta_column),a
 
     xor a
     ld (current_scroll),a
@@ -299,7 +440,7 @@ sr_putcolumn2:
     
    
     ld a,0
-    ld (meta_tile_offset),a
+    ld (current_meta_column),a
 
 
     ld a,(cam_edge_r)
@@ -310,8 +451,6 @@ sr_putcolumn2:
     ld (current_scroll),a
 
     ret
-
-
 
 
 
@@ -354,7 +493,7 @@ sr_putcolumn2:
 ;     ld de,LEVEL_Y_START_ADDRESS+39 ;top right cell
 ;     ld b,LEVEL_HEIGHT_META
     
-;     ld a,(meta_tile_offset)
+;     ld a,(current_meta_column)
 ;     cp 0
 ;     jp z,sr_putcolumn
 ;     jp nz,sr_putcolumn_2nd
@@ -394,7 +533,7 @@ sr_putcolumn2:
 ;     djnz sr_putcolumn
     
 ;     ld a,1
-;     ld (meta_tile_offset),a
+;     ld (current_meta_column),a
 
 ;     xor a
 ;     ld (current_scroll),a
@@ -442,7 +581,7 @@ sr_putcolumn2:
 ;     ld (cam_edge_r),a
     
 ;     ld a,0
-;     ld (meta_tile_offset),a
+;     ld (current_meta_column),a
 
 ;     xor a
 ;     ld (current_scroll),a
@@ -470,14 +609,14 @@ sr_putcolumn2:
 ;     ld a,(current_scroll)
 ;     inc a
 ;     cp 8          
-;     call z,drawcolumn_left 
+;     call z,sl_scrollmax 
 ;     ld (current_scroll),a
 ;     ld b,a
 ;     ld a,8
 ;     sub b
 ;     nextreg $30,a
 ;     ret
-; drawcolumn_left:
+; sl_scrollmax:
 ;     ; ld hl,$4000+1279
 ;     ; ld de,$4001+1279
 ;     ld hl,$44FF
