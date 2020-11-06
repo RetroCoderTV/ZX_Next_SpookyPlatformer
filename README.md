@@ -8,4 +8,5 @@ Mainly just playing about, unlikely to end as a full playable game.
 
 
 Check out the live coding sessions: https://www.twitch.tv/retrocodertv
-Or recorded: youtub
+
+Or recorded: https://www.youtube.com/c/RetroCoderTV
