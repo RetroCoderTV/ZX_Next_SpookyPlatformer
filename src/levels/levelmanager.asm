@@ -175,6 +175,7 @@ view_init_line_pass2:
 
 MAX_SCROLL equ 16   
 
+
 scroll_left:
     ld a,(scroll_direction)
     cp LEFT
@@ -182,16 +183,18 @@ scroll_left:
 
     ld a,LEFT
     ld (scroll_direction),a
+
 do_scroll_left:
     ld a,(cam_x)
     cp 0
     jp z,p_move_left
 
     ld a,(current_scroll)
+    inc a
     cp MAX_SCROLL
+    ld (current_scroll),a
     call z,sl_scrollmax
     ld a,(current_scroll)
-    inc a
     ld (current_scroll),a
     ld b,a
     ld a,MAX_SCROLL
@@ -206,21 +209,20 @@ sl_scrollmax:
 
     ld hl,superlevel
     ld a,(cam_x)
+    sub 1
     add hl,a
     ld de,LEVEL_START_ADDRESS
     ld b,LEVEL_HEIGHT_META
     call putsupercolumn
 
+    xor a
+    ld (current_scroll),a
+
     ld a,(cam_x)
     dec a
     ld (cam_x),a
 
-    xor a
-    ld (current_scroll),a
-
     ret
-
-
 
 
 
@@ -259,17 +261,27 @@ sr_scrollmax:
     ld de,LEVEL_START_ADDRESS+76
     ld b,LEVEL_HEIGHT_META
     call putsupercolumn
-    
+
+    xor a
+    ld (current_scroll),a
 
     ld a,(cam_x)
     inc a
     ld (cam_x),a
 
-    xor a
-    ld (current_scroll),a
-
     ret
 
+
+
+;puts super tiles column from superlevel (map) to screen tile memory
+;supertile description (2x2 cells; 2bytes per cell):
+;AB
+;CD
+;2 bytes per cell
+;Inputs:
+;B=level height in supertiles
+;DE=top tile in column (screen memory)
+;HL=top tile in superlevel column
 putsupercolumn:
     ld a,(hl) ;get supertile id
     add a,a
