@@ -679,7 +679,7 @@ check_collision_jumping:
     ret nz
 
 
-    ld hl,metalevel
+    ld hl,superlevel
     ld a,(player_world_y)
     cp 5
     ret c
@@ -728,7 +728,7 @@ check_grounded:
     cp DOWN
     ret nz
 
-    ld hl,metalevel
+    ld hl,superlevel
     ld a,(player_world_y)
     cp 5
     ret c
