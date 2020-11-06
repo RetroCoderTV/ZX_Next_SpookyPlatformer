@@ -17,7 +17,7 @@ LEVEL_START equ 0
 ; cam_edge_r db LEVEL_START+VIEW_WIDTH_META
 cam_x db LEVEL_START
 
-test_layer2_scroll dw 0
+test_layer2_scroll dw 320
 
 
 layer2_init:
@@ -63,18 +63,15 @@ layer2_update:
     nextreg $16, a
     ld a,h
     nextreg $71, a
-    inc hl
-    inc hl
+    dec hl
+    dec hl
 
     ld (test_layer2_scroll),hl
-    cp 0
-    ret z
-
-    ld a,l
-    cp low 320 ;sjasm - gives the low byte needed for value 320
+    ld a,h
+    or l
     ret nz
 
-    ld hl,0
+    ld hl,320
     ld (test_layer2_scroll),hl
 
     ret 
@@ -184,6 +181,8 @@ scroll_left:
     ld a,LEFT
     ld (scroll_direction),a
 
+    ret
+
 do_scroll_left:
     ld a,(cam_x)
     cp 0
@@ -195,7 +194,6 @@ do_scroll_left:
     ld (current_scroll),a
     call z,sl_scrollmax
     ld a,(current_scroll)
-    ld (current_scroll),a
     ld b,a
     ld a,MAX_SCROLL
     sub b
@@ -207,9 +205,12 @@ sl_scrollmax:
     ld bc,20*32*2
     lddr
 
+    ld a,(cam_x)
+    dec a
+    ld (cam_x),a
+
     ld hl,superlevel
     ld a,(cam_x)
-    sub 1
     add hl,a
     ld de,LEVEL_START_ADDRESS
     ld b,LEVEL_HEIGHT_META
@@ -218,9 +219,7 @@ sl_scrollmax:
     xor a
     ld (current_scroll),a
 
-    ld a,(cam_x)
-    dec a
-    ld (cam_x),a
+    
 
     ret
 
@@ -233,6 +232,8 @@ scroll_right:
 
     ld a,RIGHT
     ld (scroll_direction),a
+
+    ret
 
 do_scroll_right:
     ld a,(cam_x)

@@ -514,7 +514,7 @@ plyr_move_left:
     cp 0
     jp nz,p_move_left
     ld a,l
-    cp SCROLL_MARKER_X+1
+    cp SCROLL_MARKER_X
     jp c,scroll_left
     jp nc,p_move_left
         
