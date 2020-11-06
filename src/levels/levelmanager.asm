@@ -29,7 +29,7 @@ layer2_init:
     ret
 
 tiles_init:
-    ; CLIPTILES 8,151,0,255
+    CLIPTILES 8,151,0,255
     call tiles_set_palette
 
     ;load the tile defs
