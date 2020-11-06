@@ -29,7 +29,7 @@ layer2_init:
     ret
 
 tiles_init:
-    ; CLIPTILES 4,155,0,255
+    CLIPTILES 4,155,0,255
     call tiles_set_palette
 
     ;load the tile defs
@@ -191,6 +191,11 @@ scroll_left:
     ld a,LEFT
     ld (scroll_direction),a
 
+    ld a,(current_meta_column)
+    ld b,a
+    ld a,(cam_edge_r)
+    sub b
+    ld (cam_x),a
 
 do_scroll_left:
     ld a,(cam_edge_r)
@@ -214,8 +219,7 @@ sl_scrollmax:
     lddr  
 
     ld hl,metalevel            
-    ld a,(cam_x) 
-    sub 2    
+    ld a,(cam_x)   
     add hl,a                                  
     ld de,LEVEL_Y_START_ADDRESS             ; top left cell 
     ld b,LEVEL_HEIGHT_META
@@ -224,48 +228,6 @@ sl_scrollmax:
     cp 0
     jp z,sl_putcolumn1
     jp nz,sl_putcolumn2
-sl_putcolumn1:
-    ld a,(hl)
-    add a,a
-    add a,a
-    push hl
-    ld hl,metatiles
-    add hl,a
-    add hl,a
-    ld a,(hl) 
-    ld (de),a 
-    inc hl
-    inc de
-    ld a,(hl)
-    ld (de),a   
-    pop hl
-    add de,(VIEW_WIDTH*2)-1 ;WIDTH-1
-    ld a,(hl)
-    add a,a
-    add a,a
-    push hl
-    ld hl,metatiles
-    add hl,a
-    add a,4
-    add hl,a
-    ld a,(hl)
-    ld (de),a 
-    inc hl
-    inc de
-    ld a,(hl)
-    ld (de),a  
-    pop hl
-    add de,(VIEW_WIDTH*2)-1
-    add hl,LEVEL_WIDTH_META
-    djnz sl_putcolumn1
-    
-    ld a,1
-    ld (current_meta_column),a
-
-    xor a
-    ld (current_scroll),a
-
-    ret
 sl_putcolumn2:
     ld a,(hl)
     add a,a
@@ -307,6 +269,48 @@ sl_putcolumn2:
     ld (current_meta_column),a
 
 
+    xor a
+    ld (current_scroll),a
+
+    ret
+sl_putcolumn1:
+    ld a,(hl)
+    add a,a
+    add a,a
+    push hl
+    ld hl,metatiles
+    add hl,a
+    add hl,a
+    ld a,(hl) 
+    ld (de),a 
+    inc hl
+    inc de
+    ld a,(hl)
+    ld (de),a   
+    pop hl
+    add de,(VIEW_WIDTH*2)-1 ;WIDTH-1
+    ld a,(hl)
+    add a,a
+    add a,a
+    push hl
+    ld hl,metatiles
+    add hl,a
+    add a,4
+    add hl,a
+    ld a,(hl)
+    ld (de),a 
+    inc hl
+    inc de
+    ld a,(hl)
+    ld (de),a  
+    pop hl
+    add de,(VIEW_WIDTH*2)-1
+    add hl,LEVEL_WIDTH_META
+    djnz sl_putcolumn1
+    
+    ld a,1
+    ld (current_meta_column),a
+
     ld a,(cam_edge_r)
     dec a
     ld (cam_edge_r),a
@@ -314,7 +318,10 @@ sl_putcolumn2:
     xor a
     ld (current_scroll),a
 
+  
+
     ret
+
 
    
 
@@ -330,6 +337,13 @@ scroll_right:
     
     ld a,RIGHT
     ld (scroll_direction),a
+
+    ld a,(current_meta_column)
+    ld b,a
+    ld a,(cam_edge_r)
+    add a,b
+    sub VIEW_WIDTH_META
+    ld (cam_x),a
 
 do_scroll_right:
 
