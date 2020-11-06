@@ -29,7 +29,7 @@ layer2_init:
     ret
 
 tiles_init:
-    ; CLIPTILES 8,151,0,255
+    CLIPTILES 8,151,0,255
     call tiles_set_palette
 
     ;load the tile defs
@@ -188,9 +188,10 @@ do_scroll_left:
     jp z,p_move_left
 
     ld a,(current_scroll)
-    inc a
     cp MAX_SCROLL
     call z,sl_scrollmax
+    ld a,(current_scroll)
+    inc a
     ld (current_scroll),a
     ld b,a
     ld a,MAX_SCROLL

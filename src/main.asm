@@ -20,7 +20,7 @@
 start:
 	di
 	ld sp,0x7FFE
-	nextreg $7,3 ;set Mhz mode (3=28mhz)
+	nextreg $7,2 ;set Mhz mode (3=28mhz)
 	nextreg $15,%00001011 ;sprites/layers system register
 	call game_init	
 	jp main_loop

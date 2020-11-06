@@ -383,9 +383,9 @@ player_update_walking:
     ret
 
 player_jump_start:
-    ; ld a,(keypressed_Space_Held)
-    ; cp TRUE
-    ; ret z
+    ld a,(keypressed_Space_Held)
+    cp TRUE
+    ret z
 
     ld a,PLAYER_JUMP_ATTR3
     ld (player_attr_3),a
