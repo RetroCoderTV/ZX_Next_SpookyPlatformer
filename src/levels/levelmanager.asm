@@ -177,7 +177,8 @@ view_init_line_pass2:
 
 current_meta_column db 0      
 
-
+;OO     OO
+;OO     OO
 scroll_left:
     ld a,(cam_edge_r)
     sub VIEW_WIDTH_META
@@ -189,6 +190,16 @@ scroll_left:
     
     ld a,LEFT
     ld (scroll_direction),a
+
+    ld a,(current_meta_column)
+    ld b,a
+    ld a,(cam_edge_r)
+    sub b
+    ld (cam_edge_r),a
+    sub VIEW_WIDTH_META
+    ld (cam_x),a
+
+
 do_scroll_left:
     ld a,(cam_edge_r)
     sub VIEW_WIDTH_META
