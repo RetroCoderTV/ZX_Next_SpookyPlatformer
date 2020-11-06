@@ -1,3 +1,2 @@
-main.map
-main.list
-cspect.log
+*.log
+cspect_win.dat
