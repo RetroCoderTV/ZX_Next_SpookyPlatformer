@@ -191,14 +191,6 @@ scroll_left:
     ld a,LEFT
     ld (scroll_direction),a
 
-    ld a,(current_meta_column)
-    ld b,a
-    ld a,(cam_edge_r)
-    sub b
-    ld (cam_edge_r),a
-    sub VIEW_WIDTH_META
-    ld (cam_x),a
-
 
 do_scroll_left:
     ld a,(cam_edge_r)
@@ -222,7 +214,8 @@ sl_scrollmax:
     lddr  
 
     ld hl,metalevel            
-    ld a,(cam_x)     
+    ld a,(cam_x) 
+    sub 2    
     add hl,a                                  
     ld de,LEVEL_Y_START_ADDRESS             ; top left cell 
     ld b,LEVEL_HEIGHT_META
@@ -231,7 +224,6 @@ sl_scrollmax:
     cp 0
     jp z,sl_putcolumn1
     jp nz,sl_putcolumn2
-
 sl_putcolumn1:
     ld a,(hl)
     add a,a
