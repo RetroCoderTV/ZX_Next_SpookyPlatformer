@@ -620,6 +620,8 @@ player_set_to_default_frame:
 
 
 player_calculate_world_position:
+
+
     ld a,(py)
     and %11110000
     rrca
@@ -642,8 +644,7 @@ p_wp_l:
     rrca 
     rrca
     ld b,a
-    ld a,(cam_edge_r)
-    sub VIEW_WIDTH_META
+    ld a,(cam_x)
     ld c,a
     ld a,b
     add a,c    
@@ -659,8 +660,7 @@ p_wp_r:
     rrca 
     rrca
     ld b,a
-    ld a,(cam_edge_r)
-    sub VIEW_WIDTH_META
+    ld a,(cam_x)
     ld c,a
     ld a,b
     add a,c    

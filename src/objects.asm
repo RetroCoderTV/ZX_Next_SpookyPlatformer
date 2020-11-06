@@ -111,12 +111,12 @@ object_check_in_view:
 
     ld a,(ix+2)
     ld b,a
-    ld a,(cam_edge_r)
+    ld a,(cam_x)
+    add a,VIEW_WIDTH_META
     cp b
     jp c, obj_set_not_inview
 
-    ld a,(cam_edge_r)
-    sub VIEW_WIDTH
+    ld a,(cam_x)
     ld b,a
     ld a,(ix+2)
     cp b
@@ -159,8 +159,7 @@ object_calculate_screen_pos:
 
 obj_screen_moving_left:
     ;X (scroll left)
-    ld a,(cam_edge_r)
-    sub VIEW_WIDTH
+    ld a,(cam_x)
     ld b,a
     ld a,(ix+2) ;wX
     sub b ;wX-camX
@@ -177,8 +176,7 @@ obj_screen_moving_left:
 
 obj_screen_moving_right:
     ;X (scroll left)
-    ld a,(cam_edge_r)
-    sub VIEW_WIDTH
+    ld a,(cam_x)
     ld b,a
     ld a,(ix+2) ;wX
     sub b ;wX-camX
