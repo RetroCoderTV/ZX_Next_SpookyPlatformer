@@ -374,7 +374,7 @@ player_update_walking:
     cp TRUE
     jp z,plyr_move_right_start
 
-    ;else idle?...
+    ;else idle walking state...
     ld a,PLAYER_DEFAULT_ATTR3
     ld (player_attr_3),a
 

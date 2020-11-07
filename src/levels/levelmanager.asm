@@ -17,7 +17,7 @@ LEVEL_START equ 0
 ; cam_edge_r db LEVEL_START+VIEW_WIDTH_META
 cam_x db LEVEL_START
 
-test_layer2_scroll dw 320
+layer2_scroll dw 320
 
 
 layer2_init:
@@ -58,7 +58,7 @@ tiles_init:
 
 
 layer2_update:
-    ld hl,(test_layer2_scroll)
+    ld hl,(layer2_scroll)
     ld a,l
     nextreg $16, a
     ld a,h
@@ -66,13 +66,13 @@ layer2_update:
     dec hl
     dec hl
 
-    ld (test_layer2_scroll),hl
+    ld (layer2_scroll),hl
     ld a,h
     or l
     ret nz
 
     ld hl,320
-    ld (test_layer2_scroll),hl
+    ld (layer2_scroll),hl
 
     ret 
 
@@ -186,14 +186,11 @@ do_scroll_left:
     jp z,p_move_left
 
     ld a,(current_scroll)
-    inc a
+    dec a
     ld (current_scroll),a
-    cp MAX_SCROLL
+    cp $ff
     call z,sl_scrollmax
     ld a,(current_scroll)
-    ld b,a
-    ld a,MAX_SCROLL-1
-    sub b
     nextreg $30,a
     ret
 sl_scrollmax:
@@ -202,21 +199,20 @@ sl_scrollmax:
     ld bc,20*32*2
     lddr
 
-    
+    ld a,(cam_x)
+    dec a
+    ld (cam_x),a
 
     ld hl,superlevel
     ld a,(cam_x)
-    sub 1
     add hl,a
     ld de,LEVEL_START_ADDRESS
     ld b,LEVEL_HEIGHT_META
     call putsupercolumn
 
-    ld a,(cam_x)
-    dec a
-    ld (cam_x),a
+    
 
-    xor a
+    ld a,MAX_SCROLL-1
     ld (current_scroll),a
 
     

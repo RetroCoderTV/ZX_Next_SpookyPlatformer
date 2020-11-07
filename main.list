@@ -658,7 +658,7 @@
 374+  8207 FE 01            cp TRUE
 375+  8209 CA EA 82         jp z,plyr_move_right_start
 376+  820C
-377+  820C                  ;else idle?...
+377+  820C                  ;else idle walking state...
 378+  820C 3E C0            ld a,PLAYER_DEFAULT_ATTR3
 379+  820E 32 99 80         ld (player_attr_3),a
 380+  8211
@@ -840,7 +840,7 @@
 556+  831B 2A 95 80         ld hl,(px)
 557+  831E 7D               ld a,l
 558+  831F FE A0            cp SCROLL_MARKER_X
-559+  8321 D2 4F 8D         jp nc,scroll_right
+559+  8321 D2 4A 8D         jp nc,scroll_right
 560+  8324 DA 27 83         jp c,p_move_right
 561+  8327
 562+  8327              p_move_right
@@ -2286,7 +2286,7 @@
  17+  8C02              ; cam_edge_r db LEVEL_START+VIEW_WIDTH_META
  18+  8C02 00           cam_x db LEVEL_START
  19+  8C03
- 20+  8C03 40 01        test_layer2_scroll dw 320
+ 20+  8C03 40 01        layer2_scroll dw 320
  21+  8C05
  22+  8C05
  23+  8C05              layer2_init:
@@ -2345,7 +2345,7 @@
  58+  8C6F
  59+  8C6F
  60+  8C6F              layer2_update:
- 61+  8C6F 2A 03 8C         ld hl,(test_layer2_scroll)
+ 61+  8C6F 2A 03 8C         ld hl,(layer2_scroll)
  62+  8C72 7D               ld a,l
  63+  8C73 ED 92 16         nextreg $16, a
  64+  8C76 7C               ld a,h
@@ -2353,13 +2353,13 @@
  66+  8C7A 2B               dec hl
  67+  8C7B 2B               dec hl
  68+  8C7C
- 69+  8C7C 22 03 8C         ld (test_layer2_scroll),hl
+ 69+  8C7C 22 03 8C         ld (layer2_scroll),hl
  70+  8C7F 7C               ld a,h
  71+  8C80 B5               or l
  72+  8C81 C0               ret nz
  73+  8C82
  74+  8C82 21 40 01         ld hl,320
- 75+  8C85 22 03 8C         ld (test_layer2_scroll),hl
+ 75+  8C85 22 03 8C         ld (layer2_scroll),hl
  76+  8C88
  77+  8C88 C9               ret
  78+  8C89
@@ -2367,7 +2367,7 @@
  80+  8C89
  81+  8C89
  82+  8C89              tiles_set_palette:
- 83+  8C89 21 CD 8D         ld hl,caveman_palette
+ 83+  8C89 21 C8 8D         ld hl,caveman_palette
  84+  8C8C ED 91 43 30      nextreg $43,%00110000
  85+  8C90 AF               xor a
  86+  8C91 06 10            ld b,16
@@ -2473,197 +2473,193 @@
 186+  8D0C CA E2 82         jp z,p_move_left
 187+  8D0F
 188+  8D0F 3A 00 8C         ld a,(current_scroll)
-189+  8D12 3C               inc a
+189+  8D12 3D               dec a
 190+  8D13 32 00 8C         ld (current_scroll),a
-191+  8D16 FE 10            cp MAX_SCROLL
-192+  8D18 CC 26 8D         call z,sl_scrollmax
+191+  8D16 FE FF            cp $ff
+192+  8D18 CC 22 8D         call z,sl_scrollmax
 193+  8D1B 3A 00 8C         ld a,(current_scroll)
-194+  8D1E 47               ld b,a
-195+  8D1F 3E 0F            ld a,MAX_SCROLL-1
-196+  8D21 90               sub b
-197+  8D22 ED 92 30         nextreg $30,a
-198+  8D25 C9               ret
-199+  8D26              sl_scrollmax:
-200+  8D26 21 FC 49         ld hl,$4a00-4
-201+  8D29 11 00 4A         ld de,$4a00
-202+  8D2C 01 00 05         ld bc,20*32*2
-203+  8D2F ED B8            lddr
-204+  8D31
-205+  8D31
-206+  8D31
-207+  8D31 21 80 87         ld hl,superlevel
-208+  8D34 3A 02 8C         ld a,(cam_x)
-209+  8D37 D6 01            sub 1
-210+  8D39 ED 31            add hl,a
-211+  8D3B 11 00 45         ld de,LEVEL_START_ADDRESS
-212+  8D3E 06 08            ld b,LEVEL_HEIGHT_META
-213+  8D40 CD 95 8D         call putsupercolumn
-214+  8D43
-215+  8D43 3A 02 8C         ld a,(cam_x)
-216+  8D46 3D               dec a
-217+  8D47 32 02 8C         ld (cam_x),a
-218+  8D4A
-219+  8D4A AF               xor a
-220+  8D4B 32 00 8C         ld (current_scroll),a
-221+  8D4E
-222+  8D4E
-223+  8D4E
-224+  8D4E C9               ret
-225+  8D4F
-226+  8D4F
-227+  8D4F
-228+  8D4F              scroll_right:
-229+  8D4F                  ; ld a,(scroll_direction)
-230+  8D4F                  ; cp RIGHT
-231+  8D4F                  ; jp z,do_scroll_right
-232+  8D4F
-233+  8D4F                  ; ld a,RIGHT
-234+  8D4F                  ; ld (scroll_direction),a
-235+  8D4F
-236+  8D4F              do_scroll_right:
-237+  8D4F 3A 02 8C         ld a,(cam_x)
-238+  8D52 C6 14            add a,VIEW_WIDTH_META
-239+  8D54 FE 50            cp LEVEL_WIDTH_META
-240+  8D56 D2 27 83         jp nc, p_move_right
-241+  8D59
-242+  8D59 3A 00 8C         ld a,(current_scroll)
-243+  8D5C 3C               inc a
-244+  8D5D 32 00 8C         ld (current_scroll),a
-245+  8D60 FE 10            cp MAX_SCROLL
-246+  8D62 CC 6C 8D         call z,sr_scrollmax
-247+  8D65 3A 00 8C         ld a,(current_scroll)
-248+  8D68 ED 92 30         nextreg $30,a
-249+  8D6B C9               ret
-250+  8D6C
-251+  8D6C              sr_scrollmax:
-252+  8D6C 21 04 45         ld hl,LEVEL_START_ADDRESS+4
-253+  8D6F 11 00 45         ld de,LEVEL_START_ADDRESS
-254+  8D72 01 00 05         ld bc,20*32*2
-255+  8D75 ED B0            ldir
-256+  8D77
-257+  8D77 21 80 87         ld hl,superlevel
-258+  8D7A 3A 02 8C         ld a,(cam_x)
-259+  8D7D C6 14            add a,VIEW_WIDTH_META
-260+  8D7F ED 31            add hl,a
-261+  8D81 11 4C 45         ld de,LEVEL_START_ADDRESS+76
-262+  8D84 06 08            ld b,LEVEL_HEIGHT_META
-263+  8D86 CD 95 8D         call putsupercolumn
-264+  8D89
-265+  8D89 AF               xor a
-266+  8D8A 32 00 8C         ld (current_scroll),a
-267+  8D8D
-268+  8D8D 3A 02 8C         ld a,(cam_x)
-269+  8D90 3C               inc a
-270+  8D91 32 02 8C         ld (cam_x),a
-271+  8D94
-272+  8D94 C9               ret
-273+  8D95
-274+  8D95
-275+  8D95
-276+  8D95              ;puts super tiles column from superlevel (map) to screen tile memory
-277+  8D95              ;supertile description (2x2 cells; 2bytes per cell):
-278+  8D95              ;AB
-279+  8D95              ;CD
-280+  8D95              ;2 bytes per cell
-281+  8D95              ;Inputs:
-282+  8D95              ;B=level height in supertiles
-283+  8D95              ;DE=top tile in column (screen memory)
-284+  8D95              ;HL=top tile in superlevel column
-285+  8D95              putsupercolumn:
-286+  8D95 7E               ld a,(hl) ;get supertile id
-287+  8D96 87               add a,a
-288+  8D97 87               add a,a
-289+  8D98 E5               push hl ;HL=supertiles again
-290+  8D99 21 00 8A         ld hl,supertiles
-291+  8D9C ED 31            add hl,a
-292+  8D9E ED 31            add hl,a ;hl=supertiles+=(8*supertile ID)
-293+  8DA0 7E               ld a,(hl)
-294+  8DA1 12               ld (de),a ;tile Aa
-295+  8DA2 23               inc hl
-296+  8DA3 13               inc de
-297+  8DA4 7E               ld a,(hl)
-298+  8DA5 12               ld (de),a ;tile Ab
-299+  8DA6 23               inc hl
-300+  8DA7 13               inc de
-301+  8DA8 7E               ld a,(hl)
-302+  8DA9 12               ld (de),a ;tile Ba
-303+  8DAA 23               inc hl
-304+  8DAB 13               inc de
-305+  8DAC 7E               ld a,(hl)
-306+  8DAD 12               ld (de),a ;tile Bb
-307+  8DAE 23               inc hl
-308+  8DAF ED 35 4D 00      add de,(VIEW_WIDTH*2)-3 ;down one line of screen tiles (2bytes per tile)
-309+  8DB3 7E               ld a,(hl)
-310+  8DB4 12               ld (de),a ;tile Ca
-311+  8DB5 23               inc hl
-312+  8DB6 13               inc de
-313+  8DB7 7E               ld a,(hl)
-314+  8DB8 12               ld (de),a ;tile Cb
-315+  8DB9 23               inc hl
-316+  8DBA 13               inc de
-317+  8DBB 7E               ld a,(hl)
-318+  8DBC 12               ld (de),a ;tile Da
-319+  8DBD 23               inc hl
-320+  8DBE 13               inc de
-321+  8DBF 7E               ld a,(hl)
-322+  8DC0 12               ld (de),a ;tile Db
-323+  8DC1 E1               pop hl
-324+  8DC2 ED 35 4D 00      add de,(VIEW_WIDTH*2)-3
-325+  8DC6 ED 34 50 00      add hl,LEVEL_WIDTH_META
-326+  8DCA 10 C9            djnz putsupercolumn
-327+  8DCC C9               ret
-328+  8DCD
-329+  8DCD
-330+  8DCD
-331+  8DCD
-332+  8DCD
-333+  8DCD
-334+  8DCD
-335+  8DCD
-336+  8DCD
+194+  8D1E ED 92 30         nextreg $30,a
+195+  8D21 C9               ret
+196+  8D22              sl_scrollmax:
+197+  8D22 21 FC 49         ld hl,$4a00-4
+198+  8D25 11 00 4A         ld de,$4a00
+199+  8D28 01 00 05         ld bc,20*32*2
+200+  8D2B ED B8            lddr
+201+  8D2D
+202+  8D2D 3A 02 8C         ld a,(cam_x)
+203+  8D30 3D               dec a
+204+  8D31 32 02 8C         ld (cam_x),a
+205+  8D34
+206+  8D34 21 80 87         ld hl,superlevel
+207+  8D37 3A 02 8C         ld a,(cam_x)
+208+  8D3A ED 31            add hl,a
+209+  8D3C 11 00 45         ld de,LEVEL_START_ADDRESS
+210+  8D3F 06 08            ld b,LEVEL_HEIGHT_META
+211+  8D41 CD 90 8D         call putsupercolumn
+212+  8D44
+213+  8D44
+214+  8D44
+215+  8D44 3E 0F            ld a,MAX_SCROLL-1
+216+  8D46 32 00 8C         ld (current_scroll),a
+217+  8D49
+218+  8D49
+219+  8D49
+220+  8D49 C9               ret
+221+  8D4A
+222+  8D4A
+223+  8D4A
+224+  8D4A              scroll_right:
+225+  8D4A                  ; ld a,(scroll_direction)
+226+  8D4A                  ; cp RIGHT
+227+  8D4A                  ; jp z,do_scroll_right
+228+  8D4A
+229+  8D4A                  ; ld a,RIGHT
+230+  8D4A                  ; ld (scroll_direction),a
+231+  8D4A
+232+  8D4A              do_scroll_right:
+233+  8D4A 3A 02 8C         ld a,(cam_x)
+234+  8D4D C6 14            add a,VIEW_WIDTH_META
+235+  8D4F FE 50            cp LEVEL_WIDTH_META
+236+  8D51 D2 27 83         jp nc, p_move_right
+237+  8D54
+238+  8D54 3A 00 8C         ld a,(current_scroll)
+239+  8D57 3C               inc a
+240+  8D58 32 00 8C         ld (current_scroll),a
+241+  8D5B FE 10            cp MAX_SCROLL
+242+  8D5D CC 67 8D         call z,sr_scrollmax
+243+  8D60 3A 00 8C         ld a,(current_scroll)
+244+  8D63 ED 92 30         nextreg $30,a
+245+  8D66 C9               ret
+246+  8D67
+247+  8D67              sr_scrollmax:
+248+  8D67 21 04 45         ld hl,LEVEL_START_ADDRESS+4
+249+  8D6A 11 00 45         ld de,LEVEL_START_ADDRESS
+250+  8D6D 01 00 05         ld bc,20*32*2
+251+  8D70 ED B0            ldir
+252+  8D72
+253+  8D72 21 80 87         ld hl,superlevel
+254+  8D75 3A 02 8C         ld a,(cam_x)
+255+  8D78 C6 14            add a,VIEW_WIDTH_META
+256+  8D7A ED 31            add hl,a
+257+  8D7C 11 4C 45         ld de,LEVEL_START_ADDRESS+76
+258+  8D7F 06 08            ld b,LEVEL_HEIGHT_META
+259+  8D81 CD 90 8D         call putsupercolumn
+260+  8D84
+261+  8D84 AF               xor a
+262+  8D85 32 00 8C         ld (current_scroll),a
+263+  8D88
+264+  8D88 3A 02 8C         ld a,(cam_x)
+265+  8D8B 3C               inc a
+266+  8D8C 32 02 8C         ld (cam_x),a
+267+  8D8F
+268+  8D8F C9               ret
+269+  8D90
+270+  8D90
+271+  8D90
+272+  8D90              ;puts super tiles column from superlevel (map) to screen tile memory
+273+  8D90              ;supertile description (2x2 cells; 2bytes per cell):
+274+  8D90              ;AB
+275+  8D90              ;CD
+276+  8D90              ;2 bytes per cell
+277+  8D90              ;Inputs:
+278+  8D90              ;B=level height in supertiles
+279+  8D90              ;DE=top tile in column (screen memory)
+280+  8D90              ;HL=top tile in superlevel column
+281+  8D90              putsupercolumn:
+282+  8D90 7E               ld a,(hl) ;get supertile id
+283+  8D91 87               add a,a
+284+  8D92 87               add a,a
+285+  8D93 E5               push hl ;HL=supertiles again
+286+  8D94 21 00 8A         ld hl,supertiles
+287+  8D97 ED 31            add hl,a
+288+  8D99 ED 31            add hl,a ;hl=supertiles+=(8*supertile ID)
+289+  8D9B 7E               ld a,(hl)
+290+  8D9C 12               ld (de),a ;tile Aa
+291+  8D9D 23               inc hl
+292+  8D9E 13               inc de
+293+  8D9F 7E               ld a,(hl)
+294+  8DA0 12               ld (de),a ;tile Ab
+295+  8DA1 23               inc hl
+296+  8DA2 13               inc de
+297+  8DA3 7E               ld a,(hl)
+298+  8DA4 12               ld (de),a ;tile Ba
+299+  8DA5 23               inc hl
+300+  8DA6 13               inc de
+301+  8DA7 7E               ld a,(hl)
+302+  8DA8 12               ld (de),a ;tile Bb
+303+  8DA9 23               inc hl
+304+  8DAA ED 35 4D 00      add de,(VIEW_WIDTH*2)-3 ;down one line of screen tiles (2bytes per tile)
+305+  8DAE 7E               ld a,(hl)
+306+  8DAF 12               ld (de),a ;tile Ca
+307+  8DB0 23               inc hl
+308+  8DB1 13               inc de
+309+  8DB2 7E               ld a,(hl)
+310+  8DB3 12               ld (de),a ;tile Cb
+311+  8DB4 23               inc hl
+312+  8DB5 13               inc de
+313+  8DB6 7E               ld a,(hl)
+314+  8DB7 12               ld (de),a ;tile Da
+315+  8DB8 23               inc hl
+316+  8DB9 13               inc de
+317+  8DBA 7E               ld a,(hl)
+318+  8DBB 12               ld (de),a ;tile Db
+319+  8DBC E1               pop hl
+320+  8DBD ED 35 4D 00      add de,(VIEW_WIDTH*2)-3
+321+  8DC1 ED 34 50 00      add hl,LEVEL_WIDTH_META
+322+  8DC5 10 C9            djnz putsupercolumn
+323+  8DC7 C9               ret
+324+  8DC8
+325+  8DC8
+326+  8DC8
+327+  8DC8
+328+  8DC8
+329+  8DC8
+330+  8DC8
+331+  8DC8
+332+  8DC8
 # file closed: src/levels/levelmanager.asm
- 52   8DCD              	include 'assets\sprites.asm'
+ 52   8DC8              	include 'assets\sprites.asm'
 # file opened: src/assets/sprites.asm
-  1+  8DCD              ; Sprite Attribute 0
-  2+  8DCD              ;     X X X X X X X X
-  3+  8DCD
-  4+  8DCD              ; Sprite Attribute 1
-  5+  8DCD              ;     Y Y Y Y Y Y Y Y
-  6+  8DCD
-  7+  8DCD              ; Sprite Attribute 2
-  8+  8DCD              ;     P P P P XM YM R X8/PR
-  9+  8DCD
- 10+  8DCD              ; Sprite Attribute 3
- 11+  8DCD              ;     V E N5 N4 N3 N2 N1 N0 (NNNNN=Pattern ID)
- 12+  8DCD
- 13+  8DCD              ; Sprite Attribute 4
- 14+  8DCD              ; A. Extended Anchor Sprite
- 15+  8DCD              ;     H N6 T X X Y Y Y8
- 16+  8DCD              ; B. Relative Sprite, Composite Type
- 17+  8DCD              ;     0 1 N6 X X Y Y PO
- 18+  8DCD              ; C. Relative Sprite, Unified Type
- 19+  8DCD              ;     0 1 N6 0 0 0 0 PO
- 20+  8DCD
- 21+  8DCD
- 22+  8DCD
+  1+  8DC8              ; Sprite Attribute 0
+  2+  8DC8              ;     X X X X X X X X
+  3+  8DC8
+  4+  8DC8              ; Sprite Attribute 1
+  5+  8DC8              ;     Y Y Y Y Y Y Y Y
+  6+  8DC8
+  7+  8DC8              ; Sprite Attribute 2
+  8+  8DC8              ;     P P P P XM YM R X8/PR
+  9+  8DC8
+ 10+  8DC8              ; Sprite Attribute 3
+ 11+  8DC8              ;     V E N5 N4 N3 N2 N1 N0 (NNNNN=Pattern ID)
+ 12+  8DC8
+ 13+  8DC8              ; Sprite Attribute 4
+ 14+  8DC8              ; A. Extended Anchor Sprite
+ 15+  8DC8              ;     H N6 T X X Y Y Y8
+ 16+  8DC8              ; B. Relative Sprite, Composite Type
+ 17+  8DC8              ;     0 1 N6 X X Y Y PO
+ 18+  8DC8              ; C. Relative Sprite, Unified Type
+ 19+  8DC8              ;     0 1 N6 0 0 0 0 PO
+ 20+  8DC8
+ 21+  8DC8
+ 22+  8DC8
 # file closed: src/assets/sprites.asm
- 53   8DCD
- 54   8DCD
- 55   8DCD              	include 'loadbins.asm'
+ 53   8DC8
+ 54   8DC8
+ 55   8DC8              	include 'loadbins.asm'
 # file opened: src/loadbins.asm
-  1+  8DCD
-  2+  8DCD
-  3+  8DCD              ;;;;;Tiles
-  4+  8DCD
-  5+  8DCD
-  6+  8DCD
-  7+  8DCD
-  8+  8DCD
-  9+  8DCD              caveman_palette:
- 10+  8DCD                  incbin 'assets/cavetiles2.nxp',0
- 11+  8DE9
- 12+  8DE9                  MMU 6,16
- 13+  8DE9                  org $c000
+  1+  8DC8
+  2+  8DC8
+  3+  8DC8              ;;;;;Tiles
+  4+  8DC8
+  5+  8DC8
+  6+  8DC8
+  7+  8DC8
+  8+  8DC8
+  9+  8DC8              caveman_palette:
+ 10+  8DC8                  incbin 'assets/cavetiles2.nxp',0
+ 11+  8DE4
+ 12+  8DE4                  MMU 6,16
+ 13+  8DE4                  org $c000
  14+  C000
  15+  C000                  incbin 'assets/cavetiles2.til',0,TILE_DEFINITIONS_SIZE
  16+  D000
