@@ -327,10 +327,6 @@ player_init_sprites:
 
 
 player_update:
-    
-
-    
-
     ld a,(player_animation_state)
     cp WALKING
     jp z, player_update_walking
@@ -364,21 +360,24 @@ player_update_walking:
     inc a
     ld (player_animation_timer),a
 
-    ld a,(keypressed_A)
-    cp TRUE
-    call z,plyr_move_left_start
-
-    ld a,(keypressed_D)
-    cp TRUE
-    call z,plyr_move_right_start
+    call check_grounded
 
     ld a,(keypressed_Space)
     cp TRUE
     call z,player_jump_start
 
-    
+    ld a,(keypressed_A)
+    cp TRUE
+    jp z,plyr_move_left_start
 
-    call check_grounded
+    ld a,(keypressed_D)
+    cp TRUE
+    jp z,plyr_move_right_start
+
+    ;else idle?...
+    ld a,PLAYER_DEFAULT_ATTR3
+    ld (player_attr_3),a
+
 
     ret
 
@@ -496,6 +495,8 @@ plyr_move_left_start:
     ld hl,(px)
     add hl,32 ;2 relatives width (plus anchor)
     ld (px),hl
+
+    ret
 plyr_move_left:
     
     call player_calculate_world_position
@@ -514,7 +515,7 @@ plyr_move_left:
     cp 0
     jp nz,p_move_left
     ld a,l
-    cp SCROLL_MARKER_X
+    cp SCROLL_MARKER_X-8
     jp c,scroll_left
     jp nc,p_move_left
         
@@ -539,6 +540,7 @@ plyr_move_right_start:
     ld hl,(px)
     add hl,-32
     ld (px),hl
+    ret
 plyr_move_right:
     call player_calculate_world_position
     ; ; ; ; ; ; ; ; ; ; call check_collision_right
@@ -603,6 +605,10 @@ player_draw:
 player_animate_walk:
     xor a
     ld (player_animation_timer),a
+
+    ld a,(player_animation_state)
+    cp WALKING
+    ret nz
     
     ld a,(player_attr_3)
     and %00111111 ;mask out top 2 bits

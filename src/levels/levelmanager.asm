@@ -174,15 +174,12 @@ MAX_SCROLL equ 16
 
 
 scroll_left:
-    ld a,(scroll_direction)
-    cp LEFT
-    jp z,do_scroll_left
+    ; ld a,(scroll_direction)
+    ; cp LEFT
+    ; jp z,do_scroll_left
 
-    ld a,LEFT
-    ld (scroll_direction),a
-
-    ret
-
+    ; ld a,LEFT
+    ; ld (scroll_direction),a
 do_scroll_left:
     ld a,(cam_x)
     cp 0
@@ -190,12 +187,12 @@ do_scroll_left:
 
     ld a,(current_scroll)
     inc a
-    cp MAX_SCROLL
     ld (current_scroll),a
+    cp MAX_SCROLL
     call z,sl_scrollmax
     ld a,(current_scroll)
     ld b,a
-    ld a,MAX_SCROLL
+    ld a,MAX_SCROLL-1
     sub b
     nextreg $30,a
     ret
@@ -205,16 +202,19 @@ sl_scrollmax:
     ld bc,20*32*2
     lddr
 
-    ld a,(cam_x)
-    dec a
-    ld (cam_x),a
+    
 
     ld hl,superlevel
     ld a,(cam_x)
+    sub 1
     add hl,a
     ld de,LEVEL_START_ADDRESS
     ld b,LEVEL_HEIGHT_META
     call putsupercolumn
+
+    ld a,(cam_x)
+    dec a
+    ld (cam_x),a
 
     xor a
     ld (current_scroll),a
@@ -226,14 +226,12 @@ sl_scrollmax:
 
 
 scroll_right:
-    ld a,(scroll_direction)
-    cp RIGHT
-    jp z,do_scroll_right
+    ; ld a,(scroll_direction)
+    ; cp RIGHT
+    ; jp z,do_scroll_right
 
-    ld a,RIGHT
-    ld (scroll_direction),a
-
-    ret
+    ; ld a,RIGHT
+    ; ld (scroll_direction),a
 
 do_scroll_right:
     ld a,(cam_x)
@@ -243,12 +241,13 @@ do_scroll_right:
 
     ld a,(current_scroll)
     inc a
-    cp MAX_SCROLL
     ld (current_scroll),a
+    cp MAX_SCROLL
     call z,sr_scrollmax
     ld a,(current_scroll)
     nextreg $30,a
     ret
+
 sr_scrollmax:
     ld hl,LEVEL_START_ADDRESS+4
     ld de,LEVEL_START_ADDRESS
