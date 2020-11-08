@@ -107,8 +107,6 @@ object_update:
 
 
 object_check_in_view:
-
-
     ld a,(ix+2)
     ld b,a
     ld a,(cam_x)

@@ -40,11 +40,13 @@ caveman_palette:
 ; A>B>C>D>A>B>C>D
 
 ;;;sprites
+SPRITE_PLAYER_ID equ 0
 SPRITE_SEGMENTS equ 9
 SPRITE_PLAYER_COUNT equ 9*4
-SPRITE_COUNT equ SPRITE_PLAYER_COUNT ;+ANY_OTHERS+ETC
+SPRITE_COUNT equ 37  ;<--- TOTAL SPRITE COUNT 
 
 
+SPRITE_BONE_ID equ 36
 
 
     MMU 6,14
@@ -764,7 +766,23 @@ Caveman_Walk_D_9:
 	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
 	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
 
-
+Bone:
+	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $49, $49, $49, $49, $E3, $E3, $E3;
+	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $49, $6D, $92, $92, $6D, $49, $E3, $E3;
+	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $49, $92, $B6, $DB, $92, $6D, $49, $E3;
+	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $49, $6D, $92, $92, $DB, $DB, $92, $49, $E3;
+	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $49, $92, $DB, $DB, $92, $92, $B6, $6D, $49;
+	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $49, $B6, $DB, $DB, $92, $DB, $DB, $92, $49;
+	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $49, $B6, $DB, $DB, $B6, $DB, $DB, $92, $49;
+	db  $E3, $E3, $E3, $E3, $E3, $E3, $49, $6D, $DB, $DB, $DB, $DB, $B6, $92, $6D, $49;
+	db  $E3, $E3, $E3, $E3, $E3, $E3, $49, $92, $DB, $DB, $DB, $B6, $92, $6D, $49, $E3;
+	db  $E3, $E3, $E3, $E3, $E3, $49, $92, $DB, $DB, $B6, $92, $6D, $49, $49, $E3, $E3;
+	db  $E3, $E3, $E3, $49, $49, $92, $DB, $B6, $92, $49, $49, $49, $E3, $E3, $E3, $E3;
+	db  $E3, $49, $49, $6D, $B6, $DB, $B6, $49, $49, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+	db  $49, $6D, $B6, $DB, $B6, $92, $49, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+	db  $49, $6D, $B6, $B6, $92, $49, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+	db  $E3, $49, $6D, $92, $6D, $49, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
+	db  $E3, $E3, $49, $49, $49, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
 
 
 

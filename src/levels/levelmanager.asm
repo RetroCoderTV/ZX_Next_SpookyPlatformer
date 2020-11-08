@@ -1,20 +1,28 @@
 TILE_DEFINITIONS_SIZE equ 4096
 
-WORLD_WIDTH equ 160
+
 VIEW_WIDTH equ 40
 VIEW_HEIGHT equ 32
 
 VIEW_WIDTH_META equ 20
 
+LEVEL_START_ADDRESS equ $4500 ;half way down
+LEVEL_WIDTH_META equ 80
+LEVEL_HEIGHT_META equ 8
 
-VIEW_SIZE equ VIEW_WIDTH*VIEW_HEIGHT
+OUT_OF_WORLD equ LEVEL_WIDTH_META+1
+
+
+TILE_ATTR_NOMIRROR equ %00000000
+TILE_ATTR_MIRROR equ %00001000
+
 
 
 current_scroll db 0
 scroll_direction db RIGHT
 
 LEVEL_START equ 0
-; cam_edge_r db LEVEL_START+VIEW_WIDTH_META
+
 cam_x db LEVEL_START
 
 layer2_scroll dw 320
@@ -46,8 +54,6 @@ tiles_init:
     nextreg $68, %10000000
     nextreg $43, %00110000
 
-    ; ld a,3
-    
     xor a ;black
     nextreg $4c,a ;tilemap transparency colour 
     nextreg $14,a; global transparency colour
@@ -174,12 +180,12 @@ MAX_SCROLL equ 16
 
 
 scroll_left:
-    ; ld a,(scroll_direction)
-    ; cp LEFT
-    ; jp z,do_scroll_left
+    ld a,(scroll_direction)
+    cp LEFT
+    jp z,do_scroll_left
 
-    ; ld a,LEFT
-    ; ld (scroll_direction),a
+    ld a,LEFT
+    ld (scroll_direction),a
 do_scroll_left:
     ld a,(cam_x)
     cp 0
@@ -210,24 +216,20 @@ sl_scrollmax:
     ld b,LEVEL_HEIGHT_META
     call putsupercolumn
 
-    
-
     ld a,MAX_SCROLL-1
     ld (current_scroll),a
-
-    
 
     ret
 
 
 
 scroll_right:
-    ; ld a,(scroll_direction)
-    ; cp RIGHT
-    ; jp z,do_scroll_right
+    ld a,(scroll_direction)
+    cp RIGHT
+    jp z,do_scroll_right
 
-    ; ld a,RIGHT
-    ; ld (scroll_direction),a
+    ld a,RIGHT
+    ld (scroll_direction),a
 
 do_scroll_right:
     ld a,(cam_x)

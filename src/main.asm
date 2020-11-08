@@ -49,9 +49,8 @@ stack_top db 0
 	include 'retrotools\spritetools.asm'
 	include 'levels\levels.asm'
 	include 'levels\levelmanager.asm'
-	include 'assets\sprites.asm'
-
-
+	include 'projectiles.asm'
+	
 	include 'loadbins.asm'
 
 

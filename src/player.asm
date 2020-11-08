@@ -327,13 +327,15 @@ player_init_sprites:
 
 
 player_update:
+    ld a,(keypressed_Q)
+    cp TRUE
+    call z,throw_hammer
+
     ld a,(player_animation_state)
     cp WALKING
     jp z, player_update_walking
     cp JUMPING
     jp z, player_update_jumping
-    ; cp ATTACKING
-    ; cp CLIMBING
 
 
     ret
@@ -386,12 +388,12 @@ player_jump_start:
     cp TRUE
     ret z
 
-    ld a,PLAYER_JUMP_ATTR3
-    ld (player_attr_3),a
-
     ld a,(player_animation_state)
     cp JUMPING
     ret z
+
+    ld a,PLAYER_JUMP_ATTR3
+    ld (player_attr_3),a
 
     ld a,JUMPING
     ld (player_animation_state),a
@@ -626,8 +628,6 @@ player_set_to_default_frame:
 
 
 player_calculate_world_position:
-
-
     ld a,(py)
     and %11110000
     rrca
@@ -695,6 +695,24 @@ check_collision_jumping:
     mul d,e
     add hl,de
     ld a,(player_world_x)
+    ld e,a
+    ld d,0
+    add hl,de
+    ld a,(hl)
+    call check_solid
+    jp z,collided_jumping
+
+    ld hl,superlevel
+    ld a,(player_world_y)
+    cp 5
+    ret c
+    sub 5
+    ld d,a
+    ld e,LEVEL_WIDTH_META
+    mul d,e
+    add hl,de
+    ld a,(player_world_x)
+    add a,1
     ld e,a
     ld d,0
     add hl,de
@@ -949,3 +967,14 @@ grounded_false:
 ;     ld a,TRUE
 ;     ld (player_collided_solid),a
 ;     ret
+
+
+
+throw_hammer:
+    ld a,(keypressed_Q_Held)
+    cp TRUE
+    ret z
+
+
+    call projectiles_spawn
+    ret
