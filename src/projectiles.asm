@@ -7,13 +7,22 @@
 ;5=attr2
 ;6=attr3
 ;7=slot_ID
-
+;8=vy
+;9=y direction
+;10=vTimer
 projectiles:
-    db OUT_OF_WORLD,0 : dw 0 : db 0, %00000000, %00100100, 20
-    db OUT_OF_WORLD,0 : dw 0 : db 0, %00000000, %00100100, 21
-    db OUT_OF_WORLD,0 : dw 0 : db 0, %00000000, %00100100, 22
+    db OUT_OF_WORLD,0 : dw 0 : db 0, %00000000, %00100100, 20,0,UP,0
+    db OUT_OF_WORLD,0 : dw 0 : db 0, %00000000, %00100100, 21,0,UP,0
+    db OUT_OF_WORLD,0 : dw 0 : db 0, %00000000, %00100100, 22,0,UP,0
     db END_OF_ARRAY
-PROJECTILES_DATA_LENGTH equ 8
+PROJECTILES_DATA_LENGTH equ 11
+
+PROJECTILE_MAX_VELOCITY equ 8
+PROJECTILE_MIN_VELOCITY equ 0
+
+PROJECTILE_X_VELOCITY equ 16
+
+PROJECTILE_VELOCITY_DELAY equ 20
 
 
 projectiles_init:
@@ -55,6 +64,13 @@ proj_spwn_start:
 
     ld a,(player_world_y)
     ld (ix+1),a
+
+    ld (ix+8),PROJECTILE_MAX_VELOCITY
+
+    ld (ix+9),UP
+
+    xor a
+    ld (ix+10),a
 
 
     ret
@@ -107,26 +123,39 @@ projectile_update:
     call projectile_check_in_view
     call projectile_calculate_screen_pos
     
-    ld a,(ix+6)
-    bit 7,a
-    ret z
-    
-    ;move projectile up
-    ld a,(ix+4)
-    inc a
-    inc a
-    inc a
-    inc a
-    ld (ix+4),a
-    cp MAX_SCROLL
-    call z,proj_up_one
-    
-    
 
 
     ld a,(frame_counter)
     and %00000011
     call z,projectile_rotate
+    
+    ld a,(ix+6)
+    bit 7,a
+    ret z
+    
+    ld a,(ix+10)
+    inc a
+    ld (ix+10),a
+
+
+    ld a,(ix+9)
+    cp DOWN
+    jp z,p_upd_dwn
+    ;move projectile up
+    ld a,(ix+4) ;y pixel offset
+    add a,(ix+8) ;y Vel
+    ld (ix+4),a
+    cp MAX_SCROLL
+    call z,proj_up_one
+    ret
+p_upd_dwn:   
+    ;move projectile up
+    ld a,(ix+4) ;y scroll
+    add a,(ix+8) ;y Vel
+    ld (ix+4),a
+    cp MAX_SCROLL
+    call z,proj_down_one
+    
 
     ret
 
@@ -135,10 +164,68 @@ proj_up_one:
     dec a
     ld (ix+1),a
     ld (ix+4),0
-
     cp 0
     call z,projectile_kill ;kill it if top of screen
+    
+    ld a,(ix+10)
+    cp PROJECTILE_VELOCITY_DELAY
+    ret c
+
+    ld a,(ix+8)
+    and %11111110
+    rrca
+    ld (ix+8),a
+    cp 0
+    ld (ix+9),DOWN
+
+    xor a
+    ld (ix+10),a
+    
     ret
+
+proj_down_one:
+    ld a,(ix+1)
+    inc a
+    ld (ix+1),a
+    ld (ix+4),0
+    cp 15
+    call z,projectile_kill ;kill it if top of screen
+    
+    ld a,(ix+10)
+    cp PROJECTILE_VELOCITY_DELAY
+    ret c
+    
+    ld a,(ix+8)
+    cp PROJECTILE_MAX_VELOCITY
+    ret z
+    add a,a
+    ld (ix+8),a
+
+    xor a
+    ld (ix+10),a
+
+
+    ret
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 projectile_draw:
     ld a,(ix+7)
@@ -149,6 +236,9 @@ projectile_draw:
     nextreg $35,a
 
     ;attr 1 (y)
+    ld a,(ix+9)
+    cp DOWN
+    jp z,proj_draw_down
     ld a,(ix+4)
     ld b,a
     ld a,(ix+1)
@@ -171,8 +261,29 @@ projectile_draw:
     nextreg $38,a
 
     ret
+proj_draw_down:
+    ld a,(ix+4)
+    ld b,a
+    ld a,(ix+1)
+    add a,a
+    add a,a
+    add a,a
+    add a,a
+    add a,b
+    nextreg $36,a
 
+    ;attr 2 
+    ld a,(ix+5)
+    ld b,a
+    ld a,(ix+3) ;X8 (msb)
+    or b
+    nextreg $37,a
 
+    ;attr 3
+    ld a,(ix+6)
+    nextreg $38,a
+
+    ret
 
 
 
@@ -190,19 +301,13 @@ projectile_kill:
     call projectile_draw
 
     ld (ix),OUT_OF_WORLD
+
+    ld (ix+8),PROJECTILE_MAX_VELOCITY
     ret
 
 
 
 projectile_calculate_screen_pos:
-    ; ;Y 
-    ; ld a,(ix+1)
-    ; add a,a
-    ; add a,a
-    ; add a,a
-    ; add a,a ;A*16
-    ; ld (ix+4),a
-
     ld a,(scroll_direction)
     cp LEFT
     jp z,proj_screen_moving_left

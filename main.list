@@ -1260,7 +1260,7 @@
 976+  8464 C8               ret z
 977+  8465
 978+  8465
-979+  8465 CD 40 8E         call projectiles_spawn
+979+  8465 CD 49 8E         call projectiles_spawn
 980+  8468 C9               ret
 # file closed: src/player.asm
  46   8469              	include 'objects.asm'
@@ -1668,7 +1668,7 @@
  10+  8632
  11+  8632 CD 6A 8C         call tiles_init
  12+  8635 CD A4 80         call player_init
- 13+  8638 CD 3F 8E         call projectiles_init
+ 13+  8638 CD 48 8E         call projectiles_init
  14+  863B
  15+  863B C9               ret
  16+  863C
@@ -1686,14 +1686,14 @@
  28+  864E CD C3 81         call player_update
  29+  8651 CD A8 80         call draw_debug_sprite
  30+  8654 CD 6B 84         call objects_update
- 31+  8657 CD 79 8E         call projectiles_update
+ 31+  8657 CD 8E 8E         call projectiles_update
  32+  865A
  33+  865A C9               ret
  34+  865B
  35+  865B              game_draw:
  36+  865B CD 37 83         call player_draw
  37+  865E CD 80 84         call objects_draw
- 38+  8661 CD 8E 8E         call projectiles_draw
+ 38+  8661 CD A3 8E         call projectiles_draw
  39+  8664 C9               ret
  40+  8665
  41+  8665
@@ -2406,7 +2406,7 @@
  86+  8CCD
  87+  8CCD
  88+  8CCD              tiles_set_palette:
- 89+  8CCD 21 9D 8F         ld hl,caveman_palette
+ 89+  8CCD 21 3A 90         ld hl,caveman_palette
  90+  8CD0 ED 91 43 30      nextreg $43,%00110000
  91+  8CD4 AF               xor a
  92+  8CD5 06 10            ld b,16
@@ -2664,307 +2664,415 @@
   7+  8E26              ;5=attr2
   8+  8E26              ;6=attr3
   9+  8E26              ;7=slot_ID
- 10+  8E26
- 11+  8E26              projectiles:
- 12+  8E26 51 00            db OUT_OF_WORLD,0
- 12+  8E28 00 00          dw 0
- 12+  8E2A 00 00 24 14    db 0, %00000000, %00100100, 20
- 13+  8E2E 51 00            db OUT_OF_WORLD,0
- 13+  8E30 00 00          dw 0
- 13+  8E32 00 00 24 15    db 0, %00000000, %00100100, 21
- 14+  8E36 51 00            db OUT_OF_WORLD,0
- 14+  8E38 00 00          dw 0
- 14+  8E3A 00 00 24 16    db 0, %00000000, %00100100, 22
- 15+  8E3E FF               db END_OF_ARRAY
- 16+  8E3F              PROJECTILES_DATA_LENGTH equ 8
- 17+  8E3F
- 18+  8E3F
- 19+  8E3F              projectiles_init:
- 20+  8E3F
- 21+  8E3F C9               ret
- 22+  8E40
- 23+  8E40
- 24+  8E40
- 25+  8E40
- 26+  8E40
- 27+  8E40
- 28+  8E40
- 29+  8E40              projectiles_spawn:
- 30+  8E40 DD 21 26 8E      ld ix,projectiles
- 31+  8E44              proj_spwn_start:
- 32+  8E44 DD 7E 00         ld a,(ix)
- 33+  8E47 FE FF            cp END_OF_ARRAY
- 34+  8E49 C8               ret z
- 35+  8E4A
- 36+  8E4A DD 7E 06         ld a,(ix+6)
- 37+  8E4D CB 7F            bit 7,a
- 38+  8E4F C2 71 8E         jp nz,proj_spwn_next
- 39+  8E52
- 40+  8E52 CB FF            set 7,a
- 41+  8E54 DD 77 06         ld (ix+6),a
- 42+  8E57
- 43+  8E57
- 44+  8E57 3A 93 80         ld a,(player_world_x)
- 45+  8E5A DD 77 00         ld (ix),a
- 46+  8E5D
- 47+  8E5D 2A 95 80         ld hl,(px)
- 48+  8E60 DD 75 02         ld (ix+2),l
- 49+  8E63 DD 74 03         ld (ix+3),h
- 50+  8E66
- 51+  8E66
- 52+  8E66
- 53+  8E66 AF               xor a ;py offset
- 54+  8E67 DD 77 04         ld (ix+4),a
- 55+  8E6A
- 56+  8E6A 3A 94 80         ld a,(player_world_y)
- 57+  8E6D DD 77 01         ld (ix+1),a
- 58+  8E70
- 59+  8E70
- 60+  8E70 C9               ret
- 61+  8E71              proj_spwn_next:
- 62+  8E71 11 08 00         ld de,PROJECTILES_DATA_LENGTH
- 63+  8E74 DD 19            add ix,de
- 64+  8E76 C3 44 8E         jp proj_spwn_start
- 65+  8E79
- 66+  8E79
+ 10+  8E26              ;8=vy
+ 11+  8E26              ;9=y direction
+ 12+  8E26              ;10=vTimer
+ 13+  8E26              projectiles:
+ 14+  8E26 51 00            db OUT_OF_WORLD,0
+ 14+  8E28 00 00          dw 0
+ 14+  8E2A 00 00 24 14    db 0, %00000000, %00100100, 20,0,UP,0
+ 14+  8E2E 00 02 00
+ 15+  8E31 51 00            db OUT_OF_WORLD,0
+ 15+  8E33 00 00          dw 0
+ 15+  8E35 00 00 24 15    db 0, %00000000, %00100100, 21,0,UP,0
+ 15+  8E39 00 02 00
+ 16+  8E3C 51 00            db OUT_OF_WORLD,0
+ 16+  8E3E 00 00          dw 0
+ 16+  8E40 00 00 24 16    db 0, %00000000, %00100100, 22,0,UP,0
+ 16+  8E44 00 02 00
+ 17+  8E47 FF               db END_OF_ARRAY
+ 18+  8E48              PROJECTILES_DATA_LENGTH equ 11
+ 19+  8E48
+ 20+  8E48              PROJECTILE_MAX_VELOCITY equ 8
+ 21+  8E48              PROJECTILE_MIN_VELOCITY equ 0
+ 22+  8E48
+ 23+  8E48              PROJECTILE_X_VELOCITY equ 16
+ 24+  8E48
+ 25+  8E48              PROJECTILE_VELOCITY_DELAY equ 20
+ 26+  8E48
+ 27+  8E48
+ 28+  8E48              projectiles_init:
+ 29+  8E48
+ 30+  8E48 C9               ret
+ 31+  8E49
+ 32+  8E49
+ 33+  8E49
+ 34+  8E49
+ 35+  8E49
+ 36+  8E49
+ 37+  8E49
+ 38+  8E49              projectiles_spawn:
+ 39+  8E49 DD 21 26 8E      ld ix,projectiles
+ 40+  8E4D              proj_spwn_start:
+ 41+  8E4D DD 7E 00         ld a,(ix)
+ 42+  8E50 FE FF            cp END_OF_ARRAY
+ 43+  8E52 C8               ret z
+ 44+  8E53
+ 45+  8E53 DD 7E 06         ld a,(ix+6)
+ 46+  8E56 CB 7F            bit 7,a
+ 47+  8E58 C2 86 8E         jp nz,proj_spwn_next
+ 48+  8E5B
+ 49+  8E5B CB FF            set 7,a
+ 50+  8E5D DD 77 06         ld (ix+6),a
+ 51+  8E60
+ 52+  8E60
+ 53+  8E60 3A 93 80         ld a,(player_world_x)
+ 54+  8E63 DD 77 00         ld (ix),a
+ 55+  8E66
+ 56+  8E66 2A 95 80         ld hl,(px)
+ 57+  8E69 DD 75 02         ld (ix+2),l
+ 58+  8E6C DD 74 03         ld (ix+3),h
+ 59+  8E6F
+ 60+  8E6F
+ 61+  8E6F
+ 62+  8E6F AF               xor a ;py offset
+ 63+  8E70 DD 77 04         ld (ix+4),a
+ 64+  8E73
+ 65+  8E73 3A 94 80         ld a,(player_world_y)
+ 66+  8E76 DD 77 01         ld (ix+1),a
  67+  8E79
- 68+  8E79              projectiles_update:
- 69+  8E79 DD 21 26 8E      ld ix,projectiles
- 70+  8E7D              proj_upd_start:
- 71+  8E7D DD 7E 00         ld a,(ix)
- 72+  8E80 FE FF            cp END_OF_ARRAY
- 73+  8E82 C8               ret z
- 74+  8E83
- 75+  8E83 CD AB 8E         call projectile_update
- 76+  8E86
- 77+  8E86              proj_upd_next:
- 78+  8E86 11 08 00         ld de,PROJECTILES_DATA_LENGTH
+ 68+  8E79 DD 36 08 08      ld (ix+8),PROJECTILE_MAX_VELOCITY
+ 69+  8E7D
+ 70+  8E7D DD 36 09 02      ld (ix+9),UP
+ 71+  8E81
+ 72+  8E81 AF               xor a
+ 73+  8E82 DD 77 0A         ld (ix+10),a
+ 74+  8E85
+ 75+  8E85
+ 76+  8E85 C9               ret
+ 77+  8E86              proj_spwn_next:
+ 78+  8E86 11 0B 00         ld de,PROJECTILES_DATA_LENGTH
  79+  8E89 DD 19            add ix,de
- 80+  8E8B C3 7D 8E         jp proj_upd_start
+ 80+  8E8B C3 4D 8E         jp proj_spwn_start
  81+  8E8E
  82+  8E8E
  83+  8E8E
- 84+  8E8E              projectiles_draw:
+ 84+  8E8E              projectiles_update:
  85+  8E8E DD 21 26 8E      ld ix,projectiles
- 86+  8E92              proj_drw_start:
+ 86+  8E92              proj_upd_start:
  87+  8E92 DD 7E 00         ld a,(ix)
  88+  8E95 FE FF            cp END_OF_ARRAY
  89+  8E97 C8               ret z
  90+  8E98
- 91+  8E98 DD 7E 06         ld a,(ix+6)
- 92+  8E9B CB 7F            bit 7,a
- 93+  8E9D CA A3 8E         jp z,proj_drw_next
- 94+  8EA0
- 95+  8EA0 CD E0 8E         call projectile_draw
- 96+  8EA3
- 97+  8EA3              proj_drw_next:
- 98+  8EA3 11 08 00         ld de,PROJECTILES_DATA_LENGTH
- 99+  8EA6 DD 19            add ix,de
-100+  8EA8 C3 92 8E         jp proj_drw_start
-101+  8EAB
-102+  8EAB
-103+  8EAB
-104+  8EAB
-105+  8EAB
-106+  8EAB              projectile_update:
-107+  8EAB CD 74 8F         call projectile_check_in_view
-108+  8EAE CD 24 8F         call projectile_calculate_screen_pos
-109+  8EB1
-110+  8EB1 DD 7E 06         ld a,(ix+6)
-111+  8EB4 CB 7F            bit 7,a
-112+  8EB6 C8               ret z
-113+  8EB7
-114+  8EB7                  ;move projectile up
-115+  8EB7 DD 7E 04         ld a,(ix+4)
-116+  8EBA 3C               inc a
-117+  8EBB 3C               inc a
-118+  8EBC 3C               inc a
-119+  8EBD 3C               inc a
-120+  8EBE DD 77 04         ld (ix+4),a
-121+  8EC1 FE 10            cp MAX_SCROLL
-122+  8EC3 CC CF 8E         call z,proj_up_one
-123+  8EC6
-124+  8EC6
+ 91+  8E98 CD C0 8E         call projectile_update
+ 92+  8E9B
+ 93+  8E9B              proj_upd_next:
+ 94+  8E9B 11 0B 00         ld de,PROJECTILES_DATA_LENGTH
+ 95+  8E9E DD 19            add ix,de
+ 96+  8EA0 C3 92 8E         jp proj_upd_start
+ 97+  8EA3
+ 98+  8EA3
+ 99+  8EA3
+100+  8EA3              projectiles_draw:
+101+  8EA3 DD 21 26 8E      ld ix,projectiles
+102+  8EA7              proj_drw_start:
+103+  8EA7 DD 7E 00         ld a,(ix)
+104+  8EAA FE FF            cp END_OF_ARRAY
+105+  8EAC C8               ret z
+106+  8EAD
+107+  8EAD DD 7E 06         ld a,(ix+6)
+108+  8EB0 CB 7F            bit 7,a
+109+  8EB2 CA B8 8E         jp z,proj_drw_next
+110+  8EB5
+111+  8EB5 CD 50 8F         call projectile_draw
+112+  8EB8
+113+  8EB8              proj_drw_next:
+114+  8EB8 11 0B 00         ld de,PROJECTILES_DATA_LENGTH
+115+  8EBB DD 19            add ix,de
+116+  8EBD C3 A7 8E         jp proj_drw_start
+117+  8EC0
+118+  8EC0
+119+  8EC0
+120+  8EC0
+121+  8EC0
+122+  8EC0              projectile_update:
+123+  8EC0 CD 11 90         call projectile_check_in_view
+124+  8EC3 CD C1 8F         call projectile_calculate_screen_pos
 125+  8EC6
 126+  8EC6
-127+  8EC6 3A 22 86         ld a,(frame_counter)
-128+  8EC9 E6 03            and %00000011
-129+  8ECB CC 0D 8F         call z,projectile_rotate
-130+  8ECE
-131+  8ECE C9               ret
-132+  8ECF
-133+  8ECF              proj_up_one:
-134+  8ECF DD 7E 01         ld a,(ix+1)
-135+  8ED2 3D               dec a
-136+  8ED3 DD 77 01         ld (ix+1),a
-137+  8ED6 DD 36 04 00      ld (ix+4),0
-138+  8EDA
-139+  8EDA FE 00            cp 0
-140+  8EDC CC 18 8F         call z,projectile_kill ;kill it if top of screen
-141+  8EDF C9               ret
-142+  8EE0
-143+  8EE0              projectile_draw:
-144+  8EE0 DD 7E 07         ld a,(ix+7)
-145+  8EE3 ED 92 34         nextreg $34,a
-146+  8EE6
-147+  8EE6                  ;attr 0 (x lsb)
-148+  8EE6 DD 7E 02         ld a,(ix+2)
-149+  8EE9 ED 92 35         nextreg $35,a
-150+  8EEC
-151+  8EEC                  ;attr 1 (y)
-152+  8EEC DD 7E 04         ld a,(ix+4)
-153+  8EEF 47               ld b,a
-154+  8EF0 DD 7E 01         ld a,(ix+1)
-155+  8EF3 87               add a,a
-156+  8EF4 87               add a,a
-157+  8EF5 87               add a,a
-158+  8EF6 87               add a,a
-159+  8EF7 90               sub b
-160+  8EF8 ED 92 36         nextreg $36,a
-161+  8EFB
-162+  8EFB                  ;attr 2
-163+  8EFB DD 7E 05         ld a,(ix+5)
-164+  8EFE 47               ld b,a
-165+  8EFF DD 7E 03         ld a,(ix+3) ;X8 (msb)
-166+  8F02 B0               or b
-167+  8F03 ED 92 37         nextreg $37,a
-168+  8F06
-169+  8F06                  ;attr 3
-170+  8F06 DD 7E 06         ld a,(ix+6)
-171+  8F09 ED 92 38         nextreg $38,a
-172+  8F0C
-173+  8F0C C9               ret
-174+  8F0D
-175+  8F0D
-176+  8F0D
-177+  8F0D
-178+  8F0D
-179+  8F0D              projectile_rotate:
-180+  8F0D DD 7E 05         ld a,(ix+5)
-181+  8F10 C6 02            add a,2
-182+  8F12 E6 0E            and %00001110
-183+  8F14 DD 77 05         ld (ix+5),a
-184+  8F17 C9               ret
-185+  8F18
-186+  8F18
-187+  8F18
-188+  8F18              projectile_kill:
-189+  8F18 DD CB 06 BE      res 7,(ix+6)
-190+  8F1C CD E0 8E         call projectile_draw
-191+  8F1F
-192+  8F1F DD 36 00 51      ld (ix),OUT_OF_WORLD
-193+  8F23 C9               ret
-194+  8F24
-195+  8F24
-196+  8F24
-197+  8F24              projectile_calculate_screen_pos:
-198+  8F24                  ; ;Y
-199+  8F24                  ; ld a,(ix+1)
-200+  8F24                  ; add a,a
-201+  8F24                  ; add a,a
-202+  8F24                  ; add a,a
-203+  8F24                  ; add a,a ;A*16
-204+  8F24                  ; ld (ix+4),a
-205+  8F24
-206+  8F24 3A 45 8C         ld a,(scroll_direction)
-207+  8F27 FE 00            cp LEFT
-208+  8F29 CA 32 8F         jp z,proj_screen_moving_left
-209+  8F2C FE 01            cp RIGHT
-210+  8F2E CA 53 8F         jp z,proj_screen_moving_right
-211+  8F31
-212+  8F31 C9               ret
-213+  8F32
-214+  8F32
-215+  8F32              proj_screen_moving_left:
-216+  8F32                  ;X (scroll left)
-217+  8F32 3A 46 8C         ld a,(cam_x)
-218+  8F35 47               ld b,a
-219+  8F36 DD 7E 00         ld a,(ix+0) ;wX
-220+  8F39 90               sub b ;wX-camX
-221+  8F3A 21 00 00         ld hl,0
-222+  8F3D ED 31            add hl,a
-223+  8F3F 29               add hl,hl
-224+  8F40 29               add hl,hl
-225+  8F41 29               add hl,hl
-226+  8F42 29               add hl,hl
-227+  8F43 3A 44 8C         ld a,(current_scroll)
-228+  8F46 47               ld b,a
-229+  8F47 3E 10            ld a,16
-230+  8F49 90               sub b
-231+  8F4A ED 31            add hl,a
-232+  8F4C DD 75 02         ld (ix+2),l
-233+  8F4F DD 74 03         ld (ix+3),h ;X8
-234+  8F52 C9               ret
-235+  8F53
-236+  8F53              proj_screen_moving_right:
-237+  8F53                  ;X (scroll left)
-238+  8F53 3A 46 8C         ld a,(cam_x)
-239+  8F56 47               ld b,a
-240+  8F57 DD 7E 00         ld a,(ix) ;wX
-241+  8F5A 90               sub b ;wX-camX
-242+  8F5B 21 00 00         ld hl,0
-243+  8F5E ED 31            add hl,a
-244+  8F60 29               add hl,hl
-245+  8F61 29               add hl,hl
-246+  8F62 29               add hl,hl
-247+  8F63 29               add hl,hl
-248+  8F64 3A 44 8C         ld a,(current_scroll)
-249+  8F67 47               ld b,a
-250+  8F68 3E 10            ld a,16
-251+  8F6A 90               sub b
-252+  8F6B ED 31            add hl,a
-253+  8F6D DD 75 02         ld (ix+2),l
-254+  8F70 DD 74 03         ld (ix+3),h ;X8
-255+  8F73
-256+  8F73 C9               ret
-257+  8F74
-258+  8F74
-259+  8F74
-260+  8F74              projectile_check_in_view:
-261+  8F74 DD 7E 00         ld a,(ix)
-262+  8F77 47               ld b,a
-263+  8F78 3A 46 8C         ld a,(cam_x)
-264+  8F7B C6 14            add a,VIEW_WIDTH_META
-265+  8F7D B8               cp b
-266+  8F7E DA 91 8F         jp c, proj_set_not_inview
-267+  8F81
-268+  8F81 3A 46 8C         ld a,(cam_x)
-269+  8F84 47               ld b,a
-270+  8F85 DD 7E 00         ld a,(ix)
-271+  8F88 B8               cp b
-272+  8F89 DA 91 8F         jp c, proj_set_not_inview
-273+  8F8C
-274+  8F8C
-275+  8F8C                  ; set to inview=yes
-276+  8F8C DD CB 06 FE      set 7,(ix+6)
-277+  8F90
-278+  8F90 C9               ret
-279+  8F91
-280+  8F91              proj_set_not_inview:
-281+  8F91 DD 36 00 51      ld (ix),OUT_OF_WORLD
-282+  8F95 DD CB 06 BE      res 7,(ix+6)
-283+  8F99 CD E0 8E         call projectile_draw
-284+  8F9C
-285+  8F9C
-286+  8F9C C9               ret
-287+  8F9D
+127+  8EC6
+128+  8EC6 3A 22 86         ld a,(frame_counter)
+129+  8EC9 E6 03            and %00000011
+130+  8ECB CC A6 8F         call z,projectile_rotate
+131+  8ECE
+132+  8ECE DD 7E 06         ld a,(ix+6)
+133+  8ED1 CB 7F            bit 7,a
+134+  8ED3 C8               ret z
+135+  8ED4
+136+  8ED4 DD 7E 0A         ld a,(ix+10)
+137+  8ED7 3C               inc a
+138+  8ED8 DD 77 0A         ld (ix+10),a
+139+  8EDB
+140+  8EDB
+141+  8EDB DD 7E 09         ld a,(ix+9)
+142+  8EDE FE 03            cp DOWN
+143+  8EE0 CA F2 8E         jp z,p_upd_dwn
+144+  8EE3                  ;move projectile up
+145+  8EE3 DD 7E 04         ld a,(ix+4) ;y pixel offset
+146+  8EE6 DD 86 08         add a,(ix+8) ;y Vel
+147+  8EE9 DD 77 04         ld (ix+4),a
+148+  8EEC FE 10            cp MAX_SCROLL
+149+  8EEE CC 01 8F         call z,proj_up_one
+150+  8EF1 C9               ret
+151+  8EF2              p_upd_dwn:
+152+  8EF2                  ;move projectile up
+153+  8EF2 DD 7E 04         ld a,(ix+4) ;y scroll
+154+  8EF5 DD 86 08         add a,(ix+8) ;y Vel
+155+  8EF8 DD 77 04         ld (ix+4),a
+156+  8EFB FE 10            cp MAX_SCROLL
+157+  8EFD CC 2B 8F         call z,proj_down_one
+158+  8F00
+159+  8F00
+160+  8F00 C9               ret
+161+  8F01
+162+  8F01              proj_up_one:
+163+  8F01 DD 7E 01         ld a,(ix+1)
+164+  8F04 3D               dec a
+165+  8F05 DD 77 01         ld (ix+1),a
+166+  8F08 DD 36 04 00      ld (ix+4),0
+167+  8F0C FE 00            cp 0
+168+  8F0E CC B1 8F         call z,projectile_kill ;kill it if top of screen
+169+  8F11
+170+  8F11 DD 7E 0A         ld a,(ix+10)
+171+  8F14 FE 14            cp PROJECTILE_VELOCITY_DELAY
+172+  8F16 D8               ret c
+173+  8F17
+174+  8F17 DD 7E 08         ld a,(ix+8)
+175+  8F1A E6 FE            and %11111110
+176+  8F1C 0F               rrca
+177+  8F1D DD 77 08         ld (ix+8),a
+178+  8F20 FE 00            cp 0
+179+  8F22 DD 36 09 03      ld (ix+9),DOWN
+180+  8F26
+181+  8F26 AF               xor a
+182+  8F27 DD 77 0A         ld (ix+10),a
+183+  8F2A
+184+  8F2A C9               ret
+185+  8F2B
+186+  8F2B              proj_down_one:
+187+  8F2B DD 7E 01         ld a,(ix+1)
+188+  8F2E 3C               inc a
+189+  8F2F DD 77 01         ld (ix+1),a
+190+  8F32 DD 36 04 00      ld (ix+4),0
+191+  8F36 FE 0F            cp 15
+192+  8F38 CC B1 8F         call z,projectile_kill ;kill it if top of screen
+193+  8F3B
+194+  8F3B DD 7E 0A         ld a,(ix+10)
+195+  8F3E FE 14            cp PROJECTILE_VELOCITY_DELAY
+196+  8F40 D8               ret c
+197+  8F41
+198+  8F41 DD 7E 08         ld a,(ix+8)
+199+  8F44 FE 08            cp PROJECTILE_MAX_VELOCITY
+200+  8F46 C8               ret z
+201+  8F47 87               add a,a
+202+  8F48 DD 77 08         ld (ix+8),a
+203+  8F4B
+204+  8F4B AF               xor a
+205+  8F4C DD 77 0A         ld (ix+10),a
+206+  8F4F
+207+  8F4F
+208+  8F4F C9               ret
+209+  8F50
+210+  8F50
+211+  8F50
+212+  8F50
+213+  8F50
+214+  8F50
+215+  8F50
+216+  8F50
+217+  8F50
+218+  8F50
+219+  8F50
+220+  8F50
+221+  8F50
+222+  8F50
+223+  8F50
+224+  8F50
+225+  8F50
+226+  8F50
+227+  8F50
+228+  8F50
+229+  8F50
+230+  8F50              projectile_draw:
+231+  8F50 DD 7E 07         ld a,(ix+7)
+232+  8F53 ED 92 34         nextreg $34,a
+233+  8F56
+234+  8F56                  ;attr 0 (x lsb)
+235+  8F56 DD 7E 02         ld a,(ix+2)
+236+  8F59 ED 92 35         nextreg $35,a
+237+  8F5C
+238+  8F5C                  ;attr 1 (y)
+239+  8F5C DD 7E 09         ld a,(ix+9)
+240+  8F5F FE 03            cp DOWN
+241+  8F61 CA 85 8F         jp z,proj_draw_down
+242+  8F64 DD 7E 04         ld a,(ix+4)
+243+  8F67 47               ld b,a
+244+  8F68 DD 7E 01         ld a,(ix+1)
+245+  8F6B 87               add a,a
+246+  8F6C 87               add a,a
+247+  8F6D 87               add a,a
+248+  8F6E 87               add a,a
+249+  8F6F 90               sub b
+250+  8F70 ED 92 36         nextreg $36,a
+251+  8F73
+252+  8F73                  ;attr 2
+253+  8F73 DD 7E 05         ld a,(ix+5)
+254+  8F76 47               ld b,a
+255+  8F77 DD 7E 03         ld a,(ix+3) ;X8 (msb)
+256+  8F7A B0               or b
+257+  8F7B ED 92 37         nextreg $37,a
+258+  8F7E
+259+  8F7E                  ;attr 3
+260+  8F7E DD 7E 06         ld a,(ix+6)
+261+  8F81 ED 92 38         nextreg $38,a
+262+  8F84
+263+  8F84 C9               ret
+264+  8F85              proj_draw_down:
+265+  8F85 DD 7E 04         ld a,(ix+4)
+266+  8F88 47               ld b,a
+267+  8F89 DD 7E 01         ld a,(ix+1)
+268+  8F8C 87               add a,a
+269+  8F8D 87               add a,a
+270+  8F8E 87               add a,a
+271+  8F8F 87               add a,a
+272+  8F90 80               add a,b
+273+  8F91 ED 92 36         nextreg $36,a
+274+  8F94
+275+  8F94                  ;attr 2
+276+  8F94 DD 7E 05         ld a,(ix+5)
+277+  8F97 47               ld b,a
+278+  8F98 DD 7E 03         ld a,(ix+3) ;X8 (msb)
+279+  8F9B B0               or b
+280+  8F9C ED 92 37         nextreg $37,a
+281+  8F9F
+282+  8F9F                  ;attr 3
+283+  8F9F DD 7E 06         ld a,(ix+6)
+284+  8FA2 ED 92 38         nextreg $38,a
+285+  8FA5
+286+  8FA5 C9               ret
+287+  8FA6
+288+  8FA6
+289+  8FA6
+290+  8FA6              projectile_rotate:
+291+  8FA6 DD 7E 05         ld a,(ix+5)
+292+  8FA9 C6 02            add a,2
+293+  8FAB E6 0E            and %00001110
+294+  8FAD DD 77 05         ld (ix+5),a
+295+  8FB0 C9               ret
+296+  8FB1
+297+  8FB1
+298+  8FB1
+299+  8FB1              projectile_kill:
+300+  8FB1 DD CB 06 BE      res 7,(ix+6)
+301+  8FB5 CD 50 8F         call projectile_draw
+302+  8FB8
+303+  8FB8 DD 36 00 51      ld (ix),OUT_OF_WORLD
+304+  8FBC
+305+  8FBC DD 36 08 08      ld (ix+8),PROJECTILE_MAX_VELOCITY
+306+  8FC0 C9               ret
+307+  8FC1
+308+  8FC1
+309+  8FC1
+310+  8FC1              projectile_calculate_screen_pos:
+311+  8FC1 3A 45 8C         ld a,(scroll_direction)
+312+  8FC4 FE 00            cp LEFT
+313+  8FC6 CA CF 8F         jp z,proj_screen_moving_left
+314+  8FC9 FE 01            cp RIGHT
+315+  8FCB CA F0 8F         jp z,proj_screen_moving_right
+316+  8FCE
+317+  8FCE C9               ret
+318+  8FCF
+319+  8FCF
+320+  8FCF              proj_screen_moving_left:
+321+  8FCF                  ;X (scroll left)
+322+  8FCF 3A 46 8C         ld a,(cam_x)
+323+  8FD2 47               ld b,a
+324+  8FD3 DD 7E 00         ld a,(ix+0) ;wX
+325+  8FD6 90               sub b ;wX-camX
+326+  8FD7 21 00 00         ld hl,0
+327+  8FDA ED 31            add hl,a
+328+  8FDC 29               add hl,hl
+329+  8FDD 29               add hl,hl
+330+  8FDE 29               add hl,hl
+331+  8FDF 29               add hl,hl
+332+  8FE0 3A 44 8C         ld a,(current_scroll)
+333+  8FE3 47               ld b,a
+334+  8FE4 3E 10            ld a,16
+335+  8FE6 90               sub b
+336+  8FE7 ED 31            add hl,a
+337+  8FE9 DD 75 02         ld (ix+2),l
+338+  8FEC DD 74 03         ld (ix+3),h ;X8
+339+  8FEF C9               ret
+340+  8FF0
+341+  8FF0              proj_screen_moving_right:
+342+  8FF0                  ;X (scroll left)
+343+  8FF0 3A 46 8C         ld a,(cam_x)
+344+  8FF3 47               ld b,a
+345+  8FF4 DD 7E 00         ld a,(ix) ;wX
+346+  8FF7 90               sub b ;wX-camX
+347+  8FF8 21 00 00         ld hl,0
+348+  8FFB ED 31            add hl,a
+349+  8FFD 29               add hl,hl
+350+  8FFE 29               add hl,hl
+351+  8FFF 29               add hl,hl
+352+  9000 29               add hl,hl
+353+  9001 3A 44 8C         ld a,(current_scroll)
+354+  9004 47               ld b,a
+355+  9005 3E 10            ld a,16
+356+  9007 90               sub b
+357+  9008 ED 31            add hl,a
+358+  900A DD 75 02         ld (ix+2),l
+359+  900D DD 74 03         ld (ix+3),h ;X8
+360+  9010
+361+  9010 C9               ret
+362+  9011
+363+  9011
+364+  9011
+365+  9011              projectile_check_in_view:
+366+  9011 DD 7E 00         ld a,(ix)
+367+  9014 47               ld b,a
+368+  9015 3A 46 8C         ld a,(cam_x)
+369+  9018 C6 14            add a,VIEW_WIDTH_META
+370+  901A B8               cp b
+371+  901B DA 2E 90         jp c, proj_set_not_inview
+372+  901E
+373+  901E 3A 46 8C         ld a,(cam_x)
+374+  9021 47               ld b,a
+375+  9022 DD 7E 00         ld a,(ix)
+376+  9025 B8               cp b
+377+  9026 DA 2E 90         jp c, proj_set_not_inview
+378+  9029
+379+  9029
+380+  9029                  ; set to inview=yes
+381+  9029 DD CB 06 FE      set 7,(ix+6)
+382+  902D
+383+  902D C9               ret
+384+  902E
+385+  902E              proj_set_not_inview:
+386+  902E DD 36 00 51      ld (ix),OUT_OF_WORLD
+387+  9032 DD CB 06 BE      res 7,(ix+6)
+388+  9036 CD 50 8F         call projectile_draw
+389+  9039
+390+  9039
+391+  9039 C9               ret
+392+  903A
 # file closed: src/projectiles.asm
- 53   8F9D
- 54   8F9D              	include 'loadbins.asm'
+ 53   903A
+ 54   903A              	include 'loadbins.asm'
 # file opened: src/loadbins.asm
-  1+  8F9D
-  2+  8F9D
-  3+  8F9D              ;;;;;Tiles
-  4+  8F9D
-  5+  8F9D
-  6+  8F9D
-  7+  8F9D
-  8+  8F9D
-  9+  8F9D              caveman_palette:
- 10+  8F9D                  incbin 'assets/cavetiles2.nxp',0
- 11+  8FB9
- 12+  8FB9                  MMU 6,16
- 13+  8FB9                  org $c000
+  1+  903A
+  2+  903A
+  3+  903A              ;;;;;Tiles
+  4+  903A
+  5+  903A
+  6+  903A
+  7+  903A
+  8+  903A
+  9+  903A              caveman_palette:
+ 10+  903A                  incbin 'assets/cavetiles2.nxp',0
+ 11+  9056
+ 12+  9056                  MMU 6,16
+ 13+  9056                  org $c000
  14+  C000
  15+  C000                  incbin 'assets/cavetiles2.til',0,TILE_DEFINITIONS_SIZE
  16+  D000
